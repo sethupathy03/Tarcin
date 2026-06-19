@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vint Cerf Lab - Protocol Selector</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="back">◀ Back</div>
+    <h1 class="brand">Vint Cerf <span>Lab</span></h1>
+    <div class="score-box">
+      <span class="score-label">Points:</span>
+      <span class="score-value" id="scoreDisplay">0</span>
+    </div>
+    <div class="listen"><button id="listenBtn">🔊 Listen</button></div>
+  </header>
+
+  <main class="container">
+    <section class="selector">
+      <h2>Protocol selector</h2>
+      <p class="muted">Select then assign</p>
+      <div class="protocols">
+        <button class="proto" data-proto="TCP"><img class="proto-img" src="assets/tcp.png" alt="TCP"><div class="text"><strong>TCP</strong><small>Reliable data delivery</small></div></button>
+        <button class="proto" data-proto="HTTP"><img class="proto-img" src="assets/http.png" alt="HTTP"><div class="text"><strong>HTTP</strong><small>Web pages and browsers</small></div></button>
+        <button class="proto" data-proto="SMTP"><img class="proto-img" src="assets/smtp.png" alt="SMTP"><div class="text"><strong>SMTP</strong><small>Sending emails</small></div></button>
+        <button class="proto" data-proto="FTP"><img class="proto-img" src="assets/ftp.png" alt="FTP"><div class="text"><strong>FTP</strong><small>Transferring files</small></div></button>
+      </div>
+    </section>
+
+    <section class="cards">
+      <article class="card" data-expected="HTTP" data-explanation="HTTP is used to load web pages in a browser.">
+        <div class="illustration"><img class="card-img" src="assets/globe.png" alt="Globe"></div>
+        <div class="card-content">
+          <h3>Browser loads website</h3>
+          <p class="desc">When you open a website in your browser.</p>
+          <div class="meta">
+            <span class="assigned">—</span>
+            <a class="scenario-link" href="https://school.edu/news" target="_blank" rel="noopener">https://school.edu/news</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" data-expected="SMTP" data-explanation="SMTP is used for sending emails.">
+        <div class="illustration"><img class="card-img" src="assets/mail.png" alt="Mail"></div>
+        <div class="card-content">
+          <h3>Send a school email</h3>
+          <p class="desc">When you send an email to your friend or teacher.</p>
+          <div class="meta">
+            <span class="assigned">—</span>
+            <a class="scenario-link" href="mailto:friend@school.edu">mailto:friend@school.edu</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" data-expected="FTP" data-explanation="FTP is used to transfer files between computers.">
+        <div class="illustration"><img class="card-img" src="assets/folder.png" alt="Folder"></div>
+        <div class="card-content">
+          <h3>Download a file</h3>
+          <p class="desc">When you download a file from a server.</p>
+          <div class="meta">
+            <span class="assigned">—</span>
+            <a class="scenario-link" href="ftp://files.edu/game.zip">ftp://files.edu/game.zip</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" data-expected="TCP" data-explanation="TCP ensures reliable and ordered data delivery.">
+        <div class="illustration"><img class="card-img" src="assets/gamepad.png" alt="Gamepad"></div>
+        <div class="card-content">
+          <h3>Stream reliable data</h3>
+          <p class="desc">When apps like video calls or online games stay stable.</p>
+          <div class="meta">
+            <span class="assigned">—</span>
+            <a class="scenario-link" href="https://192.168.1.5:443/" target="_blank" rel="noopener">https://192.168.1.5:443/</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" data-expected="HTTP" data-explanation="Browsers use HTTP/HTTPS to access websites.">
+        <div class="illustration"><img class="card-img" src="assets/phone.png" alt="Phone"></div>
+        <div class="card-content">
+          <h3>Visit a weather page</h3>
+          <p class="desc">When you check the weather online.</p>
+          <div class="meta">
+            <span class="assigned">—</span>
+            <a class="scenario-link" href="https://weather.com/today" target="_blank" rel="noopener">https://weather.com/today</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" data-expected="FTP" data-explanation="FTP supports both uploading and downloading files.">
+        <div class="illustration"><img class="card-img" src="assets/upload.png" alt="Upload"></div>
+        <div class="card-content">
+          <h3>Upload project files</h3>
+          <p class="desc">When you upload your files to the server.</p>
+          <div class="meta">
+            <span class="assigned">—</span>
+            <a class="scenario-link" href="ftp://server.edu/upload/">ftp://server.edu/upload/</a>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div id="feedbackOverlay" class="feedback-overlay"></div>
+    <div id="feedback" class="feedback hidden">
+      <div class="feedback-content">
+        <div class="feedback-status"></div>
+        <div class="feedback-proto"></div>
+        <div class="feedback-explanation"></div>
+      </div>
+    </div>
+
+    <footer class="tip">Think about what is happening and choose the protocol that makes it possible!</footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

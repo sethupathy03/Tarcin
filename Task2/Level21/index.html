@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Basics Lab – Cyber Safety Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',sans-serif;
+  min-height:100vh;
+  background:linear-gradient(160deg,#a8d8f0 0%,#c5e8f7 40%,#b3d9f0 100%);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:20px;
+}
+
+/* Cloud decorations */
+body::before,body::after{
+  content:'';position:fixed;border-radius:50%;
+  background:rgba(255,255,255,.45);filter:blur(0);
+  pointer-events:none;z-index:0;
+}
+body::before{width:180px;height:80px;top:6%;left:2%;border-radius:60px;
+  box-shadow:60px -15px 0 20px rgba(255,255,255,.45);}
+body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
+  box-shadow:45px -10px 0 15px rgba(255,255,255,.45);}
+
+/* ── App Wrapper ──────────────────────────────────────────── */
+#app{
+  width:100%;max-width:940px;position:relative;z-index:1;
+}
+
+/* ── QUIZ SCREEN ──────────────────────────────────────────── */
+#quiz-screen{display:flex;flex-direction:column;gap:14px;}
+
+/* ── Header Banner ────────────────────────────────────────── */
+.header-banner{
+  background:linear-gradient(135deg,#29b6f6 0%,#0288d1 100%);
+  border-radius:24px;padding:18px 22px 16px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;gap:12px;
+  box-shadow:0 6px 24px rgba(2,136,209,.35);
+  position:relative;overflow:visible;
+}
+
+/* back button */
+.btn-back{
+  background:#fff;border:none;border-radius:50px;
+  padding:9px 18px;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:14px;color:#333;
+  cursor:pointer;display:flex;align-items:center;gap:6px;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+  transition:transform .15s,box-shadow .15s;white-space:nowrap;
+}
+.btn-back:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.2);}
+
+/* title block */
+.title-block{text-align:center;}
+.main-title{
+  font-size:clamp(26px,4vw,42px);font-weight:900;
+  color:#fff;line-height:1.1;letter-spacing:-.5px;
+  text-shadow:3px 3px 0 #1565c0,-1px -1px 0 #1565c0,
+              1px -1px 0 #1565c0,-1px 1px 0 #1565c0;
+}
+.main-title span{color:#ffe500;}
+.subtitle-pill{
+  display:inline-block;margin-top:6px;
+  background:rgba(21,101,192,.75);
+  border-radius:50px;padding:6px 20px;
+  font-size:clamp(11px,1.8vw,14px);font-weight:700;color:#fff;
+  line-height:1.3;
+}
+.subtitle-pill em{color:#4dd0e1;font-style:normal;}
+
+/* right controls */
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.progress-fraction{
+  background:#fff;border-radius:50px;padding:7px 16px;
+  font-weight:900;font-size:15px;color:#1565c0;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);
+}
+.btn-listen{
+  background:#ffe500;border:none;border-radius:50px;
+  padding:9px 18px;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:14px;color:#333;
+  cursor:pointer;display:flex;align-items:center;gap:6px;
+  box-shadow:0 3px 10px rgba(0,0,0,.2);
+  transition:transform .15s;
+}
+.btn-listen:hover{transform:translateY(-2px);}
+
+/* ── Stats Bar ────────────────────────────────────────────── */
+.stats-bar{
+  background:#fff;border-radius:20px;
+  padding:14px 28px;
+  display:flex;justify-content:space-around;align-items:center;
+  box-shadow:0 4px 18px rgba(0,0,0,.1);gap:12px;flex-wrap:wrap;
+}
+.stat-item{display:flex;align-items:center;gap:10px;}
+.stat-icon{font-size:30px;line-height:1;}
+.stat-text{display:flex;flex-direction:column;}
+.stat-label{font-size:12px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.stat-value{font-size:22px;font-weight:900;color:#1a1a2e;line-height:1.1;}
+.stat-value.level-name{font-size:16px;color:#7c4dff;font-weight:800;}
+.stat-divider{width:1px;height:40px;background:#e8e8e8;}
+
+/* ── Decision Card ────────────────────────────────────────── */
+.decision-card{
+  background:#fff;border-radius:24px;
+  padding:22px 26px 20px;
+  box-shadow:0 6px 28px rgba(0,0,0,.1);
+}
+
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.card-badge{
+  background:#7c4dff;border-radius:12px;
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;flex-shrink:0;
+}
+.card-meta{display:flex;flex-direction:column;}
+.card-meta-label{font-size:11px;font-weight:800;color:#7c4dff;
+  text-transform:uppercase;letter-spacing:1px;}
+.card-meta-title{font-size:19px;font-weight:900;color:#1a1a2e;}
+
+/* illustration circle */
+.illustration-wrap{
+  text-align:center;margin:0 auto 16px;
+  width:130px;height:130px;
+  background:radial-gradient(circle,#e8f4fd 60%,#c3e0f5 100%);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:60px;box-shadow:0 4px 16px rgba(0,0,0,.08);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.illustration-wrap.pop{transform:scale(1.12);}
+
+.question-text{
+  font-size:clamp(16px,2.2vw,19px);font-weight:800;
+  color:#1a1a2e;text-align:center;line-height:1.45;
+  margin-bottom:14px;
+}
+
+/* divider */
+.choice-divider{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:16px;color:#7c4dff;font-weight:800;font-size:14px;
+}
+.choice-divider::before,.choice-divider::after{
+  content:'';flex:1;height:1.5px;
+  background:linear-gradient(90deg,transparent,#c4b5fd,transparent);
+}
+
+/* ── Choice Buttons ───────────────────────────────────────── */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+
+.choice-btn{
+  border:3px solid transparent;border-radius:24px;
+  padding:18px 16px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  transition:transform .18s,box-shadow .18s,background .2s,border-color .2s;
+  font-family:'Nunito',sans-serif;
+  text-align:center;background:transparent;
+  position:relative;overflow:hidden;
+  min-height:180px;
+}
+.choice-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.14);}
+.choice-btn:disabled{cursor:default;}
+
+.choice-safe{
+  background:#f0fdf4;border-color:#4ade80;
+}
+.choice-unsafe{
+  background:#fff1f2;border-color:#f87171;
+}
+
+.choice-icon{width:120px;height:120px;flex-shrink:0;line-height:1;display:flex;align-items:center;justify-content:center;}
+.choice-icon svg{width:110px;height:110px;display:block;}
+.choice-info{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.choice-label{font-size:16px;font-weight:900;letter-spacing:.5px;}
+.safe-label{color:#16a34a;}
+.unsafe-label{color:#dc2626;}
+.choice-sub{font-size:12px;color:#555;font-weight:600;line-height:1.4;max-width:220px;}
+
+/* Answer reveal states */
+.choice-btn.reveal-correct{
+  background:#dcfce7!important;border-color:#22c55e!important;
+  box-shadow:0 0 0 4px rgba(34,197,94,.25);
+  animation:correctPulse .5s ease;
+}
+.choice-btn.reveal-wrong{
+  background:#fee2e2!important;border-color:#ef4444!important;
+  opacity:.75;
+}
+@keyframes correctPulse{
+  0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}
+}
+
+/* ── Explanation Box ──────────────────────────────────────── */
+.explanation-box{
+  background:linear-gradient(135deg,#fffde7,#fff9c4);
+  border:2.5px solid #fbc02d;border-radius:16px;
+  padding:14px 18px;
+  display:flex;align-items:flex-start;gap:12px;
+  animation:slideUp .35s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.explanation-box.hidden{display:none;}
+.expl-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
+.expl-content{}
+.expl-result{font-size:15px;font-weight:900;margin-bottom:3px;}
+.expl-result.correct-result{color:#16a34a;}
+.expl-result.wrong-result{color:#dc2626;}
+.expl-text{font-size:13px;color:#555;font-weight:600;line-height:1.4;}
+
+/* ── Progress Tracker ─────────────────────────────────────── */
+
+/* ── RESULTS SCREEN ───────────────────────────────────────── */
+#results-screen{display:none;flex-direction:column;align-items:center;gap:20px;text-align:center;}
+#results-screen.active{display:flex;}
+
+.results-card{
+  background:#fff;border-radius:28px;
+  padding:40px 36px;width:100%;max-width:620px;
+  box-shadow:0 8px 40px rgba(0,0,0,.13);
+}
+.results-hero{font-size:72px;margin-bottom:12px;
+  animation:heroFloat 2.5s ease-in-out infinite;}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.results-title{font-size:34px;font-weight:900;color:#1a1a2e;margin-bottom:4px;}
+.results-sub{font-size:16px;color:#666;font-weight:600;margin-bottom:28px;}
+
+.score-display{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  border-radius:20px;padding:22px;margin-bottom:24px;
+  color:#fff;
+}
+.score-num{font-size:52px;font-weight:900;line-height:1;}
+.score-of{font-size:16px;opacity:.85;font-weight:700;}
+
+.badge-display{
+  background:linear-gradient(135deg,#f8f0ff,#ede7ff);
+  border:3px solid #c4b5fd;border-radius:18px;
+  padding:20px;margin-bottom:24px;
+}
+.badge-emoji{font-size:50px;margin-bottom:8px;}
+.badge-title{font-size:24px;font-weight:900;color:#5b21b6;margin-bottom:4px;}
+.badge-msg{font-size:14px;color:#666;font-weight:600;line-height:1.45;}
+
+.accuracy-bar-wrap{margin-bottom:24px;}
+.accuracy-label{font-size:13px;color:#888;font-weight:700;margin-bottom:8px;}
+.accuracy-bar{height:14px;background:#f0f0f0;border-radius:20px;overflow:hidden;}
+.accuracy-fill{height:100%;border-radius:20px;
+  background:linear-gradient(90deg,#7c4dff,#22c55e);
+  transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+
+.btn-restart{
+  background:linear-gradient(135deg,#7c4dff,#5b21b6);
+  color:#fff;border:none;border-radius:50px;
+  padding:15px 42px;font-family:'Nunito',sans-serif;
+  font-size:18px;font-weight:900;cursor:pointer;
+  box-shadow:0 6px 22px rgba(124,77,255,.45);
+  transition:transform .18s,box-shadow .18s;
+}
+.btn-restart:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(124,77,255,.5);}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media(max-width:640px){
+  body{padding:10px;}
+  .choices{grid-template-columns:1fr;}
+  .stats-bar{gap:6px;}
+  .stat-value{font-size:18px;}
+  .decision-card{padding:16px;}
+  .main-title{font-size:22px;}
+}
+@media(max-width:480px){
+  .header-banner{grid-template-columns:1fr;gap:8px;padding:14px;}
+  .header-right{flex-direction:row;justify-content:space-between;width:100%;}
+  .title-block{padding:0;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ QUIZ SCREEN ══════════════════════════════════════════ -->
+  <div id="quiz-screen">
+
+    <!-- Header Banner -->
+    <div class="header-banner">
+
+
+      <!-- Title -->
+      <div class="title-block">
+        <div class="main-title">Privacy <span>Basics</span> Lab</div>
+        <div class="subtitle-pill">
+          Test your <em>cyber safety</em> knowledge<br>and learn how to protect yourself online.
+        </div>
+      </div>
+
+      <!-- Right controls -->
+      <div class="header-right">
+        <div class="progress-fraction" id="fraction-display">1/14</div>
+        <button class="btn-listen" id="btn-listen">🔊 Listen</button>
+      </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-text">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="score-display">0</span>
+        </div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-text">
+          <span class="stat-label">Level</span>
+          <span class="stat-value level-name" id="level-display">Cyber Cadet</span>
+        </div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-text">
+          <span class="stat-label">Challenge</span>
+          <span class="stat-value" id="challenge-display">1 of 14</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision Card -->
+    <div class="decision-card">
+      <div class="card-header">
+        <div class="card-badge">🛡️</div>
+        <div class="card-meta">
+          <span class="card-meta-label">Privacy Decision</span>
+          <span class="card-meta-title" id="scenario-label">Scenario 1/14</span>
+        </div>
+      </div>
+
+      <div class="illustration-wrap" id="illustration">🔐</div>
+
+      <p class="question-text" id="question-text">Loading…</p>
+
+      <div class="choice-divider">⚡ Is this a safe or unsafe choice? ⚡</div>
+
+      <div class="choices">
+        <button class="choice-btn choice-safe" id="btn-safe" onclick="answer('Safe')">
+          <div class="choice-icon">
+            <svg width="120" height="170" viewBox="0 0 120 170" xmlns="http://www.w3.org/2000/svg">
+            <path d="M60 5 L110 25 L110 95 Q110 135 60 155 Q10 135 10 95 L10 25 Z" fill="#66bb6a" stroke="#388e3c" stroke-width="2.5"/>
+            <path d="M60 17 L100 34 L100 95 Q100 130 60 147 Q20 130 20 95 L20 34 Z" fill="#a5d6a7"/>
+            <polyline points="36,88 50,105 84,68" fill="none" stroke="#2e7d32" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="45" cy="52" r="4.5" fill="#1b5e20"/>
+            <circle cx="75" cy="52" r="4.5" fill="#1b5e20"/>
+            <path d="M41 67 Q60 82 79 67" fill="none" stroke="#1b5e20" stroke-width="2.8" stroke-linecap="round"/>
+            <ellipse cx="37" cy="63" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
+            <ellipse cx="83" cy="63" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="choice-info">
+            <span class="choice-label safe-label">SAFE</span>
+            <span class="choice-sub">This is a smart choice<br>that keeps you secure!</span>
+          </div>
+        </button>
+        <button class="choice-btn choice-unsafe" id="btn-unsafe" onclick="answer('Unsafe')">
+          <div class="choice-icon">
+            <svg width="160" height="145" viewBox="0 0 160 145" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="80,5 5,140 155,140" fill="#ffc107" stroke="#e65100" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="80,20 12,135 148,135" fill="#ffca28"/>
+  <rect x="76" y="45" width="9" height="38" rx="4.5" fill="#5d4037"/>
+  <circle cx="80" cy="93" r="4.5" fill="#5d4037"/>
+  <circle cx="65" cy="103" r="5" fill="#5d4037"/>
+  <circle cx="96" cy="103" r="5" fill="#5d4037"/>
+  <path d="M62 120 Q80 110 98 120" fill="none" stroke="#5d4037" stroke-width="3.2" stroke-linecap="round"/>
+  <ellipse cx="57" cy="111" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
+  <ellipse cx="103" cy="111" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
+</svg>
+          </div>
+          <div class="choice-info">
+            <span class="choice-label unsafe-label">UNSAFE</span>
+            <span class="choice-sub">This could put your<br>information at risk!</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Explanation (hidden until answered) -->
+      <div class="explanation-box hidden" id="explanation-box">
+        <div class="expl-icon" id="expl-icon">💡</div>
+        <div class="expl-content">
+          <div class="expl-result" id="expl-result">Well done!</div>
+          <div class="expl-text" id="expl-text">Great job!</div>
+        </div>
+      </div>
+    </div>
+
+
+  </div><!-- end quiz-screen -->
+
+  <!-- ══ RESULTS SCREEN ════════════════════════════════════════ -->
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="results-hero" id="results-hero">🦸</div>
+      <div class="results-title">Lab Complete!</div>
+      <div class="results-sub" id="results-sub">You finished all 14 scenarios!</div>
+
+      <div class="score-display">
+        <div class="score-num" id="final-score">0</div>
+        <div class="score-of">correct answers out of 14</div>
+      </div>
+
+      <div class="badge-display">
+        <div class="badge-emoji" id="badge-emoji">🌱</div>
+        <div class="badge-title" id="badge-title">Cyber Cadet</div>
+        <div class="badge-msg" id="badge-msg">Keep practising to level up your cyber skills!</div>
+      </div>
+
+      <div class="accuracy-bar-wrap">
+        <div class="accuracy-label" id="accuracy-label">Accuracy: 0%</div>
+        <div class="accuracy-bar"><div class="accuracy-fill" id="accuracy-fill" style="width:0%"></div></div>
+      </div>
+
+      <button class="btn-restart" onclick="restart()">🔄 Play Again</button>
+    </div>
+  </div>
+
+</div><!-- end app -->
+
+<script>
+/* ════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════ */
+const QUESTIONS = [
+  // Level 1 – Cyber Cadet (Q1-5)
+  { q:'You use "123456" as your password for your favorite games and email.',
+    ans:'Unsafe', expl:'123456 is one of the most common passwords — extremely easy for hackers to guess!',
+    icon:'🔑', level:'Cyber Cadet', levelNum:1 },
+  { q:'Your best friend asks for your password so they can help you in a game.',
+    ans:'Unsafe', expl:'Passwords should always stay private — even from friends!',
+    icon:'🤐', level:'Cyber Cadet', levelNum:1 },
+  { q:'You always update your tablet and apps when they ask you to.',
+    ans:'Safe', expl:'Updates patch security holes and fix bugs that hackers can exploit.',
+    icon:'🔄', level:'Cyber Cadet', levelNum:1 },
+  { q:'You sign out of your account after using a shared computer.',
+    ans:'Safe', expl:'Signing out prevents anyone else from accessing your account on that device.',
+    icon:'🚪', level:'Cyber Cadet', levelNum:1 },
+  { q:'You turn on two-step verification (2FA) for your accounts.',
+    ans:'Safe', expl:'2FA adds an extra layer of protection even if your password is stolen.',
+    icon:'🔐', level:'Cyber Cadet', levelNum:1 },
+
+  // Level 2 – Cyber Explorer (Q6-10)
+  { q:"You read an app's permissions before installing it.",
+    ans:'Safe', expl:"Reading permissions helps you understand what data an app can access.",
+    icon:'📋', level:'Cyber Explorer', levelNum:2 },
+  { q:"You cover your webcam when you're not using it.",
+    ans:'Safe', expl:'Covering your webcam protects your privacy from potential spying.',
+    icon:'📷', level:'Cyber Explorer', levelNum:2 },
+  { q:'You think carefully before posting photos or videos online.',
+    ans:'Safe', expl:'Once posted, content can spread widely — think before you share!',
+    icon:'📸', level:'Cyber Explorer', levelNum:2 },
+  { q:'You leave your device unlocked when you walk away from it.',
+    ans:'Unsafe', expl:'Anyone nearby could access your personal data on an unlocked device.',
+    icon:'📱', level:'Cyber Explorer', levelNum:2 },
+  { q:'You create a password like "R!ver#Cl0ud42" by mixing letters, numbers, and symbols.',
+    ans:'Safe', expl:'Complex mixed passwords are much harder for attackers to crack.',
+    icon:'🔒', level:'Cyber Explorer', levelNum:2 },
+
+  // Level 3 – Cyber Detective (Q11-14)
+  { q:'You send a photo of your school ID card to someone you met online.',
+    ans:'Unsafe', expl:'Your school ID contains sensitive personal information — never share it online!',
+    icon:'🪪', level:'Cyber Detective', levelNum:3 },
+  { q:'You verify a website\'s address before entering your password.',
+    ans:'Safe', expl:'Checking the URL helps you avoid fake phishing websites.',
+    icon:'🌐', level:'Cyber Detective', levelNum:3 },
+  { q:'You log into your email on the free Wi-Fi at a coffee shop.',
+    ans:'Unsafe', expl:'Public Wi-Fi can expose your login credentials to snoopers.',
+    icon:'☕', level:'Cyber Detective', levelNum:3 },
+  { q:'You download a game from an unknown website because it\'s free.',
+    ans:'Unsafe', expl:'Unknown sites may bundle malware or viruses with their downloads.',
+    icon:'⬇️', level:'Cyber Detective', levelNum:3 },
+];
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let currentIdx = 0;
+let score = 0;
+let answered = false;
+let results = []; // true=correct, false=wrong per question
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+function init() {
+  currentIdx = 0;
+  score = 0;
+  answered = false;
+  results = [];
+  document.getElementById('quiz-screen').style.display = 'flex';
+  document.getElementById('results-screen').classList.remove('active');
+  loadQuestion();
+}
+
+/* ════════════════════════════════════════════════
+   PROGRESS TRACK
+════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════
+   LOAD QUESTION
+════════════════════════════════════════════════ */
+function loadQuestion() {
+  if (currentIdx >= QUESTIONS.length) { showResults(); return; }
+  answered = false;
+
+  const q = QUESTIONS[currentIdx];
+
+  // Update header
+  document.getElementById('fraction-display').textContent = `${currentIdx+1}/14`;
+  document.getElementById('scenario-label').textContent = `Scenario ${currentIdx+1}/14`;
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('challenge-display').textContent = `${currentIdx+1} of 14`;
+  document.getElementById('level-display').textContent = q.level;
+
+  // Illustration with pop animation
+  const illus = document.getElementById('illustration');
+  illus.textContent = q.icon;
+  illus.classList.remove('pop');
+  void illus.offsetWidth; // reflow
+  illus.classList.add('pop');
+  setTimeout(()=>illus.classList.remove('pop'), 400);
+
+  // Reset buttons
+  const btnSafe = document.getElementById('btn-safe');
+  const btnUnsafe = document.getElementById('btn-unsafe');
+  btnSafe.className = 'choice-btn choice-safe';
+  btnUnsafe.className = 'choice-btn choice-unsafe';
+  btnSafe.disabled = false;
+  btnUnsafe.disabled = false;
+
+  // Hide explanation
+  document.getElementById('explanation-box').classList.add('hidden');
+}
+
+/* ════════════════════════════════════════════════
+   ANSWER HANDLER
+════════════════════════════════════════════════ */
+function answer(choice) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[currentIdx];
+  const correct = (choice === q.ans);
+
+  // Update score
+  if (correct) score++;
+  results.push(correct);
+
+  // Highlight buttons
+  const btnSafe   = document.getElementById('btn-safe');
+  const btnUnsafe = document.getElementById('btn-unsafe');
+  btnSafe.disabled   = true;
+  btnUnsafe.disabled = true;
+
+  // Always show correct answer in green
+  if (q.ans === 'Safe')   btnSafe.classList.add('reveal-correct');
+  else                    btnUnsafe.classList.add('reveal-correct');
+
+  // If user clicked wrong, mark it red
+  if (!correct) {
+    if (choice === 'Safe') btnSafe.classList.add('reveal-wrong');
+    else                   btnUnsafe.classList.add('reveal-wrong');
+  }
+
+  // Update score display
+  document.getElementById('score-display').textContent = score;
+
+  // Show explanation
+  const exBox    = document.getElementById('explanation-box');
+  const exResult = document.getElementById('expl-result');
+  const exText   = document.getElementById('expl-text');
+  const exIcon   = document.getElementById('expl-icon');
+  exBox.classList.remove('hidden');
+  if (correct) {
+    exIcon.textContent = '🌟';
+    exResult.textContent = '✅ Correct! Great thinking!';
+    exResult.className = 'expl-result correct-result';
+  } else {
+    exIcon.textContent = '💡';
+    exResult.textContent = '❌ Not quite — here\'s why:';
+    exResult.className = 'expl-result wrong-result';
+  }
+  exText.textContent = q.expl;
+
+  // Auto-advance after 2 s
+  setTimeout(() => {
+    currentIdx++;
+    loadQuestion();
+  }, 2000);
+}
+
+/* ════════════════════════════════════════════════
+   RESULTS
+════════════════════════════════════════════════ */
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').classList.add('active');
+
+  const pct = Math.round(score / 14 * 100);
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('accuracy-label').textContent = `Accuracy: ${pct}%`;
+
+  // Animate bar after short delay
+  setTimeout(() => {
+    document.getElementById('accuracy-fill').style.width = pct + '%';
+  }, 100);
+
+  // Badge
+  let emoji, title, msg, hero;
+  if (score <= 5) {
+    emoji='🌱'; title='Cyber Cadet';
+    msg='Keep practising — every expert started as a beginner! 💪';
+    hero='🦸';
+  } else if (score <= 10) {
+    emoji='🔵'; title='Cyber Explorer';
+    msg='Great effort! You know the basics well. Keep exploring! 🚀';
+    hero='🦸‍♀️';
+  } else {
+    emoji='🟣'; title='Cyber Detective';
+    msg='Outstanding! You\'re a true Cyber Detective — you spot risks like a pro! 🕵️';
+    hero='🧑‍💻';
+  }
+  document.getElementById('results-hero').textContent = hero;
+  document.getElementById('badge-emoji').textContent = emoji;
+  document.getElementById('badge-title').textContent = title;
+  document.getElementById('badge-msg').textContent = msg;
+  document.getElementById('results-sub').textContent =
+    `You answered ${score} out of 14 correctly!`;
+}
+
+/* ════════════════════════════════════════════════
+   RESTART
+════════════════════════════════════════════════ */
+function restart() { init(); }
+
+/* ════════════════════════════════════════════════
+   LISTEN BUTTON (Text-to-Speech)
+════════════════════════════════════════════════ */
+document.getElementById('btn-listen').addEventListener('click', () => {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const q = QUESTIONS[currentIdx];
+    if (!q) return;
+    const utt = new SpeechSynthesisUtterance(q.q);
+    utt.rate = 0.92; utt.pitch = 1.05;
+    window.speechSynthesis.speak(utt);
+  }
+});
+
+/* ════════════════════════════════════════════════
+   START
+════════════════════════════════════════════════ */
+init();
+</script>
+</body>
+</html>

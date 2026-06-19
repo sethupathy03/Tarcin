@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Code History Timeline - A fun educational game for kids to learn about computing milestones by arranging them in chronological order." />
+  <title>Code History Timeline - Kids Computing Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Floating decorative elements -->
+  <div class="floating-stars" aria-hidden="true">
+    <span class="star star-1">⭐</span>
+    <span class="star star-2">✨</span>
+    <span class="star star-3">🌟</span>
+    <span class="star star-4">💫</span>
+    <span class="star star-5">⭐</span>
+    <span class="star star-6">✨</span>
+  </div>
+
+  <main class="page-wrapper" id="pageWrapper">
+    <!-- Header -->
+    <header class="page-header" id="pageHeader">
+      <button class="back-btn" id="backBtn" aria-label="Go back">
+        <span class="back-arrow">←</span> Back
+      </button>
+      <div class="header-title-area">
+        <h1 class="header-title">Code History Timeline</h1>
+      </div>
+      <div class="page-actions">
+        <button class="action-pill timeline-pill active" id="timelineBtn">
+          <span class="pill-icon">🕐</span> Timeline
+        </button>
+        <button class="action-pill listen-pill" id="listenBtn">
+          <span class="pill-icon">🔊</span> Listen
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Title -->
+    <div class="title-section">
+      <h1 class="main-title" aria-label="Code History Timeline">
+        <span class="title-word title-code">Code</span>
+        <span class="title-word title-history">History</span>
+        <span class="title-word title-timeline">Timeline</span>
+      </h1>
+      <p class="main-subtitle">Arrange the computing milestones in chronological order</p>
+    </div>
+
+    <!-- Hero Panel with Superhero -->
+    <section class="hero-panel" id="heroPanel">
+      <div class="hero-info-side">
+        <div class="hero-info-card">
+          <div class="info-icon">🎯</div>
+          <div class="info-text">
+            <strong>USE ARROWS TO SORT</strong>
+            <p>6 Computing Milestones</p>
+          </div>
+        </div>
+        <button class="hint-btn" id="hintBtn">
+          <span class="hint-icon">💡</span> Ask Cyber Buddy
+        </button>
+      </div>
+
+      <div class="hero-card" id="heroCard">
+        <img class="hero-image" src="superhero.jfif" alt="Cyber Buddy Superhero" id="heroImage" />
+        <div class="speech-bubble" id="speechBubble">
+          <p id="bubbleText">Let's put these computing events in the right order! 🚀</p>
+          <div class="bubble-tail"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline Cards -->
+    <section class="timeline-section" id="timelineSection">
+      <ul class="event-list" id="eventList" aria-label="Timeline milestones to sort"></ul>
+
+      <div class="bottom-actions">
+        <div class="tip-card">
+          <span class="tip-emoji">💡</span>
+          <strong>Tip:</strong> Use the arrows to move items up or down. The oldest event goes first!
+        </div>
+        <button class="check-order-btn" id="checkOrderBtn">
+          <span class="check-icon">✅</span> Check Order
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successModal" aria-hidden="true">
+    <div class="modal-content" id="modalContent">
+      <div class="modal-confetti-bg" aria-hidden="true"></div>
+      <div class="modal-hero-img">
+        <img src="superhero.jfif" alt="Happy Cyber Buddy" class="modal-superhero" />
+        <div class="thumbs-up">👍</div>
+      </div>
+      <h2 class="modal-title">🎉 Timeline Complete!</h2>
+      <p class="modal-message">You arranged all milestones correctly!</p>
+      <div class="badge-section">
+        <div class="badge">
+          <span class="badge-icon">🏆</span>
+          <span class="badge-label">History Hero Badge Earned</span>
+        </div>
+        <div class="score-display">
+          <span class="score-star">⭐</span>
+          <span class="score-text">Score: <strong>100</strong></span>
+        </div>
+      </div>
+      <button class="modal-close-btn" id="modalCloseBtn">Play Again! 🔄</button>
+    </div>
+  </div>
+
+  <!-- Confetti Container -->
+  <div id="confettiContainer" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
