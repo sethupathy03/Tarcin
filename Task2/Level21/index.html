@@ -134,8 +134,16 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
   border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:60px;box-shadow:0 4px 16px rgba(0,0,0,.08);
   transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  animation:floaty 5s ease-in-out infinite;
 }
 .illustration-wrap.pop{transform:scale(1.12);}
+
+@keyframes floaty{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  25%{transform:translateY(-8px) rotate(-1deg);}
+  50%{transform:translateY(-4px) rotate(1deg);}
+  75%{transform:translateY(-8px) rotate(-1deg);}
+}
 
 .question-text{
   font-size:clamp(16px,2.2vw,19px);font-weight:800;

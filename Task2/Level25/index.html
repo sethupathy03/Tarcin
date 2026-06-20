@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Router Coverage Lab</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --navy: #1a2e6b;
+  --blue: #2d5be3;
+  --sky: #7ec8f5;
+  --green: #2ec87a;
+  --green-light: #d4f5e2;
+  --orange: #f5873a;
+  --yellow: #ffd84d;
+  --red: #ef4444;
+  --panel: #0d1b4b;
+  --white: #ffffff;
+  --shadow: rgba(26,46,107,0.13);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── ANIMATED SKY BACKGROUND ─────────────────────── */
+#sky-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── NAV ─────────────────────────────────────────── */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 16px rgba(26,46,107,0.12);
+  position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid rgba(255,255,255,0.6);
+}
+.btn-back {
+  background: white; border: 2.5px solid var(--navy);
+  border-radius: 50px; padding: 7px 18px;
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 14px; color: var(--navy); cursor: pointer;
+  transition: all .2s;
+}
+.btn-back:hover { background: var(--sky); transform: scale(1.05); }
+.score-pill {
+  background: var(--navy); color: white;
+  border-radius: 50px; padding: 7px 22px;
+  font-weight: 800; font-size: 15px; letter-spacing: 1px;
+}
+#score-val { color: var(--yellow); }
+.btn-listen {
+  background: var(--yellow); border: none;
+  border-radius: 50px; padding: 8px 20px;
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 14px; color: var(--navy); cursor: pointer;
+  box-shadow: 0 3px 10px rgba(255,200,0,0.35);
+  transition: all .2s;
+}
+.btn-listen:hover { box-shadow: 0 5px 18px rgba(255,200,0,0.6); transform: scale(1.05); }
+
+/* ── HERO ────────────────────────────────────────── */
+.hero {
+  text-align: center; padding: 22px 16px 8px;
+  position: relative; z-index: 5;
+}
+h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--navy);
+  text-shadow: 2px 2px 0 rgba(255,255,255,0.9), 4px 4px 0 rgba(26,46,107,0.08);
+}
+.subtitle { color: var(--orange); font-weight: 700; font-size: 1rem; margin-top: 4px; }
+.target-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(212,245,226,0.92); border: 2.5px solid var(--green);
+  border-radius: 14px; padding: 8px 22px; margin: 10px auto 0;
+  backdrop-filter: blur(6px);
+}
+.target-badge .tl { font-weight: 700; color: #1a7a45; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+.target-badge .tv { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: #1a7a45; }
+.target-icon {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+@keyframes bullseye-pulse {
+  0%, 100% { r: 3.4; opacity: 1; }
+  50%       { r: 4.2; opacity: .75; }
+}
+#target-bullseye { animation: bullseye-pulse 2.4s ease-in-out infinite; transform-origin: center; }
+
+/* ── WRAPPER ─────────────────────────────────────── */
+.wrapper {
+  max-width: 1100px; margin: 0 auto; padding: 14px 16px 40px;
+  position: relative; z-index: 5;
+}
+
+/* ── SIM AREA ────────────────────────────────────── */
+.sim-wrap {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(26,46,107,0.13);
+  overflow: hidden; position: relative;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.sim-label {
+  background: rgba(13,27,75,0.9); color: var(--sky);
+  font-size: 11px; font-weight: 700; letter-spacing: 4px;
+  text-transform: uppercase; padding: 7px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(8px);
+}
+#sim-board {
+  position: relative; width: 100%; height: 460px;
+  background-image:
+    linear-gradient(rgba(45,91,227,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,91,227,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  overflow: hidden; cursor: default;
+  background-color: rgba(238,244,255,0.6);
+}
+
+/* Coverage rings */
+#coverage-ring {
+  position: absolute; border-radius: 50%;
+  pointer-events: none; transform: translate(-50%, -50%);
+  /* no transition here — the ring must track the router 1:1 with
+     zero lag, even on fast drags. A transition on left/top causes
+     the wave to visibly trail behind quick mouse movements. */
+}
+.ring-strong, .ring-mid, .ring-outer {
+  position: absolute; border-radius: 50%;
+  left: 50%; top: 50%; transform: translate(-50%,-50%);
+}
+.ring-strong { background: radial-gradient(circle, rgba(46,200,122,0.22) 0%, rgba(46,200,122,0.06) 55%, transparent 70%); }
+.ring-mid    { background: radial-gradient(circle, transparent 35%, rgba(245,135,58,0.10) 55%, transparent 80%); }
+.ring-outer  { background: radial-gradient(circle, transparent 58%, rgba(239,68,68,0.07) 78%, transparent 92%); }
+
+
+/* Devices */
+.device {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: default; user-select: none;
+  z-index: 10;
+}
+.device.dragging { animation: none; cursor: grabbing; opacity: .85; z-index: 30; }
+.device-icon {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.95); border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 6px 18px var(--shadow), 0 2px 4px rgba(0,0,0,0.06);
+  border: 2px solid rgba(45,91,227,0.13);
+  transition: border-color .3s;
+  cursor: grab;
+}
+.device.dragging .device-icon { cursor: grabbing; }
+.device-label {
+  font-size: 11px; font-weight: 800; color: var(--navy);
+  background: rgba(255,255,255,0.92); border-radius: 6px; padding: 1px 7px;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+.signal-bubble {
+  font-size: 11px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; transition: background .3s, color .3s;
+}
+.sig-green  { background: #d4f5e2; color: #1a7a45; }
+.sig-yellow { background: #fff3cd; color: #856404; }
+.sig-red    { background: #fde8e8; color: #c0392b; }
+
+/* Router */
+#router {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: default; user-select: none; z-index: 20;
+  transform: translate(-50%, -50%);
+}
+#router.dragging { cursor: grabbing; z-index: 40; }
+@keyframes router-pulse {
+  0%,100% { filter: drop-shadow(0 0 6px rgba(46,200,122,0.5)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(46,200,122,0.85)); }
+}
+.router-icon {
+  width: 72px; height: 72px;
+  background: var(--navy); border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  box-shadow: 0 8px 24px rgba(26,46,107,0.4);
+  animation: router-pulse 2.2s ease-in-out infinite;
+  cursor: grab;
+}
+#router.dragging .router-icon { cursor: grabbing; }
+.router-label {
+  font-size: 11px; font-weight: 800; color: var(--white);
+  background: var(--navy); border-radius: 6px; padding: 2px 9px;
+}
+
+/* Bottom panels */
+.bottom-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 14px;
+}
+@media (max-width: 640px) { .bottom-grid { grid-template-columns: 1fr; } }
+.panel {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 18px;
+  box-shadow: 0 4px 18px var(--shadow);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.panel-head {
+  background: rgba(13,27,75,0.88); color: var(--sky);
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; padding: 8px 16px;
+}
+.signal-list { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.signal-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.signal-name { font-weight: 700; color: var(--navy); font-size: 13px; width: 80px; }
+.signal-bar-wrap { flex: 1; background: rgba(200,210,240,0.4); border-radius: 8px; height: 10px; overflow: hidden; }
+.signal-bar { height: 100%; border-radius: 8px; transition: width .3s, background .3s; }
+.signal-pct { font-weight: 800; font-size: 13px; width: 40px; text-align: right; }
+.avg-panel { padding: 20px 18px; text-align: center; }
+.avg-number {
+  font-family: 'Fredoka One', cursive;
+  font-size: 3rem; color: var(--navy); transition: color .3s; line-height: 1;
+}
+.avg-label { font-size: 12px; font-weight: 700; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.meter-wrap { margin-top: 14px; background: rgba(200,210,240,0.4); border-radius: 10px; height: 14px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 10px; transition: width .35s, background .35s; }
+.stars-row { margin-top: 10px; font-size: 1.4rem; letter-spacing: 2px; min-height: 28px; }
+
+/* Fact box */
+.fact-box {
+  background: rgba(255,251,238,0.9); border: 2px solid var(--yellow);
+  backdrop-filter: blur(6px);
+  border-radius: 14px; padding: 12px 18px; margin-bottom: 14px;
+  font-size: 13px; color: var(--navy); font-weight: 600; line-height: 1.5;
+}
+.fact-box strong { color: var(--orange); }
+
+/* Actions */
+.action-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 6px; }
+.btn-verify {
+  background: var(--green); border: none; border-radius: 50px; padding: 13px 36px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+  color: white; cursor: pointer;
+  box-shadow: 0 5px 16px rgba(46,200,122,0.4); transition: all .2s;
+}
+.btn-verify:hover { transform: scale(1.06); box-shadow: 0 8px 24px rgba(46,200,122,0.55); }
+.btn-new {
+  background: rgba(255,255,255,0.9); border: 2.5px solid var(--blue);
+  border-radius: 50px; padding: 13px 28px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+  color: var(--blue); cursor: pointer; transition: all .2s;
+  backdrop-filter: blur(6px);
+}
+.btn-new:hover { background: rgba(238,244,255,0.95); transform: scale(1.04); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+  padding: 14px 32px; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+  z-index: 200; transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s;
+  opacity: 0; pointer-events: none; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { background: var(--green); color: white; }
+.toast.error   { background: var(--red);   color: white; }
+
+/* Confetti */
+.confetti { position: fixed; pointer-events: none; z-index: 300; border-radius: 3px; animation: cffall 2s ease-in forwards; }
+@keyframes cffall {
+  0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  #sim-board { height: 360px; }
+  .device-icon { width: 52px; height: 52px; font-size: 1.6rem; }
+  .router-icon { width: 60px; height: 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ANIMATED SKY CANVAS -->
+<canvas id="sky-canvas" aria-hidden="true"></canvas>
+
+<!-- NAV -->
+<nav>
+  <button class="btn-back" onclick="history.back()" aria-label="Go back">← Back</button>
+  <div class="score-pill" aria-live="polite">Score: <span id="score-val">0</span>/5</div>
+  <button class="btn-listen" onclick="speakIntro()" aria-label="Listen to instructions">🔊 Listen</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Router Coverage Lab</h1>
+  <p class="subtitle">Place the router to maximize network coverage</p>
+  <div style="text-align:center;margin-top:10px">
+    <div class="target-badge">
+      <div class="target-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="34" height="34">
+          <circle cx="32" cy="32" r="28" fill="#fde8e8" stroke="#ef4444" stroke-width="3"/>
+          <circle cx="32" cy="32" r="19" fill="#fff3cd" stroke="#f5873a" stroke-width="3"/>
+          <circle cx="32" cy="32" r="10" fill="#d4f5e2" stroke="#2ec87a" stroke-width="3"/>
+          <circle id="target-bullseye" cx="32" cy="32" r="3.4" fill="#1a7a45"/>
+          <g id="target-arrow">
+            <line x1="50" y1="14" x2="33.4" y2="30.6" stroke="#1a2e6b" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M33.4 30.6 L37 27 L31 25 Z" fill="#1a2e6b"/>
+            <path d="M50 14 L46.5 13.2 L50.8 17.5 Z" fill="#7ec8f5"/>
+          </g>
+        </svg>
+      </div>
+      <span class="tl">Target Coverage</span>
+      <span class="tv" id="target-display">85%</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+  <!-- SIM BOARD -->
+  <div class="sim-wrap">
+    <div class="sim-label">
+      <span>Network Simulation</span>
+      <span id="sim-hint" style="font-size:11px;color:#7ec8f5;font-weight:600;letter-spacing:1px">Drag the 📡 router to a better spot!</span>
+    </div>
+    <div id="sim-board" aria-label="Network simulation board" role="application">
+      <div id="coverage-ring">
+        <div class="ring-outer"  id="r-outer"></div>
+        <div class="ring-mid"    id="r-mid"></div>
+        <div class="ring-strong" id="r-strong"></div>
+      </div>
+      <div class="device" id="dev-0" role="button" tabindex="0" aria-label="Computer device">
+        <div class="device-icon">🖥️</div>
+        <div class="device-label">Computer</div>
+        <div class="signal-bubble sig-green" id="bubble-0">100%</div>
+      </div>
+      <div class="device" id="dev-1" role="button" tabindex="0" aria-label="Laptop device">
+        <div class="device-icon">💻</div>
+        <div class="device-label">Laptop</div>
+        <div class="signal-bubble sig-green" id="bubble-1">100%</div>
+      </div>
+      <div class="device" id="dev-2" role="button" tabindex="0" aria-label="Mobile device">
+        <div class="device-icon">📱</div>
+        <div class="device-label">Mobile</div>
+        <div class="signal-bubble sig-green" id="bubble-2">100%</div>
+      </div>
+      <div class="device" id="dev-3" role="button" tabindex="0" aria-label="Tablet device">
+        <div class="device-icon">📲</div>
+        <div class="device-label">Tablet</div>
+        <div class="signal-bubble sig-green" id="bubble-3">100%</div>
+      </div>
+      <div id="router" role="button" tabindex="0" aria-label="Wi-Fi Router, drag to reposition">
+        <div class="router-icon">📡</div>
+        <div class="router-label">Wi-Fi Router</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM PANELS -->
+  <div class="bottom-grid">
+    <div class="panel">
+      <div class="panel-head">Coverage Summary</div>
+      <div class="signal-list">
+        <div class="signal-row">
+          <span class="signal-name">🖥️ Computer</span>
+          <div class="signal-bar-wrap"><div class="signal-bar" id="bar-0" style="width:100%;background:#2ec87a"></div></div>
+          <span class="signal-pct" id="pct-0" style="color:#1a7a45">100%</span>
+        </div>
+        <div class="signal-row">
+          <span class="signal-name">💻 Laptop</span>
+          <div class="signal-bar-wrap"><div class="signal-bar" id="bar-1" style="width:100%;background:#2ec87a"></div></div>
+          <span class="signal-pct" id="pct-1" style="color:#1a7a45">100%</span>
+        </div>
+        <div class="signal-row">
+          <span class="signal-name">📱 Mobile</span>
+          <div class="signal-bar-wrap"><div class="signal-bar" id="bar-2" style="width:100%;background:#2ec87a"></div></div>
+          <span class="signal-pct" id="pct-2" style="color:#1a7a45">100%</span>
+        </div>
+        <div class="signal-row">
+          <span class="signal-name">📲 Tablet</span>
+          <div class="signal-bar-wrap"><div class="signal-bar" id="bar-3" style="width:100%;background:#2ec87a"></div></div>
+          <span class="signal-pct" id="pct-3" style="color:#1a7a45">100%</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">Average Coverage</div>
+      <div class="avg-panel">
+        <div class="avg-number" id="avg-num">100%</div>
+        <div class="avg-label">Current Average</div>
+        <div class="meter-wrap">
+          <div class="meter-fill" id="meter" style="width:100%;background:#2ec87a"></div>
+        </div>
+        <div class="stars-row" id="stars-row">⭐⭐⭐⭐⭐</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACT BOX -->
+  <div class="fact-box">
+    <strong>📡 Networking Fact:</strong> Signal strength decreases as distance increases. Placing a router near the <em>center</em> of all devices generally maximizes average coverage — just like in real homes and offices!
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+    <button class="btn-verify" onclick="validate()" aria-label="Verify your network setup">✓ Verify Network</button>
+    <button class="btn-new" onclick="generateNew()" aria-label="Generate a new network layout">🔀 New Network</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   SKY CANVAS — animated clouds, birds, stars
+═══════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('sky-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* Sky gradient stops */
+  const SKY_TOP    = '#c9e8ff';
+  const SKY_MID    = '#dff0ff';
+  const SKY_BOTTOM = '#f0f7ff';
+
+  /* ── Clouds ── */
+  function makeCloud(x, y, scale, speed, opacity) {
+    return { x, y, scale, speed, opacity,
+      puffs: [
+        {rx: 60, ry: 36, ox: 0,   oy: 0},
+        {rx: 44, ry: 30, ox:-55,  oy: 12},
+        {rx: 44, ry: 30, ox: 58,  oy: 10},
+        {rx: 34, ry: 26, ox:-30,  oy:-18},
+        {rx: 32, ry: 24, ox: 28,  oy:-16},
+      ]
+    };
+  }
+
+  let clouds = [];
+  function initClouds() {
+    clouds = [];
+    const configs = [
+      { y: 0.06, scale: 1.3,  speed: 0.18, op: 0.82 },
+      { y: 0.14, scale: 0.85, speed: 0.11, op: 0.70 },
+      { y: 0.08, scale: 1.0,  speed: 0.22, op: 0.78 },
+      { y: 0.20, scale: 0.65, speed: 0.08, op: 0.55 },
+      { y: 0.03, scale: 1.55, speed: 0.14, op: 0.65 },
+      { y: 0.17, scale: 0.75, speed: 0.20, op: 0.60 },
+      { y: 0.25, scale: 0.55, speed: 0.09, op: 0.45 },
+      { y: 0.30, scale: 0.90, speed: 0.13, op: 0.50 },
+    ];
+    configs.forEach((c, i) => {
+      clouds.push(makeCloud(
+        (i / configs.length) * W * 1.4 - W * 0.1,
+        c.y * H, c.scale, c.speed, c.op
+      ));
+    });
+  }
+
+  function drawCloud(c) {
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.scale(c.scale, c.scale);
+    ctx.globalAlpha = c.opacity;
+    c.puffs.forEach(p => {
+      ctx.beginPath();
+      ctx.ellipse(p.ox, p.oy, p.rx, p.ry, 0, 0, Math.PI*2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+    });
+    /* soft shadow under cloud */
+    ctx.globalAlpha = c.opacity * 0.12;
+    c.puffs.forEach(p => {
+      ctx.beginPath();
+      ctx.ellipse(p.ox + 4, p.oy + 14, p.rx * 0.9, p.ry * 0.5, 0, 0, Math.PI*2);
+      ctx.fillStyle = '#90b8d8';
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  /* ── Birds ── */
+  function makeBird(x, y, speed, size) {
+    return { x, y, speed, size, flap: Math.random() * Math.PI * 2, flapSpeed: 0.08 + Math.random() * 0.06, wobble: Math.random() * 1000 };
+  }
+  let birds = [];
+  function initBirds() {
+    birds = [];
+    for (let i = 0; i < 7; i++) {
+      birds.push(makeBird(
+        Math.random() * W * 2 - W * 0.3,
+        H * (0.04 + Math.random() * 0.22),
+        0.35 + Math.random() * 0.55,
+        0.7 + Math.random() * 0.8
+      ));
+    }
+  }
+
+  function drawBird(b, t) {
+    const flapAngle = Math.sin(b.flap) * 0.6;
+    ctx.save();
+    ctx.translate(b.x, b.y + Math.sin(t * 0.0008 + b.wobble) * 4);
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = '#4a7faa';
+    ctx.lineWidth = b.size * 1.4;
+    ctx.lineCap = 'round';
+    /* left wing */
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-b.size * 9, -b.size * 7 * flapAngle, -b.size * 18, 0);
+    ctx.stroke();
+    /* right wing */
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(b.size * 9, -b.size * 7 * flapAngle, b.size * 18, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ── Floating particles (data packets) ── */
+  function makeParticle() {
+    return {
+      x: Math.random() * W,
+      y: H * (0.25 + Math.random() * 0.75),
+      r: 1.5 + Math.random() * 3,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: -0.15 - Math.random() * 0.35,
+      alpha: 0.2 + Math.random() * 0.5,
+      color: ['#60a5fa','#34d399','#a78bfa','#fbbf24','#f87171'][Math.floor(Math.random()*5)],
+      life: Math.random() * 300
+    };
+  }
+  let particles = [];
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < 55; i++) {
+      const p = makeParticle();
+      p.life = Math.random() * 400;
+      particles.push(p);
+    }
+  }
+
+  /* ── Sun ── */
+  function drawSun(t) {
+    const sx = W * 0.88, sy = H * 0.07;
+    const r = 38;
+    /* glow */
+    const g = ctx.createRadialGradient(sx, sy, r*0.5, sx, sy, r*2.5);
+    g.addColorStop(0, 'rgba(255,230,100,0.22)');
+    g.addColorStop(1, 'rgba(255,230,100,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(sx, sy, r*2.5, 0, Math.PI*2);
+    ctx.fill();
+    /* body */
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI*2);
+    ctx.fillStyle = '#ffe066';
+    ctx.globalAlpha = 0.88;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    /* rays */
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI*2 + t * 0.0003;
+      const x1 = sx + Math.cos(angle)*(r+6);
+      const y1 = sy + Math.sin(angle)*(r+6);
+      const x2 = sx + Math.cos(angle)*(r+14+Math.sin(t*0.002+i)*4);
+      const y2 = sy + Math.sin(angle)*(r+14+Math.sin(t*0.002+i)*4);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = 'rgba(255,220,50,0.5)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    }
+  }
+
+  initClouds(); initBirds(); initParticles();
+  window.addEventListener('resize', () => { initClouds(); initBirds(); });
+
+  let t = 0;
+  function draw() {
+    t++;
+    ctx.clearRect(0, 0, W, H);
+
+    /* Sky gradient */
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0,   SKY_TOP);
+    grad.addColorStop(0.45, SKY_MID);
+    grad.addColorStop(1,   SKY_BOTTOM);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    /* Sun */
+    ctx.globalAlpha = 1;
+    drawSun(t);
+
+    /* Clouds */
+    clouds.forEach(c => {
+      c.x += c.speed;
+      if (c.x - 200 * c.scale > W) {
+        c.x = -200 * c.scale;
+        c.y = H * (0.02 + Math.random() * 0.28);
+      }
+      ctx.globalAlpha = 1;
+      drawCloud(c);
+    });
+
+    /* Birds */
+    birds.forEach(b => {
+      b.x += b.speed;
+      b.flap += b.flapSpeed;
+      if (b.x > W + 60) {
+        b.x = -60;
+        b.y = H * (0.04 + Math.random() * 0.22);
+        b.speed = 0.35 + Math.random() * 0.55;
+      }
+      ctx.globalAlpha = 1;
+      drawBird(b, t);
+    });
+
+    /* Particles */
+    particles.forEach((p, i) => {
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.life++;
+      if (p.y < -10 || p.x < -10 || p.x > W + 10 || p.life > 500) {
+        particles[i] = makeParticle();
+        return;
+      }
+      ctx.globalAlpha = p.alpha * (1 - p.life / 500);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    });
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* ═══════════════════════════════════════════
+   GAME LOGIC
+═══════════════════════════════════════════ */
+let TARGET = 85;
+const TARGET_OPTIONS = [70, 75, 80, 85, 90];
+let score = 0;
+const devices = [
+  { id: 'dev-0', x: 0.15, y: 0.25 },
+  { id: 'dev-1', x: 0.75, y: 0.2  },
+  { id: 'dev-2', x: 0.18, y: 0.72 },
+  { id: 'dev-3', x: 0.80, y: 0.70 },
+];
+let router = { x: 0.5, y: 0.5 };
+
+const board    = document.getElementById('sim-board');
+const routerEl = document.getElementById('router');
+const ring     = document.getElementById('coverage-ring');
+const avgNum   = document.getElementById('avg-num');
+const meter    = document.getElementById('meter');
+const starsRow = document.getElementById('stars-row');
+
+function boardW() { return board.clientWidth; }
+function boardH() { return board.clientHeight; }
+
+function placeDevices() {
+  devices.forEach(d => {
+    const el = document.getElementById(d.id);
+    el.style.left = (d.x * boardW()) + 'px';
+    el.style.top  = (d.y * boardH()) + 'px';
+    el.style.transform = 'translate(-50%, -50%)';
+  });
+}
+function placeRouter() {
+  routerEl.style.left = (router.x * boardW()) + 'px';
+  routerEl.style.top  = (router.y * boardH()) + 'px';
+  updateRing(); updateCoverage();
+}
+
+function calcCoverage(dx, dy) {
+  return Math.max(0, 100 - Math.sqrt(dx*dx + dy*dy) * 0.3);
+}
+function updateCoverage() {
+  const rx = router.x * boardW(), ry = router.y * boardH();
+  let total = 0;
+  devices.forEach((d, i) => {
+    const cov = calcCoverage(d.x * boardW() - rx, d.y * boardH() - ry);
+    total += cov;
+    const pct = Math.round(cov);
+    document.getElementById('bubble-'+i).textContent = pct + '%';
+    document.getElementById('pct-'+i).textContent    = pct + '%';
+    document.getElementById('bar-'+i).style.width    = pct + '%';
+    let cls, barC, pctC;
+    if (pct >= 80)      { cls = 'sig-green';  barC = '#2ec87a'; pctC = '#1a7a45'; }
+    else if (pct >= 50) { cls = 'sig-yellow'; barC = '#f5873a'; pctC = '#a05a00'; }
+    else                { cls = 'sig-red';    barC = '#ef4444'; pctC = '#c0392b'; }
+    document.getElementById('bubble-'+i).className     = 'signal-bubble ' + cls;
+    document.getElementById('bar-'+i).style.background = barC;
+    document.getElementById('pct-'+i).style.color      = pctC;
+  });
+  const avg = Math.round((total / 4) * 10) / 10;
+  avgNum.textContent = avg + '%';
+  meter.style.width  = Math.min(100, avg) + '%';
+  if (avg >= 80)      { meter.style.background = '#2ec87a'; avgNum.style.color = '#1a7a45'; }
+  else if (avg >= 50) { meter.style.background = '#f5873a'; avgNum.style.color = '#a05a00'; }
+  else                { meter.style.background = '#ef4444'; avgNum.style.color = '#c0392b'; }
+  starsRow.textContent = avg >= 95 ? '⭐⭐⭐⭐⭐' : avg >= 90 ? '⭐⭐⭐⭐' : avg >= 80 ? '⭐⭐⭐' : avg >= 70 ? '⭐⭐' : '⭐';
+  return avg;
+}
+
+function updateRing() {
+  const rx = router.x * boardW(), ry = router.y * boardH(), R = 260;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  ring.style.width = (R*2)+'px'; ring.style.height = (R*2)+'px';
+  ['r-outer','r-mid','r-strong'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.width = (R*2)+'px'; el.style.height = (R*2)+'px';
+  });
+}
+
+/* ───────────────────────────────────────────────────────────
+   DRAG LOGIC (fixed)
+
+   Previously, drag offsets were computed from
+   el.getBoundingClientRect(), which can be mid-flight through
+   the CSS float animation (translateY up to -9px) at the
+   instant mousedown fires. The very next line adds the
+   `.dragging` class, which sets `animation: none` and
+   snaps the element back to its un-animated position —
+   causing a visible jump the moment a drag starts, and an
+   offset that no longer matched the cursor.
+
+   Fix: track the *delta* between the current mouse position
+   and the mouse position at drag start, and apply that delta
+   to the element's last known data position (d.x/d.y or
+   router.x/router.y) instead of re-deriving an offset from
+   the (animated) DOM rect.
+─────────────────────────────────────────────────────────── */
+
+/* Drag: router */
+let draggingRouter = false;
+let routerStartMouseX = 0, routerStartMouseY = 0;
+let routerStartX = 0, routerStartY = 0;
+
+routerEl.addEventListener('mousedown', e => {
+  draggingRouter = true; routerEl.classList.add('dragging');
+  routerStartMouseX = e.clientX; routerStartMouseY = e.clientY;
+  routerStartX = router.x; routerStartY = router.y;
+  e.preventDefault();
+});
+routerEl.addEventListener('touchstart', e => {
+  draggingRouter = true; routerEl.classList.add('dragging');
+  const t = e.touches[0];
+  routerStartMouseX = t.clientX; routerStartMouseY = t.clientY;
+  routerStartX = router.x; routerStartY = router.y;
+}, { passive: true });
+
+document.addEventListener('mousemove', e => {
+  if (!draggingRouter) return;
+  router.x = Math.max(0.04, Math.min(0.96, routerStartX + (e.clientX - routerStartMouseX) / boardW()));
+  router.y = Math.max(0.04, Math.min(0.96, routerStartY + (e.clientY - routerStartMouseY) / boardH()));
+  routerEl.style.left = (router.x * boardW())+'px'; routerEl.style.top = (router.y * boardH())+'px';
+  updateRing(); updateCoverage();
+});
+document.addEventListener('touchmove', e => {
+  if (!draggingRouter) return;
+  const t = e.touches[0];
+  router.x = Math.max(0.04, Math.min(0.96, routerStartX + (t.clientX - routerStartMouseX) / boardW()));
+  router.y = Math.max(0.04, Math.min(0.96, routerStartY + (t.clientY - routerStartMouseY) / boardH()));
+  routerEl.style.left = (router.x * boardW())+'px'; routerEl.style.top = (router.y * boardH())+'px';
+  updateRing(); updateCoverage();
+}, { passive: true });
+document.addEventListener('mouseup',  () => { draggingRouter = false; routerEl.classList.remove('dragging'); });
+document.addEventListener('touchend', () => { draggingRouter = false; routerEl.classList.remove('dragging'); });
+
+/* Drag: devices */
+let draggingDev = null;
+let devStartMouseX = 0, devStartMouseY = 0;
+let devStartX = 0, devStartY = 0;
+
+devices.forEach((d, i) => {
+  const el = document.getElementById(d.id);
+  el.addEventListener('mousedown', e => {
+    draggingDev = i; el.classList.add('dragging');
+    devStartMouseX = e.clientX; devStartMouseY = e.clientY;
+    devStartX = d.x; devStartY = d.y;
+    e.preventDefault();
+  });
+  el.addEventListener('touchstart', e => {
+    draggingDev = i; el.classList.add('dragging');
+    const t = e.touches[0];
+    devStartMouseX = t.clientX; devStartMouseY = t.clientY;
+    devStartX = d.x; devStartY = d.y;
+  }, { passive: true });
+});
+
+document.addEventListener('mousemove', e => {
+  if (draggingDev === null) return;
+  const d = devices[draggingDev];
+  d.x = Math.max(0.04, Math.min(0.96, devStartX + (e.clientX - devStartMouseX) / boardW()));
+  d.y = Math.max(0.04, Math.min(0.96, devStartY + (e.clientY - devStartMouseY) / boardH()));
+  const el = document.getElementById(d.id);
+  el.style.left = (d.x * boardW())+'px'; el.style.top = (d.y * boardH())+'px';
+  updateCoverage();
+});
+document.addEventListener('touchmove', e => {
+  if (draggingDev === null) return;
+  const t = e.touches[0], d = devices[draggingDev];
+  d.x = Math.max(0.04, Math.min(0.96, devStartX + (t.clientX - devStartMouseX) / boardW()));
+  d.y = Math.max(0.04, Math.min(0.96, devStartY + (t.clientY - devStartMouseY) / boardH()));
+  const el = document.getElementById(d.id);
+  el.style.left = (d.x * boardW())+'px'; el.style.top = (d.y * boardH())+'px';
+  updateCoverage();
+}, { passive: true });
+
+document.addEventListener('mouseup',  () => { if (draggingDev !== null) { document.getElementById(devices[draggingDev].id).classList.remove('dragging'); draggingDev = null; } });
+document.addEventListener('touchend', () => { if (draggingDev !== null) { document.getElementById(devices[draggingDev].id).classList.remove('dragging'); draggingDev = null; } });
+
+function validate() {
+  const avg = updateCoverage();
+  if (avg >= TARGET) {
+    score = Math.min(5, score + 1);
+    document.getElementById('score-val').textContent = score;
+    let pts = avg >= 95 ? 5 : avg >= 90 ? 4 : avg >= 80 ? 3 : avg >= 70 ? 2 : 1;
+    showToast('🎉 Excellent Network Setup! +'+pts+' pts', 'success');
+    confetti();
+    speak('Excellent! Your network coverage is '+Math.round(avg)+' percent. Great job!');
+  } else {
+    showToast('❌ Coverage too low ('+Math.round(avg)+'%). Move the router closer.', 'error');
+    speak('Coverage is too low at '+Math.round(avg)+' percent. Try moving the router to the center.');
+  }
+}
+
+const presets = [
+  [{x:.12,y:.18},{x:.8,y:.15},{x:.15,y:.78},{x:.78,y:.75}],
+  [{x:.1,y:.5},{x:.5,y:.1},{x:.9,y:.5},{x:.5,y:.9}],
+  [{x:.2,y:.25},{x:.65,y:.12},{x:.3,y:.75},{x:.85,y:.6}],
+  [{x:.05,y:.1},{x:.9,y:.2},{x:.1,y:.85},{x:.88,y:.8}],
+  [{x:.25,y:.5},{x:.75,y:.2},{x:.5,y:.8},{x:.85,y:.6}],
+];
+let presetIdx = 0;
+function generateNew() {
+  presetIdx = (presetIdx + 1) % presets.length;
+  const ps = presets[presetIdx];
+  devices.forEach((d,i) => { d.x = ps[i].x; d.y = ps[i].y; });
+  router = { x: 0.1 + Math.random()*0.15, y: 0.1 + Math.random()*0.15 };
+
+  let newTarget;
+  do { newTarget = TARGET_OPTIONS[Math.floor(Math.random() * TARGET_OPTIONS.length)]; }
+  while (newTarget === TARGET && TARGET_OPTIONS.length > 1);
+  TARGET = newTarget;
+  document.getElementById('target-display').textContent = TARGET + '%';
+
+  placeDevices(); placeRouter();
+  speak('New network layout generated. Target coverage is now '+TARGET+' percent. Drag the router to maximize coverage.');
+}
+
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3400);
+}
+
+function confetti() {
+  const cols = ['#2ec87a','#ffd84d','#2d5be3','#f5873a','#ef4444','#7ec8f5'];
+  for (let i = 0; i < 70; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.cssText = `left:${Math.random()*100}vw;top:-10px;width:${7+Math.random()*7}px;height:${7+Math.random()*7}px;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.4+Math.random()*.8}s;animation-delay:${Math.random()*.5}s;`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.93; u.pitch = 1.05;
+  window.speechSynthesis.speak(u);
+}
+function speakIntro() {
+  speak('Welcome to the Router Coverage Lab. Drag the Wi-Fi router to the best position and maximize signal coverage for all four devices. Then click Verify Network.');
+}
+
+window.addEventListener('resize', () => { placeDevices(); placeRouter(); });
+window.addEventListener('load',   () => { placeDevices(); placeRouter(); });
+</script>
+</body>
+</html>

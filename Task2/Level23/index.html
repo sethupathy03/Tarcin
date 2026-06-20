@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Vint Cerf Lab - Protocol Selector</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <header class="topbar">
     <div class="back">◀ Back</div>
@@ -22,31 +24,88 @@
       <h2>Protocol selector</h2>
       <p class="muted">Select then assign</p>
       <div class="protocols">
-        <button class="proto" data-proto="TCP"><img class="proto-img" src="assets/tcp.png" alt="TCP"><div class="text"><strong>TCP</strong><small>Reliable data delivery</small></div></button>
-        <button class="proto" data-proto="HTTP"><img class="proto-img" src="assets/http.png" alt="HTTP"><div class="text"><strong>HTTP</strong><small>Web pages and browsers</small></div></button>
-        <button class="proto" data-proto="SMTP"><img class="proto-img" src="assets/smtp.png" alt="SMTP"><div class="text"><strong>SMTP</strong><small>Sending emails</small></div></button>
-        <button class="proto" data-proto="FTP"><img class="proto-img" src="assets/ftp.png" alt="FTP"><div class="text"><strong>FTP</strong><small>Transferring files</small></div></button>
+        <button class="proto" data-proto="TCP">
+          <div class="proto-illustration">
+            <div class="shield">
+              <div class="shield-body">
+                <div class="shine"></div>
+              </div>
+              <div class="lock">
+                <div class="lock-top"></div>
+                <div class="lock-body"></div>
+              </div>
+            </div>
+          </div>
+          <div class="text"><strong>TCP</strong><small>Reliable data delivery</small></div>
+        </button>
+        <button class="proto" data-proto="HTTP">
+          <div class="proto-illustration">
+            <div class="http-container">
+              <div class="browser">🌐</div>
+              <div class="request">📝</div>
+              <div class="server">💻</div>
+              <div class="response">📤</div>
+            </div>
+          </div>
+          <div class="text"><strong>HTTP</strong><small>Web pages and browsers</small></div>
+        </button>
+        <button class="proto" data-proto="SMTP">
+          <div class="proto-illustration">
+            <div class="smtp-container">
+              <div class="sender">😊</div>
+              <div class="mail">✉️</div>
+              <div class="mail-server">📮</div>
+              <div class="cloud">☁️</div>
+            </div>
+          </div>
+          <div class="text"><strong>SMTP</strong><small>Sending emails</small></div>
+        </button>
+        <button class="proto" data-proto="FTP">
+          <div class="proto-illustration">
+            <div class="ftp-component">
+              <div class="ftp-folder">
+                <div class="folder-back"></div>
+                <div class="folder-paper"></div>
+                <div class="folder-front"></div>
+                <div class="download-badge">↓</div>
+              </div>
+            </div>
+          </div>
+          <div class="text"><strong>FTP</strong><small>Transferring files</small></div>
+        </button>
       </div>
     </section>
 
     <section class="cards">
       <article class="card" data-expected="HTTP" data-explanation="HTTP is used to load web pages in a browser.">
-        <div class="illustration"><img class="card-img" src="assets/globe.png" alt="Globe"></div>
+        <div class="illustration">
+          <div class="browser-loading">
+            <div class="browser">
+              🌐
+              <div class="loader"></div>
+            </div>
+          </div>
+        </div>
         <div class="card-content">
           <h3>Browser loads website</h3>
-          <p class="desc">When you open a website in your browser.</p>
           <div class="meta">
             <span class="assigned">—</span>
-            <a class="scenario-link" href="https://school.edu/news" target="_blank" rel="noopener">https://school.edu/news</a>
+            <a class="scenario-link" href="https://school.edu/news" target="_blank"
+              rel="noopener">https://school.edu/news</a>
           </div>
         </div>
       </article>
 
       <article class="card" data-expected="SMTP" data-explanation="SMTP is used for sending emails.">
-        <div class="illustration"><img class="card-img" src="assets/mail.png" alt="Mail"></div>
+        <div class="illustration">
+          <div class="mail-scene">
+            <div class="child left">😊</div>
+            <div class="mail">✉️</div>
+            <div class="child right">😊</div>
+          </div>
+        </div>
         <div class="card-content">
           <h3>Send a school email</h3>
-          <p class="desc">When you send an email to your friend or teacher.</p>
           <div class="meta">
             <span class="assigned">—</span>
             <a class="scenario-link" href="mailto:friend@school.edu">mailto:friend@school.edu</a>
@@ -55,10 +114,17 @@
       </article>
 
       <article class="card" data-expected="FTP" data-explanation="FTP is used to transfer files between computers.">
-        <div class="illustration"><img class="card-img" src="assets/folder.png" alt="Folder"></div>
+        <div class="illustration">
+          <div class="download-box">
+
+            <div class="folder">📁</div>
+
+            <div class="file">📄</div>
+
+          </div>    
+        </div>
         <div class="card-content">
           <h3>Download a file</h3>
-          <p class="desc">When you download a file from a server.</p>
           <div class="meta">
             <span class="assigned">—</span>
             <a class="scenario-link" href="ftp://files.edu/game.zip">ftp://files.edu/game.zip</a>
@@ -67,34 +133,72 @@
       </article>
 
       <article class="card" data-expected="TCP" data-explanation="TCP ensures reliable and ordered data delivery.">
-        <div class="illustration"><img class="card-img" src="assets/gamepad.png" alt="Gamepad"></div>
+        <div class="illustration">
+          <div class="gamepad">
+
+  <div class="left-grip">
+      <div class="joystick"></div>
+
+      <div class="dpad">
+          <span></span>
+          <span></span>
+      </div>
+  </div>
+
+  <div class="center">
+      <div class="screen"></div>
+  </div>
+
+  <div class="right-grip">
+      <div class="buttons">
+          <span class="btn a"></span>
+          <span class="btn b"></span>
+          <span class="btn x"></span>
+          <span class="btn y"></span>
+      </div>
+  </div>
+
+</div>
+        </div>
         <div class="card-content">
           <h3>Stream reliable data</h3>
-          <p class="desc">When apps like video calls or online games stay stable.</p>
           <div class="meta">
             <span class="assigned">—</span>
-            <a class="scenario-link" href="https://192.168.1.5:443/" target="_blank" rel="noopener">https://192.168.1.5:443/</a>
+            <a class="scenario-link" href="https://192.168.1.5:443/" target="_blank"
+              rel="noopener">https://192.168.1.5:443/</a>
           </div>
         </div>
       </article>
 
       <article class="card" data-expected="HTTP" data-explanation="Browsers use HTTP/HTTPS to access websites.">
-        <div class="illustration"><img class="card-img" src="assets/phone.png" alt="Phone"></div>
+        <div class="illustration">
+          <div class="weather-card">
+
+            <div class="sun">☀️</div>
+            <div class="cloud">☁️</div>
+          </div>    
+        </div>
         <div class="card-content">
           <h3>Visit a weather page</h3>
-          <p class="desc">When you check the weather online.</p>
           <div class="meta">
             <span class="assigned">—</span>
-            <a class="scenario-link" href="https://weather.com/today" target="_blank" rel="noopener">https://weather.com/today</a>
+            <a class="scenario-link" href="https://weather.com/today" target="_blank"
+              rel="noopener">https://weather.com/today</a>
           </div>
         </div>
       </article>
 
       <article class="card" data-expected="FTP" data-explanation="FTP supports both uploading and downloading files.">
-        <div class="illustration"><img class="card-img" src="assets/upload.png" alt="Upload"></div>
+        <div class="illustration">
+          <div class="upload-box">
+
+            <div class="cloud">☁️</div>
+            <div class="upload-file">📄</div>
+
+          </div>  
+        </div>
         <div class="card-content">
           <h3>Upload project files</h3>
-          <p class="desc">When you upload your files to the server.</p>
           <div class="meta">
             <span class="assigned">—</span>
             <a class="scenario-link" href="ftp://server.edu/upload/">ftp://server.edu/upload/</a>
@@ -117,4 +221,5 @@
 
   <script src="script.js"></script>
 </body>
+
 </html>

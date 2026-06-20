@@ -1,0 +1,141 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code History Timeline – A Time-Travel Adventure</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="game.css" />
+</head>
+<body>
+  <!-- Floating background decorations -->
+  <div class="sky">
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-4"></div>
+    <div class="star star-1">★</div>
+    <div class="star star-2">✦</div>
+    <div class="star star-3">✧</div>
+    <div class="star star-4">★</div>
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+  </div>
+
+  <main class="game-shell" data-testid="game-shell">
+    <!-- Header -->
+    <header class="game-header">
+      <div class="title-wrap">
+        <h1 class="game-title" data-testid="game-title">
+          <span class="t-emoji">⏳</span>
+          Code History
+          <span class="t-accent">Timeline</span>
+        </h1>
+        <p class="game-subtitle">Drag the computer milestones into the right order — earliest to latest!</p>
+      </div>
+
+      <div class="controls">
+        <div class="score-pill" data-testid="score-pill">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <button class="btn btn-primary" id="checkBtn" data-testid="check-btn">
+          <span>✨</span> Check Answers
+        </button>
+        <button class="btn btn-ghost" id="soundBtn" data-testid="sound-btn" title="Toggle sound">
+          <span id="soundIcon">🔊</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Timeline slots -->
+    <section class="timeline-section" data-testid="timeline-section">
+      <div class="timeline-labels">
+        <span class="t-label oldest">⬅ Oldest</span>
+        <span class="t-label newest">Newest ➡</span>
+      </div>
+      <div class="timeline-track" id="timelineTrack">
+        <div class="track-line"></div>
+        <!-- 6 slots get injected here -->
+      </div>
+    </section>
+
+    <!-- Card pool -->
+    <section class="pool-section">
+      <h2 class="pool-title">🎴 Pick up the cards & drop them in order!</h2>
+      <div class="card-pool" id="cardPool" data-testid="card-pool"></div>
+    </section>
+
+    <!-- Superhero hint helper -->
+    <div class="hero-corner" data-testid="hero-corner">
+      <div class="speech-bubble" id="speechBubble" data-testid="speech-bubble">
+        <p id="speechText">Hi! I'm <strong>Captain Code</strong> 🦸 Drag the cards onto the timeline. I'll help if you get stuck!</p>
+        <span class="bubble-tail"></span>
+      </div>
+      <div class="hero" id="hero" data-testid="hero">
+        <!-- SVG superhero -->
+        <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cape -->
+          <path d="M55 110 Q30 160 50 220 L100 180 L150 220 Q170 160 145 110 Z" fill="#ef4444" stroke="#7f1d1d" stroke-width="3"/>
+          <path d="M55 110 Q30 160 50 220 L100 180 L150 220 Q170 160 145 110 Z" fill="url(#capeGrad)" opacity="0.4"/>
+          <!-- Body -->
+          <rect x="65" y="105" width="70" height="80" rx="14" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/>
+          <!-- Belt -->
+          <rect x="65" y="158" width="70" height="12" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
+          <!-- Star on chest -->
+          <polygon points="100,118 106,134 122,134 109,144 114,160 100,150 86,160 91,144 78,134 94,134" fill="#fde047" stroke="#a16207" stroke-width="2"/>
+          <!-- Arms -->
+          <rect x="48" y="110" width="20" height="50" rx="10" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/>
+          <rect x="132" y="110" width="20" height="50" rx="10" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/>
+          <!-- Hands -->
+          <circle cx="58" cy="168" r="11" fill="#fcd5b5" stroke="#7c2d12" stroke-width="2"/>
+          <circle cx="142" cy="168" r="11" fill="#fcd5b5" stroke="#7c2d12" stroke-width="2"/>
+          <!-- Legs -->
+          <rect x="72" y="183" width="22" height="40" rx="8" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
+          <rect x="106" y="183" width="22" height="40" rx="8" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
+          <!-- Boots -->
+          <ellipse cx="83" cy="225" rx="14" ry="6" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
+          <ellipse cx="117" cy="225" rx="14" ry="6" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
+          <!-- Head -->
+          <circle cx="100" cy="75" r="34" fill="#fcd5b5" stroke="#7c2d12" stroke-width="3"/>
+          <!-- Hair -->
+          <path d="M68 65 Q75 38 100 40 Q125 38 132 65 Q120 55 100 58 Q80 55 68 65 Z" fill="#1f2937"/>
+          <!-- Mask -->
+          <path d="M70 70 Q70 60 80 60 L120 60 Q130 60 130 70 L130 82 Q120 88 100 84 Q80 88 70 82 Z" fill="#1e3a8a" stroke="#0f172a" stroke-width="2"/>
+          <!-- Eyes -->
+          <circle cx="88" cy="74" r="4" fill="#fff"/>
+          <circle cx="112" cy="74" r="4" fill="#fff"/>
+          <circle cx="89" cy="75" r="2" fill="#0f172a"/>
+          <circle cx="113" cy="75" r="2" fill="#0f172a"/>
+          <!-- Smile -->
+          <path d="M88 95 Q100 102 112 95" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- Cheeks -->
+          <circle cx="78" cy="92" r="4" fill="#fda4af" opacity="0.7"/>
+          <circle cx="122" cy="92" r="4" fill="#fda4af" opacity="0.7"/>
+          <defs>
+            <linearGradient id="capeGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Win modal -->
+    <div class="modal-backdrop hidden" id="winModal" data-testid="win-modal">
+      <div class="modal">
+        <div class="modal-emoji">🎉</div>
+        <h2 class="modal-title">You did it!</h2>
+        <p class="modal-text" id="modalText">Brilliant work, time-traveler! You got every event in the right order.</p>
+        <div class="modal-score" id="finalScore">+600 pts</div>
+      </div>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
