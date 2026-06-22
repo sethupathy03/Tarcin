@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Variables & Data Types Adventure</title>
+    <meta name="description"
+        content="Drag variable cards into the right data type zones and learn programming with friendly mascots.">
+
+    <meta property="og:title" content="Variables & Data Types Adventure">
+    <meta property="og:description" content="An interactive coding game for kids ages 10–15.">
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Global Reset & Base System */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --foreground: #2d2b3d;
+            --muted-foreground: #5c5776;
+        }
+
+        body {
+            /* Unique, bright, playful multi-stop gradient layout */
+            background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 35%, #f0fdf4 70%, #fef3c7 100%);
+            background-attachment: fixed;
+            color: var(--foreground);
+            font-family: 'Fredoka', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout & Container Utilities */
+        .container {
+            max-width: 80rem;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1.5rem 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .container {
+                padding: 1.5rem 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 1.5rem 2rem;
+            }
+        }
+
+        .grid-stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .grid-stats {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .grid-zones {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-zones {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* Theme Styles & Enhanced Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+        }
+
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+
+        .rounded-3xl {
+            border-radius: 1.5rem;
+        }
+
+        .rounded-full {
+            border-radius: 9999px;
+        }
+
+        /* Custom Gradients and Typography */
+        .text-gradient {
+            background: linear-gradient(90deg, #6d28d9, #0369a1, #15803d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-complete {
+            background: linear-gradient(90deg, #b45309, #6d28d9, #0369a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Interactive Zone Custom Themes */
+        .zone-string {
+            background: linear-gradient(135deg, #fffbeb, #fef08a);
+            border: 2px solid #d97706;
+        }
+
+        .zone-int {
+            background: linear-gradient(135deg, #eff6ff, #bfdbfe);
+            border: 2px solid #2563eb;
+        }
+
+        .zone-float {
+            background: linear-gradient(135deg, #ecfeff, #b2ebf2);
+            border: 2px solid #00acc1;
+        }
+
+        .zone-bool {
+            background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+            border: 2px solid #16a34a;
+        }
+
+        .zone-drop-active {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            filter: brightness(1.03);
+        }
+
+        /* Target drop areas inside zones */
+        .drop-basket {
+            margin-top: 0.75rem;
+            min-height: 64px;
+            border-radius: 0.75rem;
+            border: 2px dashed rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* Cards & Elements */
+        .var-card {
+            background: #312e81; 
+            border: 2px solid #4338ca;
+            box-shadow: 0 6px 12px rgba(49, 46, 129, 0.15);
+            cursor: grab;
+            user-select: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 700; 
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .var-card:active {
+            cursor: grabbing;
+        }
+
+        .var-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.95);
+        }
+
+        .placed-badge {
+            background: #312e81;
+            color: #ffffff;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: 'JetBrains Mono', monospace;
+            animation: fadeUp 0.4s ease-out forwards;
+        }
+
+        /* Navigation & Utility Buttons */
+        .header-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 9999px;
+            transition: transform 0.2s ease;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            color: var(--foreground);
+        }
+
+        .header-action-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Popups and Overlays */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: grid;
+            place-items: center;
+            background: rgba(45, 43, 61, 0.4);
+            padding: 1rem;
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            width: 100%;
+            max-width: 28rem;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            animation: fadeUp 0.3s ease-out forwards;
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.15) rotate(4deg); }
+        }
+
+        @keyframes sparklePop {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: var(--translate-dest) scale(0); opacity: 0; }
+        }
+
+        @keyframes mascotCelebrate {
+            0% { transform: scale(1) rotate(0deg) translateY(0); }
+            10% { transform: scale(1.2) rotate(-6deg) translateY(-12px); }
+            20% { transform: scale(1.35) rotate(6deg) translateY(-20px); }
+            30% { transform: scale(1.25) rotate(-4deg) translateY(-8px); }
+            40% { transform: scale(1.3) rotate(5deg) translateY(-16px); }
+            50% { transform: scale(1.4) rotate(0deg) translateY(-22px); }
+            60% { transform: scale(1.25) rotate(-5deg) translateY(-10px); }
+            70% { transform: scale(1.3) rotate(4deg) translateY(-18px); }
+            80% { transform: scale(1.15) rotate(-2deg) translateY(-6px); }
+            90% { transform: scale(1.1) rotate(1deg) translateY(-3px); }
+            100% { transform: scale(1) rotate(0deg) translateY(0); }
+        }
+
+        @keyframes mascotGlowPulse {
+            0% { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2)); }
+            25% { filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.6)) drop-shadow(0 0 30px rgba(34, 211, 238, 0.3)); }
+            50% { filter: drop-shadow(0 0 24px rgba(250, 204, 21, 0.7)) drop-shadow(0 0 40px rgba(74, 222, 128, 0.4)); }
+            75% { filter: drop-shadow(0 0 18px rgba(244, 114, 182, 0.6)) drop-shadow(0 0 30px rgba(96, 165, 250, 0.3)); }
+            100% { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2)); }
+        }
+
+        @keyframes mascotSuccessRing {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+            50% { box-shadow: 0 0 0 14px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        .mascot-celebrating {
+            animation: mascotCelebrate 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                mascotGlowPulse 1.2s ease-in-out forwards;
+        }
+
+        .mascot-btn-celebrating {
+            animation: mascotSuccessRing 0.8s ease-out forwards;
+        }
+
+        .fade-up {
+            animation: fadeUp 0.5s ease-out forwards;
+        }
+
+        .shake {
+            animation: shake 0.45s ease-in-out;
+        }
+
+        .celebrate .mascot {
+            animation: celebrate 0.6s ease-in-out infinite alternate;
+        }
+
+        .celebrate-once {
+            animation: celebrate 0.5s ease-in-out 2 alternate;
+        }
+
+        /* Progress bar structural setups */
+        .progress-track {
+            height: 0.75rem;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4, #10b981);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Utility positioning / formatting overrides */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+        /* Floating Logos Container */
+.tech-bg-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+    opacity: 0.15;
+}
+
+.floating-logo {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    filter: grayscale(100%);
+    animation: floatAnimation 15s infinite ease-in-out;
+}
+
+@keyframes floatAnimation {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-50px) rotate(10deg); }
+}
+
+/* Specific start positions for variety */
+.logo-1 { top: 10%; left: 10%; animation-delay: 0s; }
+.logo-2 { top: 20%; right: 15%; animation-delay: 2s; }
+.logo-3 { bottom: 15%; left: 20%; animation-delay: 4s; }
+.logo-4 { bottom: 25%; right: 10%; animation-delay: 6s; }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header class="fade-up flex items-center justify-between" style="flex-wrap: wrap; gap: 1rem;">
+            <button class="header-action-btn" onclick="window.history.back()">
+                <span>←</span> Back
+            </button>
+            <div style="text-align: center;">
+                <h1 class="text-gradient" style="font-size: 1.75rem; font-weight: 700; tracking-content: tight;">
+                    Variables and Data Types</h1>
+                <p style="font-size: 0.875rem; color: var(--muted-foreground);">Grade 6 Programming Fundamentals</p>
+            </div>
+            <button class="header-action-btn" onclick="speakNarrator()">
+                🔊 Listen
+            </button>
+        </header>
+
+        <section class="grid-stats fade-up" style="animation-delay: 0.1s;">
+            <div class="glass rounded-2xl" style="padding: 0.75rem 1.25rem;">
+                <div class="text-xs"
+                    style="text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground);">Correct
+                    Matches</div>
+                <div class="font-mono" id="score-text"
+                    style="font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">0 / 6</div>
+            </div>
+            <div class="glass rounded-2xl" style="padding: 0.75rem 1.25rem;">
+                <div class="text-xs"
+                    style="text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); margin-bottom: 0.5rem;">
+                    Progress</div>
+                <div class="progress-track">
+                    <div class="progress-bar" id="progress-indicator"></div>
+                </div>
+            </div>
+            <div class="glass flex items-center justify-between rounded-2xl" style="padding: 0.75rem 1.25rem;">
+                <div>
+                    <div class="text-xs"
+                        style="text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground);">Rank
+                    </div>
+                    <div id="rank-text" style="font-weight: 600; font-size: 0.95rem;">Just Starting</div>
+                </div>
+                <div style="font-size: 1.5rem;" id="star-rating" aria-label="0 stars">
+                    <span style="opacity: 0.25;">★★★</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid-zones" id="zones-container"></section>
+
+        <section class="fade-up glass rounded-3xl" style="margin-top: 1.5rem; padding: 1.25rem; animation-delay: 0.3s;">
+            <div class="flex items-center justify-between" style="margin-bottom: 0.75rem;">
+                <h3 style="font-size: 1.125rem; font-weight: 700;">📦 Variable Stack</h3>
+                <span class="text-xs" id="stack-count" style="color: var(--muted-foreground);">6 left — drag into a
+                    zone</span>
+            </div>
+            <div class="flex" id="variable-pool" style="flex-wrap: wrap; gap: 0.75rem;"></div>
+        </section>
+    </div>
+
+    <div id="toast-wrapper" class="hidden"
+        style="position: fixed; left: 50%; top: 1.5rem; z-index: 50; transform: translateX(-50%); animation: fadeUp 0.3s ease-out;">
+        <div id="toast-body" class="glass rounded-2xl"
+            style="padding: 0.75rem 1.25rem; font-size: 0.875rem; font-weight: 600; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);">
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="modal-backdrop hidden" onclick="closeModal()">
+        <div class="modal-content" id="modal-container" onclick="event.stopPropagation()"></div>
+    </div>
+    <div class="tech-bg-layer">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" class="floating-logo logo-1" alt="Python">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" class="floating-logo logo-2" alt="Java">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg" class="floating-logo logo-3" alt="C">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" class="floating-logo logo-4" alt="C++">
+    </div>
+
+    <script>
+        // Game Core Storage Constants - ONLY contains the 6 variables from the image parameters
+        const ALL_VARS = [
+            { id: "img1", name: "name", value: '"Alice"', type: "string" },
+            { id: "img2", name: "isReady", value: "True", type: "bool" },
+            { id: "img3", name: "age", value: "12", type: "int" },
+            { id: "img4", name: "price", value: "9.99", type: "float" },
+            { id: "img5", name: "score", value: "-50", type: "int" },
+            { id: "img6", name: "city", value: '"Tokyo"', type: "string" }
+        ];
+
+        const ZONES_META = {
+            string: { title: "String", textColor: "#7a5a20", className: "zone-string", lesson: "Strings store letters, words, and sentences. Anything inside quotation marks is usually a String.", svg: `<svg viewBox="0 0 100 100" class="mascot" width="84" height="84" aria-hidden="true"><rect x="18" y="22" width="64" height="56" rx="6" fill="#fff8e7" stroke="#b88a3a" stroke-width="2"/><line x1="50" y1="22" x2="50" y2="78" stroke="#b88a3a" stroke-width="2"/><text x="28" y="42" font-size="10" fill="#7a5a20" font-family="monospace">Aa</text><text x="58" y="58" font-size="10" fill="#7a5a20" font-family="monospace">Bb</text><circle cx="36" cy="55" r="3" fill="#222"/><circle cx="64" cy="55" r="3" fill="#222"/><path d="M40 65 Q50 72 60 65" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/><text x="12" y="18" font-size="9" fill="#ffd6a8">A</text><text x="82" y="20" font-size="9" fill="#ffd6a8">z</text></svg>` },
+            int: { title: "Integer", textColor: "#1e4dbf", className: "zone-int", lesson: "Integers are whole numbers without decimal points. They can be positive or negative.", svg: `<svg viewBox="0 0 100 100" class="mascot" width="84" height="84" aria-hidden="true"><rect x="20" y="22" width="60" height="60" rx="10" fill="#4f8cff" stroke="#1e4dbf" stroke-width="2"/><text x="32" y="44" font-size="14" font-weight="bold" fill="#fff" font-family="monospace">1</text><text x="58" y="44" font-size="14" font-weight="bold" fill="#fff" font-family="monospace">2</text><circle cx="38" cy="60" r="3.5" fill="#fff"/><circle cx="62" cy="60" r="3.5" fill="#fff"/><circle cx="38" cy="60" r="1.5" fill="#111"/><circle cx="62" cy="60" r="1.5" fill="#111"/><path d="M40 72 Q50 78 60 72" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>` },
+            float: { title: "Float", textColor: "#0d4a60", className: "zone-float", lesson: "Floats are numbers with decimal values, like 3.14 or 12.99.", svg: `<svg viewBox="0 0 100 100" class="mascot" width="84" height="84" aria-hidden="true"><path d="M50 14 C30 40 22 56 22 68 a28 28 0 0 0 56 0 C78 56 70 40 50 14 Z" fill="#5ec8e6" stroke="#1c7a9b" stroke-width="2"/><circle cx="40" cy="58" r="3.5" fill="#fff"/><circle cx="60" cy="58" r="3.5" fill="#fff"/><circle cx="40" cy="59" r="1.5" fill="#111"/><circle cx="60" cy="59" r="1.5" fill="#111"/><path d="M42 70 Q50 76 58 70" stroke="#0d4a60" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="20" cy="40" r="3" fill="#a8e7f6" opacity="0.8"/><circle cx="84" cy="50" r="2" fill="#a8e7f6" opacity="0.8"/><text x="14" y="84" font-size="8" fill="#a8e7f6">.5</text></svg>` },
+            bool: { title: "Boolean", textColor: "#1b5e20", className: "zone-bool", lesson: "Booleans can only be True or False. Perfect for yes/no questions.", svg: `<svg viewBox="0 0 100 100" class="mascot" width="84" height="84" aria-hidden="true"><rect x="32" y="14" width="36" height="72" rx="10" fill="#2a2a2a" stroke="#444" stroke-width="2"/><circle cx="50" cy="30" r="9" fill="#ff5252"/><circle cx="50" cy="50" r="9" fill="#ffd23f" opacity="0.4"/><circle cx="50" cy="70" r="9" fill="#4ade80"/><circle cx="46" cy="69" r="1.5" fill="#111"/><circle cx="54" cy="69" r="1.5" fill="#111"/><path d="M46 73 Q50 75 54 73" stroke="#111" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>` }
+        };
+
+        // State Variables
+        let remainingVars = [...ALL_VARS];
+        let placedVars = { string: [], int: [], float: [], bool: [] };
+        let currentDragId = null;
+        let isGameOverDismissed = false;
+        let touchDragClone = null;
+
+        // Web Audio Synthesizer Interface
+        function playTone(freq, dur = 0.15, type = "sine") {
+            try {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AC();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = type;
+                o.frequency.value = freq;
+                o.connect(g); g.connect(ctx.destination);
+                g.gain.setValueAtTime(0.0001, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01);
+                g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+                o.start();
+                o.stop(ctx.currentTime + dur);
+            } catch (e) { }
+        }
+
+        // Accessible Screen Narration API
+        function speakNarrator() {
+            try {
+                const u = new SpeechSynthesisUtterance(
+                    "Welcome to Variables and Data Types Adventure! Drag each variable card into the correct data type zone. Strings hold text, Integers hold whole numbers, Floats hold decimals, and Booleans hold true or false."
+                );
+                u.rate = 0.95; u.pitch = 1.1;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(u);
+            } catch (e) { }
+        }
+
+        // Dynamic UI Toast Notice 
+        let toastTimer = null;
+        function showToast(kind, msg) {
+            const wrapper = document.getElementById("toast-wrapper");
+            const body = document.getElementById("toast-body");
+            clearTimeout(toastTimer);
+
+            body.className = `glass rounded-2xl style-toast-override`;
+            if (kind === "good") {
+                body.style.border = "1px solid rgba(22, 163, 74, 0.3)";
+                body.style.color = "#166534";
+                body.innerHTML = `✨ ${msg}`;
+            } else {
+                body.style.border = "1px solid rgba(225, 29, 72, 0.3)";
+                body.style.color = "#9f1239";
+                body.innerHTML = `💭 ${msg}`;
+            }
+
+            wrapper.classList.remove("hidden");
+            toastTimer = setTimeout(() => { wrapper.classList.add("hidden"); }, 2200);
+        }
+
+        // Interactive Particle Pop Burst
+        function spawnSparkles(x, y) {
+            const colors = ["#fbbf24", "#a78bfa", "#22d3ee", "#4ade80"];
+            for (let i = 0; i < 12; i++) {
+                const span = document.createElement("span");
+                span.style.position = "fixed";
+                span.style.left = `${x}px`;
+                span.style.top = `${y}px`;
+                span.style.width = "8px";
+                span.style.height = "8px";
+                span.style.borderRadius = "50%";
+                span.style.pointerEvents = "none";
+                span.style.zIndex = "9999";
+                span.style.background = colors[i % colors.length];
+                span.style.boxShadow = "0 0 8px currentColor";
+
+                const angle = (i / 12) * Math.PI * 2;
+                const dist = 60 + Math.random() * 40;
+                const destX = Math.cos(angle) * dist;
+                const destY = Math.sin(angle) * dist;
+
+                span.style.setProperty('--translate-dest', `translate(${destX}px, ${destY}px)`);
+                span.style.animation = "sparklePop 0.7s ease-out forwards";
+
+                document.body.appendChild(span);
+                setTimeout(() => span.remove(), 700);
+            }
+        }
+
+        // HTML Rendering Generators
+        function renderApp() {
+            // 1. Calculations
+            const correctCount = Object.values(placedVars).flat().length;
+            const totalCount = ALL_VARS.length;
+            const progress = (correctCount / totalCount) * 100;
+
+            let stars = 0;
+            let rank = "Just Starting";
+            if (correctCount >= 6) { stars = 3; rank = "Data Type Master"; }
+            else if (correctCount >= 4) { stars = 2; rank = "Data Detective"; }
+            else if (correctCount >= 2) { stars = 1; rank = "Beginner Coder"; }
+
+            // 2. Synchronize Status Panels
+            document.getElementById("score-text").innerText = `${correctCount} / ${totalCount}`;
+            document.getElementById("progress-indicator").style.width = `${progress}%`;
+            document.getElementById("rank-text").innerText = rank;
+
+            let starMarkup = "★".repeat(stars) + `<span style="opacity:0.25;">${"★".repeat(3 - stars)}</span>`;
+            document.getElementById("star-rating").innerHTML = starMarkup;
+            document.getElementById("star-rating").setAttribute("aria-label", `${stars} stars`);
+
+            // 3. Setup Drop Zones Element Structure
+            const zonesContainer = document.getElementById("zones-container");
+            zonesContainer.innerHTML = "";
+
+            Object.keys(ZONES_META).forEach((key, idx) => {
+                const meta = ZONES_META[key];
+                const zoneItems = placedVars[key];
+
+                const zoneEl = document.createElement("div");
+                zoneEl.className = `fade-up relative overflow-hidden rounded-3xl p-5 ${meta.className}`;
+                zoneEl.style.animationDelay = `${0.15 + idx * 0.08}s`;
+                zoneEl.setAttribute("data-zone", key);
+
+                // Setup Drag Event Triggers
+                zoneEl.addEventListener("dragover", (e) => { e.preventDefault(); zoneEl.classList.add("zone-drop-active"); });
+                zoneEl.addEventListener("dragleave", () => zoneEl.classList.remove("zone-drop-active"));
+                zoneEl.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    zoneEl.classList.remove("zone-drop-active");
+                    handleVariablePlacement(key, { clientX: e.clientX, clientY: e.clientY });
+                });
+
+                // Basket Badges Sub-loop
+                let basketContent = `<div class="grid h-full place-items-center text-xs" style="opacity: 0.6; color: ${meta.textColor}; margin: auto;">Drop variables here</div>`;
+                if (zoneItems.length > 0) {
+                    basketContent = zoneItems.map(v => `<div class="placed-badge">${v.name} = ${v.value}</div>`).join("");
+                }
+
+                zoneEl.innerHTML = `
+          <div class="flex items-center" style="gap: 1.25rem;">
+            <button data-mascot-btn="${key}" onclick="openLesson('${key}')" class="rounded-2xl" style="flex-shrink:0; background:rgba(255,255,255,0.5); padding:0.5rem; border:1px solid rgba(255,255,255,0.7); cursor:pointer; backdrop-filter:blur(4px); transition: background 0.2s, box-shadow 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.7)'" onmouseout="this.style.background='rgba(255,255,255,0.5)'">
+              ${meta.svg}
+            </button>
+            <div style="min-width:0; flex:1;">
+              <h2 style="font-size:1.5rem; font-weight:700; color:${meta.textColor};">${meta.title}</h2>
+              <div class="drop-basket">${basketContent}</div>
+            </div>
+          </div>
+        `;
+                zonesContainer.appendChild(zoneEl);
+            });
+
+            // 4. Build Variable Source Inventory List Stack
+            const pool = document.getElementById("variable-pool");
+            const countLabel = document.getElementById("stack-count");
+            pool.innerHTML = "";
+            countLabel.innerText = `${remainingVars.length} left — drag into a zone`;
+
+            if (remainingVars.length === 0) {
+                pool.innerHTML = `<div style="padding: 1.5rem 0; width:100%; text-align:center; font-size:0.875rem; color:var(--muted-foreground);">All variables placed! 🎉</div>`;
+                if (!isGameOverDismissed) { triggerWinOverlay(); }
+                return;
+            }
+
+            remainingVars.forEach(v => {
+                const card = document.createElement("div");
+                card.className = "var-card";
+                card.setAttribute("draggable", "true");
+                card.style.touchAction = "none";
+                card.innerHTML = `<span style="color:#e9d5ff;">${v.name}</span><span style="color:#93c5fd;"> = </span><span style="color:#67e8f9;">${v.value}</span>`;
+
+                // Native Desktop Drag Handlers
+                card.addEventListener("dragstart", () => { currentDragId = v.id; card.classList.add("dragging"); });
+                card.addEventListener("dragend", () => { currentDragId = null; card.classList.remove("dragging"); });
+
+                // Touch Drag & Drop Support
+                card.addEventListener("touchstart", (e) => handleTouchStart(e, v), { passive: false });
+                card.addEventListener("touchmove", handleTouchMove, { passive: false });
+                card.addEventListener("touchend", handleTouchEnd, { passive: false });
+
+                pool.appendChild(card);
+            });
+        }
+
+        // Core Matching Processing Rules Evaluation
+        function handleVariablePlacement(zoneKey, coordPoint) {
+            if (!currentDragId) return;
+            const targetVar = remainingVars.find(x => x.id === currentDragId);
+            currentDragId = null;
+            if (!targetVar) return;
+
+            const matchedZoneEl = document.querySelector(`[data-zone="${zoneKey}"]`);
+
+            if (targetVar.type === zoneKey) {
+                // Success Match Path Logic
+                remainingVars = remainingVars.filter(x => x.id !== targetVar.id);
+                placedVars[zoneKey].push(targetVar);
+
+                // Trigger mascot celebration animation
+                if (matchedZoneEl) {
+                    matchedZoneEl.classList.add("celebrate-once");
+                    setTimeout(() => matchedZoneEl.classList.remove("celebrate-once"), 1200);
+
+                    const mascotSvg = matchedZoneEl.querySelector('.mascot');
+                    const mascotBtn = matchedZoneEl.querySelector(`[data-mascot-btn="${zoneKey}"]`);
+                    if (mascotSvg) {
+                        mascotSvg.classList.add('mascot-celebrating');
+                        setTimeout(() => mascotSvg.classList.remove('mascot-celebrating'), 1200);
+                    }
+                    if (mascotBtn) {
+                        mascotBtn.classList.add('mascot-btn-celebrating');
+                        setTimeout(() => mascotBtn.classList.remove('mascot-btn-celebrating'), 800);
+                    }
+                }
+
+                showToast("good", `Great job! ${targetVar.value} belongs to ${ZONES_META[zoneKey].title}!`);
+                if (coordPoint) { spawnSparkles(coordPoint.clientX, coordPoint.clientY); }
+
+                playTone(660, 0.12);
+                setTimeout(() => playTone(880, 0.16), 110);
+            } else {
+                // Error Structural Shaking Feedback Path
+                if (matchedZoneEl) {
+                    matchedZoneEl.classList.add("shake");
+                    setTimeout(() => matchedZoneEl.classList.remove("shake"), 450);
+                }
+                showToast("bad", "Oops! Look closely — does the value contain words, whole numbers, decimals, or True/False?");
+                playTone(180, 0.18, "square");
+            }
+            renderApp();
+        }
+
+        // Touch Event Intercept Emulation Trackers
+        function handleTouchStart(e, variableObj) {
+            currentDragId = variableObj.id;
+            const loc = e.touches[0];
+
+            touchDragClone = document.createElement("div");
+            touchDragClone.textContent = `${variableObj.name} = ${variableObj.value}`;
+            touchDragClone.style.cssText = `position:fixed; pointer-events:none; z-index:9999; left:${loc.clientX - 60}px; top:${loc.clientY - 20}px; padding:8px 14px; border-radius:10px; background:#312e81; color:#fff; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; box-shadow:0 8px 24px rgba(0,0,0,0.2); border:2px solid #4338ca;`;
+            document.body.appendChild(touchDragClone);
+        }
+
+        function handleTouchMove(e) {
+            if (!touchDragClone) return;
+            e.preventDefault(); 
+            const loc = e.touches[0];
+            touchDragClone.style.left = `${loc.clientX - 60}px`;
+            touchDragClone.style.top = `${loc.clientY - 20}px`;
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchDragClone) return;
+            const loc = e.changedTouches[0];
+            touchDragClone.remove();
+            touchDragClone = null;
+
+            const dropTarget = document.elementFromPoint(loc.clientX, loc.clientY);
+            const zoneNode = dropTarget ? dropTarget.closest("[data-zone]") : null;
+
+            if (zoneNode) {
+                const zoneType = zoneNode.getAttribute("data-zone");
+                handleVariablePlacement(zoneType, { clientX: loc.clientX, clientY: loc.clientY });
+            } else {
+                currentDragId = null;
+            }
+        }
+
+        // Modals Mechanics Engine Layout Controllers
+        function openLesson(zoneKey) {
+            const meta = ZONES_META[zoneKey];
+            const matchedExamples = ALL_VARS.filter(v => v.type === zoneKey).map(v => `
+        <div><span style="color:#c084fc;">${v.name}</span> <span style="color:#94a3b8;">=</span> <span style="color:#22d3ee;">${v.value}</span></div>
+      `).join("");
+
+            const container = document.getElementById("modal-container");
+            container.innerHTML = `
+        <div style="margin: 0 auto; width: max-content;">${meta.svg}</div>
+        <h3 style="font-size: 1.5rem; font-weight: 700; margin-top: 0.5rem; color:${meta.textColor};">${meta.title}</h3>
+        <p style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.4; color:#334155;">${meta.lesson}</p>
+        <div style="margin-top: 1rem; border-radius: 0.75rem; background: #0f172a; color:#f8fafc; padding: 0.75rem; text-align: left; font-size: 0.75rem; font-family:'JetBrains Mono',monospace;">
+          ${matchedExamples}
+        </div>
+        <button onclick="closeModal()" class="rounded-full" style="margin-top: 1.25rem; border: none; background: linear-gradient(90deg, #7c3aed, #0891b2); color: white; padding: 0.5rem 1.5rem; font-size: 0.875rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">Got it!</button>
+      `;
+            document.getElementById("modal-overlay").classList.remove("hidden");
+        }
+
+        function triggerWinOverlay() {
+            const mascotsRow = Object.keys(ZONES_META).map(key => `<div class="celebrate" style="display:inline-block; margin:0 4px;">${ZONES_META[key].svg}</div>`).join("");
+            const container = document.getElementById("modal-container");
+            container.innerHTML = `
+        <div style="font-size: 3rem;">🎊</div>
+        <h2 class="text-gradient-complete" style="font-size: 1.85rem; font-weight: 700; margin-top: 0.5rem;">Congratulations!</h2>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #475569;">You successfully organized all variables into their correct data types.</p>
+        <div style="margin-top: 1.25rem; display: flex; justify-content: center;">${mascotsRow}</div>
+        <div style="margin-top: 1.25rem; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 9999px; background: linear-gradient(90deg, #fbbf24, #ec4899); color: white; padding: 0.5rem 1.25rem; font-size: 0.875rem; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">🏅 Data Type Explorer Badge</div>
+        <div class="flex" style="margin-top: 1.25rem; justify-content: center; gap: 0.75rem;">
+          <button onclick="resetGame()" class="rounded-full" style="border:none; background:#e2e8f0; color:#1e293b; padding:0.5rem 1.25rem; font-size:0.875rem; font-weight:600; cursor:pointer;">Play Again</button>
+          <button onclick="closeModal(); isGameOverDismissed=true;" class="rounded-full" style="border:none; background:linear-gradient(90deg,#7c3aed,#0891b2); color:white; padding:0.5rem 1.25rem; font-size:0.875rem; font-weight:600; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.15);">Close</button>
+        </div>
+      `;
+            document.getElementById("modal-overlay").classList.remove("hidden");
+        }
+
+        document.getElementById("modal-overlay").addEventListener("click", closeModal);
+
+        function closeModal() {
+            document.getElementById("modal-overlay").classList.add("hidden");
+        }
+
+        function resetGame() {
+            remainingVars = [...ALL_VARS];
+            placedVars = { string: [], int: [], float: [], bool: [] };
+            isGameOverDismissed = false;
+            closeModal();
+            renderApp();
+        }
+
+        // Initialize Global App Draw
+        renderApp();
+    </script>
+</body>
+
+</html>

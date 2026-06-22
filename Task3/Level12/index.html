@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data Storage to Tables • Grade 6</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-sky-top: #3b82f6;
+            --bg-sky-bottom: #93c5fd;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #1e3a8a;
+            --text-muted: #4b5563;
+
+            --col-species: #ecfdf5;
+            --border-species: #a7f3d0;
+            --text-species: #065f46;
+
+            --col-name: #fdf2f8;
+            --border-name: #fbcfe8;
+            --text-name: #9d174d;
+
+            --col-age: #eff6ff;
+            --border-age: #bfdbfe;
+            --text-age: #1e40af;
+
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(180deg, #60a5fa 0%, #a7f3d0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: 16px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(180deg, transparent 0%, #10b981 80%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-display {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+        }
+
+        /* --- APP HEADER --- */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto 16px;
+            padding: 0 8px;
+        }
+
+        .btn-nav {
+            background: #a855f7;
+            color: white;
+            border: 3px solid white;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
+
+        .btn-listen {
+            background: #eab308;
+            color: #451a03;
+            border: 3px solid white;
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
+
+        .btn-nav:hover,
+        .btn-listen:hover {
+            transform: scale(1.05);
+        }
+
+        .app-title-box {
+            text-align: center;
+        }
+
+        .app-title-box h1 {
+            font-size: clamp(28px, 4vw, 44px);
+            color: white;
+            text-shadow: 0 4px 0 #1d4ed8, 0 6px 12px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .app-subtitle {
+            background: #2563eb;
+            color: white;
+            padding: 4px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: -4px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* --- MAIN CONTENT GRID --- */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- STRUCTURED DATA TABLE PANEL --- */
+        .panel-structured {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 4px solid #dbeafe;
+        }
+
+        .panel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .db-table-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .db-col-header {
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 3px solid transparent;
+            position: relative;
+        }
+
+        .db-col-header[data-col="species"] {
+            background: var(--col-species);
+            border-color: var(--border-species);
+            color: var(--text-species);
+        }
+
+        .db-col-header[data-col="name"] {
+            background: var(--col-name);
+            border-color: var(--border-name);
+            color: var(--text-name);
+        }
+
+        .db-col-header[data-col="age"] {
+            background: var(--col-age);
+            border-color: var(--border-age);
+            color: var(--text-age);
+        }
+
+        .col-title-area {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .col-subtitle-name {
+            font-size: 14px;
+            opacity: 0.7;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .speech-bubble {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1.4;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* TABLE SLOTS (ROWS) */
+        .table-row-cell {
+            min-height: 76px;
+            border-radius: var(--radius-md);
+            border: 3px dashed #cbd5e1;
+            background: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            padding: 8px;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .table-row-cell.dz-over {
+            background: #f1f5f9;
+            border-color: #64748b;
+            transform: scale(1.02);
+        }
+
+        .table-row-cell.filled {
+            border-style: solid;
+            background: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-row-cell[data-col="species"].filled {
+            border-color: var(--border-species);
+            color: var(--text-species);
+        }
+
+        .table-row-cell[data-col="name"].filled {
+            border-color: var(--border-name);
+            color: var(--text-name);
+        }
+
+        .table-row-cell[data-col="age"].filled {
+            border-color: var(--border-age);
+            color: var(--text-age);
+        }
+
+        .table-row-cell.dz-wrong {
+            animation: cellShake 0.4s ease both;
+            background: #fef2f2;
+            border-color: #f87171;
+        }
+
+        /* --- UNSTRUCTURED RAW FACTS PANEL --- */
+        .panel-unstructured {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 4px solid #fed7aa;
+        }
+
+        .panel-tag-orange {
+            background: #fff7ed;
+            color: #c2410c;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .facts-flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        /* --- DRAGGABLE DECK CARDS --- */
+        .fact-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: grab;
+            user-select: none;
+            box-shadow: var(--shadow-sm);
+            border: 3px solid #e2e8f0;
+            font-weight: 800;
+            font-size: 15px;
+            color: #334155;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 110px;
+            flex: 0 1 calc(16.66% - 16px);
+            text-align: center;
+        }
+
+        .fact-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .fact-card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .fact-card.placed {
+            display: none;
+        }
+
+        .fact-card[data-type="species"] {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .fact-card[data-type="name"] {
+            border-color: #fbcfe8;
+            background: #fdf2f8;
+            border-style: dashed;
+        }
+
+        .fact-card[data-type="age"] {
+            border-color: #93c5fd;
+            background: #eff6ff;
+            border-style: dotted;
+        }
+
+        /* --- FONTAWESOME INTERACTIVE CARD WRAPPERS --- */
+        .icon-container {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .fact-card[data-type="species"] .icon-container {
+            background: #e8fbf1;
+            color: #059669;
+        }
+
+        .fact-card[data-type="name"] .icon-container {
+            background: #fce7f3;
+            color: #db2777;
+        }
+
+        .fact-card[data-type="age"] .icon-container {
+            background: #e0f2fe;
+            color: #2563eb;
+        }
+
+        .fact-card:hover .icon-container {
+            transform: scale(1.15) rotate(8deg);
+        }
+
+        /* --- BOTTOM BAR TIP --- */
+        .tip-bar {
+            background: #0252c5;
+            color: white;
+            border-radius: 999px;
+            padding: 10px 24px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* --- RIGHT COLUMN WIDGETS --- */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .widget-box {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 4px solid #e0f2fe;
+        }
+
+        .widget-box h2 {
+            font-size: 18px;
+            margin-bottom: 14px;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .step-num {
+            background: #2563eb;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-item:nth-child(2) .step-num {
+            background: #10b981;
+        }
+
+        .step-item:nth-child(3) .step-num {
+            background: #a855f7;
+        }
+
+        /* --- DYNAMIC COMPLETION MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 58, 138, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 6px solid #fbbf24;
+            transform: scale(0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-icon-banner {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: modalPopIcon 0.6s ease both;
+        }
+
+        .modal-card h2 {
+            font-size: 32px;
+            color: #1e3a8a;
+            margin-bottom: 12px;
+        }
+
+        .modal-card p {
+            font-size: 16px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .btn-modal-action {
+            background: #10b981;
+            color: white;
+            border: 3px solid white;
+            padding: 12px 32px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s;
+        }
+
+        .btn-modal-action:hover {
+            transform: scale(1.05);
+        }
+
+        /* --- MASCOT LOGIC --- */
+        .mascot-sculpt {
+            width: 72px;
+            height: 72px;
+            position: relative;
+            margin-bottom: 6px;
+        }
+
+        .sculpt-bear {
+            background: #b45309;
+            border-radius: 50%;
+            width: 60px;
+            height: 56px;
+            margin: 8px auto;
+            position: relative;
+            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.15);
+            animation: animalFloat 3s ease-in-out infinite;
+        }
+
+        .sculpt-bear::before,
+        .sculpt-bear::after {
+            content: "";
+            position: absolute;
+            top: -2px;
+            width: 18px;
+            height: 18px;
+            background: #b45309;
+            border-radius: 50%;
+        }
+
+        .sculpt-bear::before {
+            left: -2px;
+        }
+
+        .sculpt-bear::after {
+            right: -2px;
+        }
+
+        .bear-hat {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            width: 40px;
+            height: 14px;
+            background: #15803d;
+            border-radius: 20px 20px 4px 4px;
+            z-index: 2;
+        }
+
+        .bear-hat::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: -6px;
+            width: 52px;
+            height: 6px;
+            background: #166534;
+            border-radius: 999px;
+        }
+
+        .bear-face {
+            position: absolute;
+            bottom: 6px;
+            left: 15px;
+            width: 30px;
+            height: 20px;
+            background: #fef3c7;
+            border-radius: 50%;
+        }
+
+        .bear-face::after {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 10px;
+            width: 10px;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 999px;
+        }
+
+        .sculpt-tag {
+            width: 48px;
+            height: 62px;
+            background: #ec4899;
+            border-radius: 12px 12px 16px 16px;
+            margin: 5px auto;
+            position: relative;
+            box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.15);
+            animation: tagWobble 2.7s ease-in-out infinite;
+        }
+
+        .sculpt-tag::before {
+            content: "";
+            position: absolute;
+            top: 6px;
+            left: 19px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .tag-eyes {
+            position: absolute;
+            top: 24px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tag-eyes::before,
+        .tag-eyes::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 50%;
+        }
+
+        .tag-smile {
+            position: absolute;
+            bottom: 14px;
+            left: 19px;
+            width: 10px;
+            height: 6px;
+            border-bottom: 3px solid #1e293b;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .sculpt-cake {
+            width: 64px;
+            height: 50px;
+            background: #fef08a;
+            border-radius: 8px 8px 12px 12px;
+            margin: 16px auto 0;
+            position: relative;
+            border-top: 8px solid #f43f5e;
+            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.1);
+            animation: cakeBounce 2.9s ease-in-out infinite;
+        }
+
+        .cake-candles {
+            position: absolute;
+            top: -20px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cake-candle {
+            width: 6px;
+            height: 14px;
+            background: #3b82f6;
+            position: relative;
+        }
+
+        .cake-candle::after {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: -1px;
+            width: 8px;
+            height: 8px;
+            background: #f97316;
+            border-radius: 50% 50% 0 50%;
+            transform: rotate(-45deg);
+        }
+
+        .cake-eyes {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cake-eyes::before,
+        .cake-eyes::after {
+            content: "";
+            width: 7px;
+            height: 7px;
+            background: #1e293b;
+            border-radius: 50%;
+        }
+
+        .db-col-header.celebrating .sculpt-bear,
+        .db-col-header.celebrating .sculpt-tag,
+        .db-col-header.celebrating .sculpt-cake {
+            animation: successSpin 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1 !important;
+        }
+
+        /* --- KEYFRAMES --- */
+        @keyframes animalFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-6px) rotate(3deg);
+            }
+        }
+
+        @keyframes tagWobble {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-4px) rotate(-4deg) scale(1.02);
+            }
+        }
+
+        @keyframes cakeBounce {
+
+            0%,
+            100% {
+                transform: translateY(0) scaleY(1);
+            }
+
+            50% {
+                transform: translateY(-5px) scaleY(1.05);
+            }
+        }
+
+        @keyframes successSpin {
+            0% {
+                transform: scale(1) rotate(0);
+            }
+
+            50% {
+                transform: scale(1.3) rotate(180deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        @keyframes cellShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-6px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(6px);
+            }
+        }
+
+        @keyframes modalPopIcon {
+            0% {
+                transform: scale(0.3) rotate(-30deg);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.2) rotate(15deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- TOASTS --- */
+        .toast-alert {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translate(-50%, 40px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 999;
+            box-shadow: var(--shadow-md);
+            pointer-events: none;
+        }
+
+        .toast-alert.visible {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .toast-alert.success {
+            background: #10b981;
+        }
+
+        .toast-alert.error {
+            background: #ef4444;
+        }
+
+        .btn-reset-inline {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            color: #64748b;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 12px;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-reset-inline:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="app-header">
+        <button class="btn-nav">◀ Back</button>
+        <div class="app-title-box">
+            <h1>Data Storage to Tables</h1>
+            <span class="app-subtitle">Grade 6 • Databases & Data</span>
+        </div>
+        <button class="btn-listen" id="listenButton">🔊 Listen</button>
+    </header>
+
+    <main class="main-layout">
+        <div class="left-column">
+
+            <section class="panel-structured" aria-label="Structured Database Table">
+                <div class="panel-tag">📋 Structured Data View</div>
+
+                <div class="db-table-grid" id="gridTable">
+                    <div class="db-col-header" data-col="species" id="head-species">
+                        <div class="mascot-sculpt">
+                            <div class="sculpt-bear">
+                                <div class="bear-hat"></div>
+                                <div class="bear-face"></div>
+                            </div>
+                        </div>
+                        <div class="col-title-area">Species</div>
+                        <div class="col-subtitle-name">Sammy</div>
+                        <div class="speech-bubble">I tell what kind of animal we're talking about!</div>
+                    </div>
+
+                    <div class="db-col-header" data-col="name" id="head-name">
+                        <div class="mascot-sculpt">
+                            <div class="sculpt-tag">
+                                <div class="tag-eyes"></div>
+                                <div class="tag-smile"></div>
+                            </div>
+                        </div>
+                        <div class="col-title-area">Name</div>
+                        <div class="col-subtitle-name">Nia</div>
+                        <div class="speech-bubble">I help every animal have its own special name!</div>
+                    </div>
+
+                    <div class="db-col-header" data-col="age" id="head-age">
+                        <div class="mascot-sculpt">
+                            <div class="sculpt-cake">
+                                <div class="cake-candles">
+                                    <div class="cake-candle"></div>
+                                    <div class="cake-candle"></div>
+                                    <div class="cake-candle"></div>
+                                </div>
+                                <div class="cake-eyes"></div>
+                            </div>
+                        </div>
+                        <div class="col-title-area">Age</div>
+                        <div class="col-subtitle-name">Andy</div>
+                        <div class="speech-bubble">I keep track of how old everyone is!</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel-unstructured" aria-label="Unstructured Items Pool">
+                <div class="panel-tag-orange">📦 Unstructured Raw Facts</div>
+                <div class="facts-flex-row" id="factsPool"></div>
+            </section>
+
+            <div class="tip-bar">
+                <span>⭐</span>
+                <strong>Tip:</strong> Think carefully! Each fact belongs in a certain column.
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="widget-box">
+                <h2>💡 How it works</h2>
+                <ul class="step-list">
+                    <li class="step-item"><span class="step-num">1</span> <span>Drag the facts from the bottom
+                            deck.</span></li>
+                    <li class="step-item"><span class="step-num">2</span> <span>Drop them into the matching type
+                            column.</span></li>
+                    <li class="step-item"><span class="step-num">3</span> <span>Build up your tidy table row by
+                            row!</span></li>
+                </ul>
+                <div style="text-align: center;">
+                    <button class="btn-reset-inline" id="btnReset">↻ Reset Layout</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="completionModal" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <div class="modal-icon-banner">🏆👑✨</div>
+            <h2>Perfectly Structured!</h2>
+            <p>Outstanding job! You matched all 6 pieces of unstructured information into their clean, organized
+                spreadsheet columns. Sammy, Nia, and Andy are super proud of your database skills!</p>
+            <button class="btn-modal-action" id="btnModalClose">Play Again! ↻</button>
+        </div>
+    </div>
+
+    <div class="toast-alert" id="toastAlert" role="alert"></div>
+
+    <script>
+        (() => {
+            // Removed row 2 (Tiger dataset items) completely to leave 2 structured rows
+            const DATASET = [
+                { row: 0, facts: [{ id: 'f1', val: 'Polar Bear', type: 'species', iconClass: 'fa-solid fa-paw' }, { id: 'f2', val: 'Snowy', type: 'name', iconClass: 'fa-solid fa-signature' }, { id: 'f3', val: '5', type: 'age', iconClass: 'fa-solid fa-cake-candles' }] },
+                { row: 1, facts: [{ id: 'f4', val: 'Penguin', type: 'species', iconClass: 'fa-solid fa-paw' }, { id: 'f5', val: 'Pingu', type: 'name', iconClass: 'fa-solid fa-signature' }, { id: 'f6', val: '8', type: 'age', iconClass: 'fa-solid fa-cake-candles' }] }
+            ];
+
+            const TOTAL_FACTS_COUNT = 6;
+            const ALL_FACTS = DATASET.flatMap(r => r.facts);
+
+            let state = {
+                placedCount: 0,
+                placed: {}
+            };
+
+            const factsPool = document.getElementById('factsPool');
+            const gridTable = document.getElementById('gridTable');
+            const toastAlert = document.getElementById('toastAlert');
+            const completionModal = document.getElementById('completionModal');
+
+            function initGridStructure() {
+                // Generate empty dropzone slots for the remaining 2 structural rows
+                for (let r = 0; r < 2; r++) {
+                    ['species', 'name', 'age'].forEach(colType => {
+                        const cell = document.createElement('div');
+                        cell.className = 'table-row-cell';
+                        cell.dataset.col = colType;
+                        cell.dataset.row = r;
+                        gridTable.appendChild(cell);
+
+                        cell.addEventListener('dragover', e => {
+                            if (!draggingCard || cell.classList.contains('filled')) return;
+                            e.preventDefault();
+                            cell.classList.add('dz-over');
+                        });
+                        cell.addEventListener('dragleave', () => cell.classList.remove('dz-over'));
+                        cell.addEventListener('drop', e => {
+                            e.preventDefault();
+                            cell.classList.remove('dz-over');
+                            if (!draggingCard || cell.classList.contains('filled')) return;
+                            handleDroppedFact(draggingCard, cell);
+                        });
+                    });
+                }
+            }
+
+            function renderFactsDeck() {
+                factsPool.innerHTML = '';
+                const deckList = [...ALL_FACTS].sort(() => 0.5 - Math.random());
+
+                deckList.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'fact-card';
+                    card.dataset.id = f.id;
+                    card.dataset.type = f.type;
+                    card.draggable = true;
+
+                    const iconContainer = document.createElement('div');
+                    iconContainer.className = 'icon-container';
+
+                    const fontIcon = document.createElement('i');
+                    fontIcon.className = f.iconClass;
+                    iconContainer.appendChild(fontIcon);
+
+                    const textWrap = document.createElement('span');
+                    textWrap.textContent = f.val;
+
+                    card.appendChild(iconContainer);
+                    card.appendChild(textWrap);
+
+                    if (state.placed[f.id]) {
+                        card.classList.add('placed');
+                    }
+
+                    card.addEventListener('dragstart', onDragStart);
+                    card.addEventListener('dragend', onDragEnd);
+                    factsPool.appendChild(card);
+                });
+            }
+
+            let draggingCard = null;
+            function onDragStart(e) {
+                draggingCard = e.currentTarget;
+                draggingCard.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            }
+            function onDragEnd() {
+                if (draggingCard) draggingCard.classList.remove('dragging');
+                draggingCard = null;
+            }
+
+            function handleDroppedFact(cardEl, cellEl) {
+                const factId = cardEl.dataset.id;
+                const factType = cardEl.dataset.type;
+                const targetCol = cellEl.dataset.col;
+                const targetRow = parseInt(cellEl.dataset.row);
+
+                const factData = ALL_FACTS.find(f => f.id === factId);
+
+                if (factType === targetCol) {
+                    cellEl.classList.add('filled');
+                    cellEl.innerHTML = `<span>${factData.val}</span>`;
+                    cardEl.classList.add('placed');
+
+                    state.placed[factId] = { col: targetCol, row: targetRow };
+                    state.placedCount++;
+
+                    triggerMascotWiggle(targetCol);
+                    triggerAudioFeedback(true);
+                    showToastNotification(`Awesome! Placed ${factData.val} correctly.`, 'success');
+
+                    if (state.placedCount === TOTAL_FACTS_COUNT) {
+                        triggerGlobalWinSequence();
+                    }
+                } else {
+                    cellEl.classList.add('dz-wrong');
+                    setTimeout(() => cellEl.classList.remove('dz-wrong'), 500);
+                    triggerAudioFeedback(false);
+                    showToastNotification(`Oops! That belongs under another category.`, 'error');
+                }
+            }
+
+            function triggerMascotWiggle(col) {
+                const headerNode = document.getElementById(`head-${col}`);
+                if (!headerNode) return;
+                headerNode.classList.add('celebrating');
+                setTimeout(() => headerNode.classList.remove('celebrating'), 800);
+            }
+
+            function triggerGlobalWinSequence() {
+                setTimeout(() => {
+                    completionModal.classList.add('open');
+                    try {
+                        const winCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
+                            const osc = winCtx.createOscillator();
+                            const gain = winCtx.createGain();
+                            osc.connect(gain);
+                            gain.connect(winCtx.destination);
+                            osc.frequency.setValueAtTime(freq, winCtx.currentTime + index * 0.1);
+                            gain.gain.setValueAtTime(0.1, winCtx.currentTime + index * 0.1);
+                            osc.start(winCtx.currentTime + index * 0.1);
+                            osc.stop(winCtx.currentTime + index * 0.1 + 0.3);
+                        });
+                    } catch (e) { }
+                }, 600);
+            }
+
+            function showToastNotification(message, dynamicClass) {
+                toastAlert.textContent = message;
+                toastAlert.className = `toast-alert visible ${dynamicClass}`;
+                clearTimeout(toastAlert.timeoutRef);
+                toastAlert.timeoutRef = setTimeout(() => {
+                    toastAlert.classList.remove('visible');
+                }, 3000);
+            }
+
+            function triggerAudioFeedback(isSuccess) {
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    osc.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+
+                    const absoluteTime = audioCtx.currentTime;
+                    if (isSuccess) {
+                        osc.frequency.setValueAtTime(523.25, absoluteTime);
+                        osc.frequency.exponentialRampToValueAtTime(659.25, absoluteTime + 0.15);
+                        gainNode.gain.setValueAtTime(0.12, absoluteTime);
+                    } else {
+                        osc.frequency.setValueAtTime(220, absoluteTime);
+                        osc.frequency.linearRampToValueAtTime(146.83, absoluteTime + 0.2);
+                        gainNode.gain.setValueAtTime(0.18, absoluteTime);
+                    }
+
+                    osc.start(absoluteTime);
+                    osc.stop(absoluteTime + 0.25);
+                } catch (err) { }
+            }
+
+            function resetGame() {
+                state.placed = {};
+                state.placedCount = 0;
+                completionModal.classList.remove('open');
+
+                document.querySelectorAll('.table-row-cell').forEach(cell => {
+                    cell.classList.remove('filled', 'dz-wrong');
+                    cell.innerHTML = '';
+                });
+
+                renderFactsDeck();
+            }
+
+            document.getElementById('listenButton').addEventListener('click', () => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const narration = new SpeechSynthesisUtterance(
+                        "Let's turn messy facts into organized tables! Drag item cards from the bottom deck and map them into the right columns."
+                    );
+                    window.speechSynthesis.speak(narration);
+                }
+            });
+
+            document.getElementById('btnReset').addEventListener('click', resetGame);
+            document.getElementById('btnModalClose').addEventListener('click', resetGame);
+
+            initGridStructure();
+            renderFactsDeck();
+        })();
+    </script>
+</body>
+
+</html>

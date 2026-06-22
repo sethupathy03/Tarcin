@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Protecting Personal Info • Grade 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  :root {
+    --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    --card-bg: #ffffff;
+    --card-border: #bbf7d0;
+    --text-main: #14532d;
+    --text-muted: #4b5563;
+    
+    --color-public: #2563eb;
+    --color-private: #9333ea;
+    --color-success: #10b981;
+    --color-error: #ef4444;
+    
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 12px;
+    --shadow-md: 0 10px 25px -5px rgba(22, 163, 74, 0.1), 0 8px 10px -6px rgba(22, 163, 74, 0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    color: var(--text-main);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+  }
+
+  /* --- APP HEADER --- */
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    margin-bottom: 32px;
+  }
+  .btn-nav, .btn-listen {
+    background: white;
+    color: var(--text-main);
+    border: 2px solid var(--card-border);
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-nav:hover, .btn-listen:hover {
+    background: #f0fdf4;
+    transform: translateY(-2px);
+  }
+  .app-title-box {
+    text-align: center;
+  }
+  .app-title-box h1 {
+    font-size: clamp(24px, 4vw, 36px);
+    color: #16a34a;
+    letter-spacing: 0.5px;
+  }
+  .app-subtitle {
+    color: #15803d;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* --- GAME MAIN CONTAINER --- */
+  .game-container {
+    width: 100%;
+    max-width: 680px;
+    perspective: 1000px;
+    margin-top: 20px;
+  }
+
+  /* --- QUIZ CARD INTERACTION --- */
+  .quiz-card {
+    background: var(--card-bg);
+    border: 3px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+    transform-style: preserve-3d;
+  }
+  
+  .quiz-card.slide-out {
+    transform: translateX(-100px) rotateY(-15deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .quiz-card.slide-in {
+    animation: cardEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes cardEnter {
+    from { transform: translateX(100px) rotateY(15deg); opacity: 0; }
+    to { transform: translateX(0) rotateY(0deg); opacity: 1; }
+  }
+
+  /* Stage View Container */
+  .dynamic-display-stage {
+    height: 140px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    border: 2px dashed #cbd5e1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* --- TOP DISPLAY SCENARIO ANIMATIONS --- */
+  
+  /* Q1: Clap-board Component */
+  .vector-clapboard {
+    width: 64px;
+    height: 54px;
+    position: relative;
+    display: none;
+  }
+  .vector-clapboard.active {
+    display: block;
+  }
+  .clap-base {
+    width: 64px;
+    height: 38px;
+    background: #1e293b;
+    border-radius: 0 0 4px 4px;
+    position: absolute;
+    bottom: 0;
+    border-top: 4px solid #f1f5f9;
+  }
+  .clap-top {
+    width: 64px;
+    height: 12px;
+    background: #1e293b;
+    border-radius: 4px 4px 0 0;
+    position: absolute;
+    bottom: 38px;
+    left: 0;
+    transform-origin: left bottom;
+    border-bottom: 3px solid #f1f5f9;
+    animation: clapAction 1.2s ease-in-out infinite;
+  }
+
+  @keyframes clapAction {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-24deg); }
+  }
+
+  /* Q2, Q3, Q4: Terminal Display */
+  .vector-terminal-prompt {
+    width: 85%;
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: monospace;
+    font-size: 14px;
+    text-align: left;
+    color: #38bdf8;
+    border: 2px solid #38bdf8;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    display: none;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .vector-terminal-prompt.active {
+    display: block;
+  }
+  .terminal-cursor {
+    display: inline-block;
+    width: 8px; height: 15px;
+    background: #38bdf8;
+    margin-left: 4px;
+    animation: cursorBlink 0.8s steps(2) infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 0; } 50% { opacity: 1; }
+  }
+
+  .question-text {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 32px;
+    color: var(--text-main);
+    min-height: 66px;
+  }
+
+  /* --- CONTROL CHOICE OPTION GRID --- */
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .btn-choice {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 24px 20px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 3px solid transparent;
+    color: white;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  /* Safe to Share Column */
+  .btn-choice[data-choice="public"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+  }
+  .btn-choice[data-choice="public"]:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
+    border-color: #93c5fd;
+  }
+
+  /* Keep Private Column */
+  .btn-choice[data-choice="private"] {
+    background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+    box-shadow: 0 6px 16px rgba(168, 85, 247, 0.25);
+  }
+  .btn-choice[data-choice="private"]:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(168, 85, 247, 0.4);
+    border-color: #e9d5ff;
+  }
+  
+  .btn-choice:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* --- FONTAWESOME HIGH-FIDELITY ICON WRAPPERS --- */
+  .icon-container {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15), inset 0 2px 4px rgba(255,255,255,0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Globe Interactive Spin Styles */
+  .btn-choice[data-choice="public"]:hover .icon-container {
+    transform: rotate(360deg) scale(1.15);
+    background: rgba(255, 255, 255, 0.3);
+  }
+  .icon-container.spinning {
+    animation: permanentSpin 1s linear infinite;
+  }
+  @keyframes permanentSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Lock Interactive Shackle Snapping Styles */
+  .btn-choice[data-choice="private"]:hover .icon-container {
+    transform: scale(1.15);
+    background: rgba(255, 255, 255, 0.3);
+  }
+  .btn-choice[data-choice="private"]:hover .fa-lock,
+  .icon-container.snapping .fa-lock {
+    animation: lockShake 0.4s ease-in-out infinite alternate;
+  }
+  @keyframes lockShake {
+    0% { transform: translateY(0) rotate(-4deg); }
+    100% { transform: translateY(-3px) rotate(4deg); }
+  }
+
+  /* Card Feedback Indicators */
+  .quiz-card.correct-flash { animation: flashGreen 0.5s ease; }
+  .quiz-card.wrong-flash { animation: flashRed 0.5s ease; }
+
+  @keyframes flashGreen {
+    0%, 100% { border-color: var(--card-border); }
+    50% { border-color: var(--color-success); background: #f0fdf4; }
+  }
+  @keyframes flashRed {
+    0%, 100% { transform: translateX(0); border-color: var(--card-border); }
+    20%, 60% { transform: translateX(-8px); border-color: var(--color-error); }
+    40%, 80% { transform: translateX(8px); border-color: var(--color-error); }
+  }
+
+  .tip-bar {
+    margin-top: 32px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* --- LIGHT-THEMED POP-UP MODAL OVERLAY --- */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20, 83, 45, 0.4);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-card {
+    background: #ffffff;
+    border: 4px solid #4ade80;
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(22, 163, 74, 0.25);
+    transform: scale(0.7) translateY(30px);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-overlay.open .modal-card {
+    transform: scale(1) translateY(0);
+  }
+  
+  .modal-showcase {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+  }
+  .modal-showcase .icon-container {
+    background: #f1f5f9;
+    color: #1e293b;
+    font-size: 32px;
+    width: 70px;
+    height: 70px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  }
+
+  .modal-card h2 {
+    font-size: 34px;
+    color: #16a34a;
+    margin-bottom: 16px;
+  }
+  .modal-card p {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    font-weight: 600;
+  }
+  .btn-modal-action {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    transition: transform 0.2s;
+  }
+  .btn-modal-action:hover {
+    transform: scale(1.05);
+  }
+</style>
+</head>
+<body>
+
+  <header class="app-header">
+    <button class="btn-nav">Back</button>
+    <div class="app-title-box">
+      <h1>Protecting Personal Info</h1>
+      <span class="app-subtitle">Grade 6 • Cyber Safety</span>
+    </div>
+    <button class="btn-listen" id="listenButton">Listen</button>
+  </header>
+
+  <main class="game-container">
+    <div class="quiz-card" id="quizCard">
+      <div class="dynamic-display-stage">
+        <div class="vector-clapboard" id="vectorClapboard">
+          <div class="clap-top"></div>
+          <div class="clap-base"></div>
+        </div>
+        
+        <div class="vector-terminal-prompt" id="vectorTerminal">
+          <span>&gt; </span><span id="typingTarget"></span><span class="terminal-cursor"></span>
+        </div>
+      </div>
+      
+      <p class="question-text" id="questionText">Preparing interactive parameters...</p>
+      
+      <div class="action-grid">
+        <button class="btn-choice" data-choice="public">
+          <div class="icon-container" id="iconGlobe">
+            <i class="fa-solid fa-earth-americas"></i>
+          </div>
+          <span>SAFE TO SHARE</span>
+        </button>
+        <button class="btn-choice" data-choice="private">
+          <div class="icon-container" id="iconLock">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <span>KEEP PRIVATE</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="tip-bar">
+      <span>Hint:</span> Ensure private identity markers remain locked away from open channels!
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="completionModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-showcase">
+        <div class="icon-container" style="color: #2563eb;"><i class="fa-solid fa-earth-americas"></i></div>
+        <div class="icon-container" style="color: #9333ea;"><i class="fa-solid fa-key"></i></div>
+      </div>
+      <h2>Congratulations! You aced it</h2>
+      <p>Splendid job! You correctly verified all dataset items. You clearly understand how to discuss open media properties while locking down credentials and home networks cleanly.</p>
+      <button class="btn-modal-action" id="btnModalClose">Restart Quiz</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const QUIZ_ITEMS = [
+    { id: 1, text: "Your favorite movie is 'The Matrix'.", expected: "public", mode: "movie", payload: "" },
+    { id: 2, text: "A photo showing your home address and street sign.", expected: "private", mode: "type", payload: "Locating address records: 742 Evergreen Road..." },
+    { id: 3, text: "Your first name and your school's name.", expected: "private", mode: "type", payload: "Compiling Profile parameters: Alex @ Crestview Prep" },
+    { id: 4, text: "A review you wrote about a new video game.", expected: "public", mode: "type", payload: "Publishing Comment: 'Gameplay mechanics are clean!'" }
+  ];
+
+  let currentIndex = 0;
+  let blockInput = false;
+  let textIntervalId = null;
+
+  const quizCard = document.getElementById('quizCard');
+  const questionText = document.getElementById('questionText');
+  const vectorClapboard = document.getElementById('vectorClapboard');
+  const vectorTerminal = document.getElementById('vectorTerminal');
+  const typingTarget = document.getElementById('typingTarget');
+  const iconGlobe = document.getElementById('iconGlobe');
+  const iconLock = document.getElementById('iconLock');
+  const completionModal = document.getElementById('completionModal');
+
+  function runTypingSequence(fullString) {
+    clearInterval(textIntervalId);
+    typingTarget.textContent = "";
+    let idx = 0;
+    
+    textIntervalId = setInterval(() => {
+      if (idx < fullString.length) {
+        typingTarget.textContent += fullString.charAt(idx);
+        idx++;
+      } else {
+        clearInterval(textIntervalId);
+      }
+    }, 45);
+  }
+
+  function loadQuestion(index) {
+    if (index >= QUIZ_ITEMS.length) {
+      triggerEndGame();
+      return;
+    }
+
+    blockInput = false;
+    const currentItem = QUIZ_ITEMS[index];
+    
+    document.querySelectorAll('.btn-choice').forEach(b => b.removeAttribute('disabled'));
+    questionText.textContent = `"${currentItem.text}"`;
+
+    if (currentItem.mode === 'movie') {
+      vectorClapboard.classList.add('active');
+      vectorTerminal.classList.remove('active');
+    } else {
+      vectorClapboard.classList.remove('active');
+      vectorTerminal.classList.add('active');
+      runTypingSequence(currentItem.payload);
+    }
+  }
+
+  function handleUserDecision(selection) {
+    if (blockInput) return;
+    blockInput = true;
+
+    const currentItem = QUIZ_ITEMS[currentIndex];
+    const choices = document.querySelectorAll('.btn-choice');
+    choices.forEach(b => b.setAttribute('disabled', 'true'));
+
+    if (selection === currentItem.expected) {
+      quizCard.classList.add('correct-flash');
+      playSynthesizedAudio(true);
+
+      if (selection === 'public') {
+        iconGlobe.classList.add('spinning');
+      } else {
+        iconLock.classList.add('snapping');
+      }
+
+      setTimeout(() => {
+        iconGlobe.classList.remove('spinning');
+        iconLock.classList.remove('snapping');
+        quizCard.classList.remove('correct-flash');
+        
+        currentIndex++;
+        quizCard.classList.add('slide-out');
+        
+        setTimeout(() => {
+          quizCard.classList.remove('slide-out');
+          quizCard.classList.add('slide-in');
+          loadQuestion(currentIndex);
+          
+          setTimeout(() => {
+            quizCard.classList.remove('slide-in');
+          }, 500);
+        }, 400);
+
+      }, 1000);
+
+    } else {
+      quizCard.classList.add('wrong-flash');
+      playSynthesizedAudio(false);
+
+      setTimeout(() => {
+        quizCard.classList.remove('wrong-flash');
+        choices.forEach(b => b.removeAttribute('disabled'));
+        blockInput = false;
+      }, 600);
+    }
+  }
+
+  function triggerEndGame() {
+    clearInterval(textIntervalId);
+    completionModal.classList.add('open');
+    playSynthesizedAudio(true);
+  }
+
+  function resetSimulationEngine() {
+    currentIndex = 0;
+    completionModal.classList.remove('open');
+    loadQuestion(currentIndex);
+  }
+
+  function playSynthesizedAudio(isSuccess) {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      
+      const now = audioCtx.currentTime;
+      if (isSuccess) {
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
+        gain.gain.setValueAtTime(0.06, now);
+      } else {
+        osc.frequency.setValueAtTime(261.63, now);
+        osc.frequency.linearRampToValueAtTime(196.00, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+      }
+      osc.start(); osc.stop(now + 0.25);
+    } catch(err){}
+  }
+
+  document.querySelectorAll('.btn-choice').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetSelection = e.currentTarget.getAttribute('data-choice');
+      handleUserDecision(targetSelection);
+    });
+  });
+
+  document.getElementById('listenButton').addEventListener('click', () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(QUIZ_ITEMS[currentIndex] ? QUIZ_ITEMS[currentIndex].text : "Audit complete");
+      window.speechSynthesis.speak(utterance);
+    }
+  });
+
+  document.getElementById('btnModalClose').addEventListener('click', resetSimulationEngine);
+
+  loadQuestion(currentIndex);
+})();
+</script>
+</body>
+</html>
