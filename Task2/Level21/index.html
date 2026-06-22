@@ -41,22 +41,11 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
   background:linear-gradient(135deg,#29b6f6 0%,#0288d1 100%);
   border-radius:24px;padding:18px 22px 16px;
   display:grid;
-  grid-template-columns:auto 1fr auto;
+  grid-template-columns:1fr auto;
   align-items:center;gap:12px;
   box-shadow:0 6px 24px rgba(2,136,209,.35);
   position:relative;overflow:visible;
 }
-
-/* back button */
-.btn-back{
-  background:#fff;border:none;border-radius:50px;
-  padding:9px 18px;font-family:'Nunito',sans-serif;
-  font-weight:800;font-size:14px;color:#333;
-  cursor:pointer;display:flex;align-items:center;gap:6px;
-  box-shadow:0 3px 10px rgba(0,0,0,.15);
-  transition:transform .15s,box-shadow .15s;white-space:nowrap;
-}
-.btn-back:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.2);}
 
 /* title block */
 .title-block{text-align:center;}
@@ -105,7 +94,6 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 .stat-text{display:flex;flex-direction:column;}
 .stat-label{font-size:12px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
 .stat-value{font-size:22px;font-weight:900;color:#1a1a2e;line-height:1.1;}
-.stat-value.level-name{font-size:16px;color:#7c4dff;font-weight:800;}
 .stat-divider{width:1px;height:40px;background:#e8e8e8;}
 
 /* ── Decision Card ────────────────────────────────────────── */
@@ -126,29 +114,39 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
   text-transform:uppercase;letter-spacing:1px;}
 .card-meta-title{font-size:19px;font-weight:900;color:#1a1a2e;}
 
-/* illustration circle */
+/* illustration stage - 2D scene per question */
 .illustration-wrap{
   text-align:center;margin:0 auto 16px;
-  width:130px;height:130px;
-  background:radial-gradient(circle,#e8f4fd 60%,#c3e0f5 100%);
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:60px;box-shadow:0 4px 16px rgba(0,0,0,.08);
-  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-  animation:floaty 5s ease-in-out infinite;
+  width:170px;height:140px;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .25s ease,transform .25s ease;
+  animation:bobble 3s ease-in-out infinite;
 }
-.illustration-wrap.pop{transform:scale(1.12);}
+.illustration-wrap svg{width:100%;height:100%;}
+.illustration-wrap.fade{opacity:0;transform:scale(.75) rotate(-4deg);}
+.illustration-wrap.pop-in{animation:popIn .45s cubic-bezier(.34,1.56,.64,1);}
 
-@keyframes floaty{
+@keyframes bobble{
   0%,100%{transform:translateY(0) rotate(0deg);}
-  25%{transform:translateY(-8px) rotate(-1deg);}
-  50%{transform:translateY(-4px) rotate(1deg);}
-  75%{transform:translateY(-8px) rotate(-1deg);}
+  50%{transform:translateY(-6px) rotate(1.5deg);}
+}
+@keyframes popIn{
+  0%{transform:scale(.4) rotate(-8deg);opacity:0;}
+  60%{transform:scale(1.12) rotate(3deg);opacity:1;}
+  100%{transform:scale(1) rotate(0deg);opacity:1;}
 }
 
 .question-text{
   font-size:clamp(16px,2.2vw,19px);font-weight:800;
   color:#1a1a2e;text-align:center;line-height:1.45;
   margin-bottom:14px;
+  transition:opacity .2s ease,transform .2s ease;
+}
+.question-text.fade{opacity:0;transform:translateY(8px);}
+.question-text.enter{animation:questionIn .4s ease;}
+@keyframes questionIn{
+  0%{opacity:0;transform:translateY(8px);}
+  100%{opacity:1;transform:translateY(0);}
 }
 
 /* divider */
@@ -165,17 +163,30 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
 
 .choice-btn{
-  border:3px solid transparent;border-radius:24px;
+  border:4px solid transparent;border-radius:28px;
   padding:18px 16px;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:12px;
-  transition:transform .18s,box-shadow .18s,background .2s,border-color .2s;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .25s ease;
   font-family:'Nunito',sans-serif;
   text-align:center;background:transparent;
   position:relative;overflow:hidden;
   min-height:180px;
 }
-.choice-btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.14);}
+.choice-btn:active:not(:disabled){transform:scale(.94);}
 .choice-btn:disabled{cursor:default;}
+.choice-btn.chosen{animation:wiggleSquish .45s ease;}
+.choice-btn.enter{animation:choiceIn .4s cubic-bezier(.34,1.56,.64,1);}
+
+@keyframes wiggleSquish{
+  0%{transform:scale(1);}
+  30%{transform:scale(.9) rotate(-3deg);}
+  60%{transform:scale(1.08) rotate(3deg);}
+  100%{transform:scale(1) rotate(0deg);}
+}
+@keyframes choiceIn{
+  0%{transform:scale(.85) translateY(10px);opacity:0;}
+  100%{transform:scale(1) translateY(0);opacity:1;}
+}
 
 .choice-safe{
   background:#f0fdf4;border-color:#4ade80;
@@ -186,6 +197,25 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 
 .choice-icon{width:120px;height:120px;flex-shrink:0;line-height:1;display:flex;align-items:center;justify-content:center;}
 .choice-icon svg{width:110px;height:110px;display:block;}
+.choice-btn.enter .choice-icon{animation:iconDrop .5s cubic-bezier(.34,1.56,.64,1) .1s both;}
+.choice-btn.enter.choice-safe #safe-check{animation:drawCheck .5s ease .35s both;}
+.choice-btn.enter.choice-unsafe #unsafe-triangle{animation:shakeWarn .5s ease .35s both;}
+
+@keyframes iconDrop{
+  0%{transform:translateY(-14px) scale(.8);opacity:0;}
+  100%{transform:translateY(0) scale(1);opacity:1;}
+}
+@keyframes drawCheck{
+  0%{stroke-dashoffset:60;}
+  100%{stroke-dashoffset:0;}
+}
+@keyframes shakeWarn{
+  0%,100%{transform:rotate(0deg);}
+  20%{transform:rotate(-6deg);}
+  40%{transform:rotate(5deg);}
+  60%{transform:rotate(-3deg);}
+  80%{transform:rotate(2deg);}
+}
 .choice-info{display:flex;flex-direction:column;align-items:center;gap:8px;}
 .choice-label{font-size:16px;font-weight:900;letter-spacing:.5px;}
 .safe-label{color:#16a34a;}
@@ -196,14 +226,17 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 .choice-btn.reveal-correct{
   background:#dcfce7!important;border-color:#22c55e!important;
   box-shadow:0 0 0 4px rgba(34,197,94,.25);
-  animation:correctPulse .5s ease;
+  animation:correctBounce .5s ease;
 }
 .choice-btn.reveal-wrong{
   background:#fee2e2!important;border-color:#ef4444!important;
   opacity:.75;
 }
-@keyframes correctPulse{
-  0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}
+@keyframes correctBounce{
+  0%{transform:scale(1);}
+  40%{transform:scale(1.1) rotate(2deg);}
+  70%{transform:scale(.97) rotate(-1deg);}
+  100%{transform:scale(1) rotate(0deg);}
 }
 
 /* ── Explanation Box ──────────────────────────────────────── */
@@ -212,9 +245,8 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
   border:2.5px solid #fbc02d;border-radius:16px;
   padding:14px 18px;
   display:flex;align-items:flex-start;gap:12px;
-  animation:slideUp .35s ease;
+  transition:opacity .2s ease;
 }
-@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .explanation-box.hidden{display:none;}
 .expl-icon{font-size:26px;flex-shrink:0;margin-top:2px;}
 .expl-content{}
@@ -223,56 +255,53 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 .expl-result.wrong-result{color:#dc2626;}
 .expl-text{font-size:13px;color:#555;font-weight:600;line-height:1.4;}
 
-/* ── Progress Tracker ─────────────────────────────────────── */
-
-/* ── RESULTS SCREEN ───────────────────────────────────────── */
-#results-screen{display:none;flex-direction:column;align-items:center;gap:20px;text-align:center;}
-#results-screen.active{display:flex;}
-
-.results-card{
-  background:#fff;border-radius:28px;
-  padding:40px 36px;width:100%;max-width:620px;
-  box-shadow:0 8px 40px rgba(0,0,0,.13);
+/* ── MODAL (Results) ─────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(20,20,40,.55);
+  align-items:center;justify-content:center;
+  z-index:50;padding:20px;
 }
-.results-hero{font-size:72px;margin-bottom:12px;
-  animation:heroFloat 2.5s ease-in-out infinite;}
-@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.results-title{font-size:34px;font-weight:900;color:#1a1a2e;margin-bottom:4px;}
-.results-sub{font-size:16px;color:#666;font-weight:600;margin-bottom:28px;}
+.modal-overlay.active{display:flex;}
 
-.score-display{
+.modal-card{
+  background:#fff;border-radius:28px;
+  padding:36px 32px;width:100%;max-width:420px;
+  box-shadow:0 12px 50px rgba(0,0,0,.25);
+  text-align:center;
+  transform:scale(.92);opacity:0;
+  transition:transform .2s ease,opacity .2s ease;
+}
+.modal-overlay.active .modal-card{transform:scale(1);opacity:1;}
+
+.modal-hero{font-size:60px;margin-bottom:8px;}
+.modal-title{font-size:26px;font-weight:900;color:#1a1a2e;margin-bottom:4px;}
+.modal-sub{font-size:14px;color:#666;font-weight:600;margin-bottom:22px;}
+
+.modal-score{
   background:linear-gradient(135deg,#667eea,#764ba2);
-  border-radius:20px;padding:22px;margin-bottom:24px;
+  border-radius:18px;padding:18px;margin-bottom:18px;
   color:#fff;
 }
-.score-num{font-size:52px;font-weight:900;line-height:1;}
-.score-of{font-size:16px;opacity:.85;font-weight:700;}
+.modal-score-num{font-size:44px;font-weight:900;line-height:1;}
+.modal-score-of{font-size:14px;opacity:.85;font-weight:700;}
 
-.badge-display{
-  background:linear-gradient(135deg,#f8f0ff,#ede7ff);
-  border:3px solid #c4b5fd;border-radius:18px;
-  padding:20px;margin-bottom:24px;
-}
-.badge-emoji{font-size:50px;margin-bottom:8px;}
-.badge-title{font-size:24px;font-weight:900;color:#5b21b6;margin-bottom:4px;}
-.badge-msg{font-size:14px;color:#666;font-weight:600;line-height:1.45;}
-
-.accuracy-bar-wrap{margin-bottom:24px;}
-.accuracy-label{font-size:13px;color:#888;font-weight:700;margin-bottom:8px;}
-.accuracy-bar{height:14px;background:#f0f0f0;border-radius:20px;overflow:hidden;}
-.accuracy-fill{height:100%;border-radius:20px;
+.modal-accuracy-wrap{margin-bottom:24px;}
+.modal-accuracy-label{font-size:13px;color:#888;font-weight:700;margin-bottom:8px;}
+.modal-accuracy-bar{height:14px;background:#f0f0f0;border-radius:20px;overflow:hidden;}
+.modal-accuracy-fill{height:100%;border-radius:20px;
   background:linear-gradient(90deg,#7c4dff,#22c55e);
-  transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+  width:0%;transition:width .8s ease;}
 
 .btn-restart{
   background:linear-gradient(135deg,#7c4dff,#5b21b6);
   color:#fff;border:none;border-radius:50px;
-  padding:15px 42px;font-family:'Nunito',sans-serif;
-  font-size:18px;font-weight:900;cursor:pointer;
+  padding:14px 36px;font-family:'Nunito',sans-serif;
+  font-size:16px;font-weight:900;cursor:pointer;
   box-shadow:0 6px 22px rgba(124,77,255,.45);
-  transition:transform .18s,box-shadow .18s;
+  transition:transform .15s;
 }
-.btn-restart:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(124,77,255,.5);}
+.btn-restart:hover{transform:translateY(-2px);}
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media(max-width:640px){
@@ -299,7 +328,6 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
     <!-- Header Banner -->
     <div class="header-banner">
 
-
       <!-- Title -->
       <div class="title-block">
         <div class="main-title">Privacy <span>Basics</span> Lab</div>
@@ -310,7 +338,7 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 
       <!-- Right controls -->
       <div class="header-right">
-        <div class="progress-fraction" id="fraction-display">1/14</div>
+        <div class="progress-fraction" id="fraction-display">1/6</div>
         <button class="btn-listen" id="btn-listen">🔊 Listen</button>
       </div>
     </div>
@@ -326,18 +354,10 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
-        <div class="stat-icon">🏆</div>
-        <div class="stat-text">
-          <span class="stat-label">Level</span>
-          <span class="stat-value level-name" id="level-display">Cyber Cadet</span>
-        </div>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat-item">
         <div class="stat-icon">🎯</div>
         <div class="stat-text">
           <span class="stat-label">Challenge</span>
-          <span class="stat-value" id="challenge-display">1 of 14</span>
+          <span class="stat-value" id="challenge-display">1 of 6</span>
         </div>
       </div>
     </div>
@@ -348,11 +368,11 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
         <div class="card-badge">🛡️</div>
         <div class="card-meta">
           <span class="card-meta-label">Privacy Decision</span>
-          <span class="card-meta-title" id="scenario-label">Scenario 1/14</span>
+          <span class="card-meta-title" id="scenario-label">Scenario 1/6</span>
         </div>
       </div>
 
-      <div class="illustration-wrap" id="illustration">🔐</div>
+      <div class="illustration-wrap" id="illustration"></div>
 
       <p class="question-text" id="question-text">Loading…</p>
 
@@ -364,12 +384,7 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
             <svg width="120" height="170" viewBox="0 0 120 170" xmlns="http://www.w3.org/2000/svg">
             <path d="M60 5 L110 25 L110 95 Q110 135 60 155 Q10 135 10 95 L10 25 Z" fill="#66bb6a" stroke="#388e3c" stroke-width="2.5"/>
             <path d="M60 17 L100 34 L100 95 Q100 130 60 147 Q20 130 20 95 L20 34 Z" fill="#a5d6a7"/>
-            <polyline points="36,88 50,105 84,68" fill="none" stroke="#2e7d32" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="45" cy="52" r="4.5" fill="#1b5e20"/>
-            <circle cx="75" cy="52" r="4.5" fill="#1b5e20"/>
-            <path d="M41 67 Q60 82 79 67" fill="none" stroke="#1b5e20" stroke-width="2.8" stroke-linecap="round"/>
-            <ellipse cx="37" cy="63" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
-            <ellipse cx="83" cy="63" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
+            <polyline id="safe-check" points="36,88 50,105 84,68" fill="none" stroke="#2e7d32" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="60" stroke-dashoffset="0"/>
             </svg>
           </div>
           <div class="choice-info">
@@ -380,15 +395,12 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
         <button class="choice-btn choice-unsafe" id="btn-unsafe" onclick="answer('Unsafe')">
           <div class="choice-icon">
             <svg width="160" height="145" viewBox="0 0 160 145" xmlns="http://www.w3.org/2000/svg">
+  <g id="unsafe-triangle">
   <polygon points="80,5 5,140 155,140" fill="#ffc107" stroke="#e65100" stroke-width="3" stroke-linejoin="round"/>
   <polygon points="80,20 12,135 148,135" fill="#ffca28"/>
   <rect x="76" y="45" width="9" height="38" rx="4.5" fill="#5d4037"/>
   <circle cx="80" cy="93" r="4.5" fill="#5d4037"/>
-  <circle cx="65" cy="103" r="5" fill="#5d4037"/>
-  <circle cx="96" cy="103" r="5" fill="#5d4037"/>
-  <path d="M62 120 Q80 110 98 120" fill="none" stroke="#5d4037" stroke-width="3.2" stroke-linecap="round"/>
-  <ellipse cx="57" cy="111" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
-  <ellipse cx="103" cy="111" rx="7" ry="4.5" fill="#ef9a9a" opacity="0.5"/>
+  </g>
 </svg>
           </div>
           <div class="choice-info">
@@ -408,30 +420,23 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
       </div>
     </div>
 
-
   </div><!-- end quiz-screen -->
 
-  <!-- ══ RESULTS SCREEN ════════════════════════════════════════ -->
-  <div id="results-screen">
-    <div class="results-card">
-      <div class="results-hero" id="results-hero">🦸</div>
-      <div class="results-title">Lab Complete!</div>
-      <div class="results-sub" id="results-sub">You finished all 14 scenarios!</div>
+  <!-- ══ RESULTS MODAL ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-card" id="modal-card">
+      <div class="modal-hero" id="modal-hero">🦸</div>
+      <div class="modal-title">Lab Complete!</div>
+      <div class="modal-sub" id="modal-sub">You finished all 6 scenarios!</div>
 
-      <div class="score-display">
-        <div class="score-num" id="final-score">0</div>
-        <div class="score-of">correct answers out of 14</div>
+      <div class="modal-score">
+        <div class="modal-score-num" id="modal-final-score">0</div>
+        <div class="modal-score-of">correct answers out of 6</div>
       </div>
 
-      <div class="badge-display">
-        <div class="badge-emoji" id="badge-emoji">🌱</div>
-        <div class="badge-title" id="badge-title">Cyber Cadet</div>
-        <div class="badge-msg" id="badge-msg">Keep practising to level up your cyber skills!</div>
-      </div>
-
-      <div class="accuracy-bar-wrap">
-        <div class="accuracy-label" id="accuracy-label">Accuracy: 0%</div>
-        <div class="accuracy-bar"><div class="accuracy-fill" id="accuracy-fill" style="width:0%"></div></div>
+      <div class="modal-accuracy-wrap">
+        <div class="modal-accuracy-label" id="modal-accuracy-label">Accuracy: 0%</div>
+        <div class="modal-accuracy-bar"><div class="modal-accuracy-fill" id="modal-accuracy-fill"></div></div>
       </div>
 
       <button class="btn-restart" onclick="restart()">🔄 Play Again</button>
@@ -442,65 +447,139 @@ body::after{width:140px;height:60px;top:8%;right:3%;border-radius:50px;
 
 <script>
 /* ════════════════════════════════════════════════
-   DATA
+   DATA — 6 scenarios, no levels
 ════════════════════════════════════════════════ */
 const QUESTIONS = [
-  // Level 1 – Cyber Cadet (Q1-5)
   { q:'You use "123456" as your password for your favorite games and email.',
     ans:'Unsafe', expl:'123456 is one of the most common passwords — extremely easy for hackers to guess!',
-    icon:'🔑', level:'Cyber Cadet', levelNum:1 },
+    scene:'weakPassword' },
   { q:'Your best friend asks for your password so they can help you in a game.',
     ans:'Unsafe', expl:'Passwords should always stay private — even from friends!',
-    icon:'🤐', level:'Cyber Cadet', levelNum:1 },
+    scene:'sharePassword' },
   { q:'You always update your tablet and apps when they ask you to.',
     ans:'Safe', expl:'Updates patch security holes and fix bugs that hackers can exploit.',
-    icon:'🔄', level:'Cyber Cadet', levelNum:1 },
+    scene:'update' },
   { q:'You sign out of your account after using a shared computer.',
     ans:'Safe', expl:'Signing out prevents anyone else from accessing your account on that device.',
-    icon:'🚪', level:'Cyber Cadet', levelNum:1 },
+    scene:'signOut' },
   { q:'You turn on two-step verification (2FA) for your accounts.',
     ans:'Safe', expl:'2FA adds an extra layer of protection even if your password is stolen.',
-    icon:'🔐', level:'Cyber Cadet', levelNum:1 },
-
-  // Level 2 – Cyber Explorer (Q6-10)
-  { q:"You read an app's permissions before installing it.",
-    ans:'Safe', expl:"Reading permissions helps you understand what data an app can access.",
-    icon:'📋', level:'Cyber Explorer', levelNum:2 },
-  { q:"You cover your webcam when you're not using it.",
-    ans:'Safe', expl:'Covering your webcam protects your privacy from potential spying.',
-    icon:'📷', level:'Cyber Explorer', levelNum:2 },
-  { q:'You think carefully before posting photos or videos online.',
-    ans:'Safe', expl:'Once posted, content can spread widely — think before you share!',
-    icon:'📸', level:'Cyber Explorer', levelNum:2 },
-  { q:'You leave your device unlocked when you walk away from it.',
-    ans:'Unsafe', expl:'Anyone nearby could access your personal data on an unlocked device.',
-    icon:'📱', level:'Cyber Explorer', levelNum:2 },
+    scene:'twoFA' },
   { q:'You create a password like "R!ver#Cl0ud42" by mixing letters, numbers, and symbols.',
     ans:'Safe', expl:'Complex mixed passwords are much harder for attackers to crack.',
-    icon:'🔒', level:'Cyber Explorer', levelNum:2 },
-
-  // Level 3 – Cyber Detective (Q11-14)
-  { q:'You send a photo of your school ID card to someone you met online.',
-    ans:'Unsafe', expl:'Your school ID contains sensitive personal information — never share it online!',
-    icon:'🪪', level:'Cyber Detective', levelNum:3 },
-  { q:'You verify a website\'s address before entering your password.',
-    ans:'Safe', expl:'Checking the URL helps you avoid fake phishing websites.',
-    icon:'🌐', level:'Cyber Detective', levelNum:3 },
-  { q:'You log into your email on the free Wi-Fi at a coffee shop.',
-    ans:'Unsafe', expl:'Public Wi-Fi can expose your login credentials to snoopers.',
-    icon:'☕', level:'Cyber Detective', levelNum:3 },
-  { q:'You download a game from an unknown website because it\'s free.',
-    ans:'Unsafe', expl:'Unknown sites may bundle malware or viruses with their downloads.',
-    icon:'⬇️', level:'Cyber Detective', levelNum:3 },
+    scene:'strongPassword' },
 ];
+
+/* ════════════════════════════════════════════════
+   2D SCENE ILLUSTRATIONS (simple, minimal)
+════════════════════════════════════════════════ */
+const SCENES = {
+  weakPassword: `
+    <svg viewBox="0 0 170 140" xmlns="http://www.w3.org/2000/svg">
+      <rect x="35" y="55" width="100" height="65" rx="10" fill="#90caf9"/>
+      <rect x="55" y="30" width="60" height="40" rx="20" fill="none" stroke="#90caf9" stroke-width="8"/>
+      <circle cx="85" cy="88" r="10" fill="#1565c0"/>
+      <rect x="80" y="95" width="10" height="16" fill="#1565c0"/>
+      <clipPath id="type-weak"><rect x="40" y="124" width="0" height="18"><animate attributeName="width" values="0;90;90" keyTimes="0;0.7;1" dur="1.6s" begin="0.1s" fill="freeze"/></rect></clipPath>
+      <text x="85" y="138" font-size="14" font-weight="800" text-anchor="middle" fill="#e53935" font-family="monospace" clip-path="url(#type-weak)">123456</text>
+      <rect x="129" y="124" width="3" height="16" fill="#e53935">
+        <animate attributeName="x" values="40;129;129" keyTimes="0;0.7;1" dur="1.6s" begin="0.1s" fill="freeze"/>
+        <animate attributeName="opacity" values="1;0;1;0;1;0;1" dur="0.8s" begin="1.7s" repeatCount="indefinite"/>
+      </rect>
+    </svg>`,
+  sharePassword: `
+    <svg viewBox="0 0 170 140" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="45" cy="60" r="26" fill="#ffcc80"/>
+      <circle cx="36" cy="56" r="3.2" fill="#5d4037"/>
+      <circle cx="54" cy="56" r="3.2" fill="#5d4037"/>
+      <path d="M34 68 Q45 76 56 68" fill="none" stroke="#5d4037" stroke-width="2.6" stroke-linecap="round"/>
+      <rect x="22" y="86" width="46" height="40" rx="14" fill="#ffb74d"/>
+      <circle cx="125" cy="60" r="26" fill="#a5d6a7"/>
+      <circle cx="116" cy="56" r="3.2" fill="#2e4d2e"/>
+      <circle cx="134" cy="56" r="3.2" fill="#2e4d2e"/>
+      <path d="M114 70 Q125 64 136 70" fill="none" stroke="#2e4d2e" stroke-width="2.6" stroke-linecap="round"/>
+      <rect x="102" y="86" width="46" height="40" rx="14" fill="#81c784"/>
+      <rect x="62" y="44" width="46" height="28" rx="6" fill="#fff" stroke="#bdbdbd" stroke-width="2"/>
+      <text x="85" y="63" font-size="13" font-weight="800" text-anchor="middle" fill="#e53935" font-family="Nunito,sans-serif">****</text>
+      <g>
+        <path d="M95 58 L70 58" fill="none" stroke="#9e9e9e" stroke-width="2.5" stroke-dasharray="6,4" stroke-linecap="round">
+          <animate attributeName="stroke-dashoffset" values="0;-20" dur="0.8s" repeatCount="indefinite"/>
+        </path>
+        <polygon points="70,58 78,53 78,63" fill="#9e9e9e">
+          <animateTransform attributeName="transform" type="translate" values="0 0;-6 0;0 0" dur="0.9s" repeatCount="indefinite"/>
+        </polygon>
+      </g>
+    </svg>`,
+  update: `
+    <svg viewBox="0 0 170 140" xmlns="http://www.w3.org/2000/svg">
+      <rect x="50" y="14" width="70" height="112" rx="14" fill="#cfd8dc" stroke="#90a4ae" stroke-width="2"/>
+      <rect x="58" y="26" width="54" height="80" rx="4" fill="#e3f2fd"/>
+      <rect x="66" y="36" width="38" height="38" rx="8" fill="#90caf9"/>
+      <g>
+        <path d="M85 42 L85 62 M85 62 L77 54 M85 62 L93 54" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <animate attributeName="opacity" values="1;0.3;1" dur="0.9s" repeatCount="indefinite"/>
+        </path>
+      </g>
+      <rect x="66" y="84" width="38" height="10" rx="5" fill="#fff" stroke="#90caf9" stroke-width="1.5"/>
+      <rect x="68" y="86" width="0" height="6" rx="3" fill="#42a5f5">
+        <animate attributeName="width" values="0;34;0" dur="1.8s" repeatCount="indefinite"/>
+      </rect>
+    </svg>`,
+  signOut: `
+    <svg viewBox="0 0 170 140" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="20" width="90" height="64" rx="6" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="2"/>
+      <rect x="27" y="27" width="76" height="46" fill="#cfe8ff"/>
+      <circle cx="65" cy="46" r="9" fill="#90a4ae"/>
+      <path d="M52 64 Q65 50 78 64" fill="#90a4ae"/>
+      <rect x="50" y="88" width="30" height="7" rx="3" fill="#9e9e9e"/>
+      <g>
+        <circle cx="138" cy="55" r="8" fill="#ffcc80"/>
+        <path d="M138 63 L138 85 M138 70 L128 78 M138 70 L148 78 M138 85 L130 100 M138 85 L146 100"
+              stroke="#5d4037" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <animateTransform attributeName="transform" type="translate" values="0 0;26 4;26 4" keyTimes="0;0.6;1" dur="1.6s" begin="0.2s" fill="freeze"/>
+      </g>
+      <g>
+        <rect x="34" y="100" width="22" height="20" rx="4" fill="#78909c" opacity="0">
+          <animate attributeName="opacity" values="0;0;1" keyTimes="0;0.55;1" dur="1.6s" begin="0.2s" fill="freeze"/>
+        </rect>
+        <path d="M38 100 L38 94 Q45 88 52 94 L52 100" fill="none" stroke="#78909c" stroke-width="3.5" opacity="0">
+          <animate attributeName="opacity" values="0;0;1" keyTimes="0;0.55;1" dur="1.6s" begin="0.2s" fill="freeze"/>
+        </path>
+      </g>
+    </svg>`,
+  twoFA: `
+    <svg viewBox="0 0 170 140" xmlns="http://www.w3.org/2000/svg">
+      <rect x="55" y="15" width="60" height="100" rx="12" fill="#b39ddb" stroke="#7e57c2" stroke-width="2"/>
+      <rect x="62" y="28" width="46" height="70" rx="4" fill="#ede7f6"/>
+      <text x="85" y="60" font-size="22" font-weight="900" text-anchor="middle" fill="#5e35b1" font-family="Nunito,sans-serif">2FA</text>
+      <circle cx="85" cy="82" r="11" fill="#66bb6a"/>
+      <polyline points="80,82 84,87 91,77" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="16" stroke-dashoffset="16">
+        <animate attributeName="stroke-dashoffset" values="16;0" dur="0.5s" begin="0.3s" fill="freeze"/>
+      </polyline>
+    </svg>`,
+  strongPassword: `
+    <svg viewBox="0 0 170 140" xmlns="http://www.w3.org/2000/svg">
+      <rect x="35" y="55" width="100" height="65" rx="10" fill="#a5d6a7"/>
+      <rect x="55" y="30" width="60" height="40" rx="20" fill="none" stroke="#a5d6a7" stroke-width="8"/>
+      <circle cx="85" cy="88" r="10" fill="#2e7d32"/>
+      <rect x="80" y="95" width="10" height="16" fill="#2e7d32"/>
+      <clipPath id="type-strong"><rect x="40" y="124" width="0" height="16"><animate attributeName="width" values="0;90;90" keyTimes="0;0.7;1" dur="1.8s" begin="0.1s" fill="freeze"/></rect></clipPath>
+      <text x="85" y="138" font-size="12" font-weight="800" text-anchor="middle" fill="#2e7d32" font-family="monospace" clip-path="url(#type-strong)">R!ver#Cl0ud42</text>
+      <rect x="129" y="124" width="3" height="14" fill="#2e7d32">
+        <animate attributeName="x" values="40;129;129" keyTimes="0;0.7;1" dur="1.8s" begin="0.1s" fill="freeze"/>
+        <animate attributeName="opacity" values="1;0;1;0;1;0;1" dur="0.8s" begin="1.9s" repeatCount="indefinite"/>
+      </rect>
+    </svg>`
+};
 
 /* ════════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════════ */
+const TOTAL = QUESTIONS.length;
 let currentIdx = 0;
 let score = 0;
 let answered = false;
-let results = []; // true=correct, false=wrong per question
 
 /* ════════════════════════════════════════════════
    INIT
@@ -509,45 +588,55 @@ function init() {
   currentIdx = 0;
   score = 0;
   answered = false;
-  results = [];
-  document.getElementById('quiz-screen').style.display = 'flex';
-  document.getElementById('results-screen').classList.remove('active');
+  document.getElementById('modal-overlay').classList.remove('active');
+  document.getElementById('score-display').textContent = '0';
   loadQuestion();
 }
-
-/* ════════════════════════════════════════════════
-   PROGRESS TRACK
-════════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════════
    LOAD QUESTION
 ════════════════════════════════════════════════ */
 function loadQuestion() {
-  if (currentIdx >= QUESTIONS.length) { showResults(); return; }
+  if (currentIdx >= TOTAL) { showResults(); return; }
   answered = false;
 
   const q = QUESTIONS[currentIdx];
 
-  // Update header
-  document.getElementById('fraction-display').textContent = `${currentIdx+1}/14`;
-  document.getElementById('scenario-label').textContent = `Scenario ${currentIdx+1}/14`;
-  document.getElementById('question-text').textContent = q.q;
-  document.getElementById('challenge-display').textContent = `${currentIdx+1} of 14`;
-  document.getElementById('level-display').textContent = q.level;
+  document.getElementById('fraction-display').textContent = `${currentIdx+1}/${TOTAL}`;
+  document.getElementById('scenario-label').textContent = `Scenario ${currentIdx+1}/${TOTAL}`;
+  document.getElementById('challenge-display').textContent = `${currentIdx+1} of ${TOTAL}`;
 
-  // Illustration with pop animation
+  // Question text — fade out, swap, fade/slide in
+  const qText = document.getElementById('question-text');
+  qText.classList.add('fade');
+  qText.classList.remove('enter');
+  setTimeout(() => {
+    qText.textContent = q.q;
+    qText.classList.remove('fade');
+    void qText.offsetWidth;
+    qText.classList.add('enter');
+  }, 150);
+
+  // Illustration — fade out, swap, bounce in
   const illus = document.getElementById('illustration');
-  illus.textContent = q.icon;
-  illus.classList.remove('pop');
-  void illus.offsetWidth; // reflow
-  illus.classList.add('pop');
-  setTimeout(()=>illus.classList.remove('pop'), 400);
+  illus.classList.add('fade');
+  illus.classList.remove('pop-in');
+  setTimeout(() => {
+    illus.innerHTML = SCENES[q.scene] || '';
+    illus.classList.remove('fade');
+    void illus.offsetWidth; // reflow to restart animation
+    illus.classList.add('pop-in');
+  }, 150);
 
   // Reset buttons
   const btnSafe = document.getElementById('btn-safe');
   const btnUnsafe = document.getElementById('btn-unsafe');
   btnSafe.className = 'choice-btn choice-safe';
   btnUnsafe.className = 'choice-btn choice-unsafe';
+  void btnSafe.offsetWidth;
+  void btnUnsafe.offsetWidth;
+  btnSafe.className = 'choice-btn choice-safe enter';
+  btnUnsafe.className = 'choice-btn choice-unsafe enter';
   btnSafe.disabled = false;
   btnUnsafe.disabled = false;
 
@@ -565,30 +654,27 @@ function answer(choice) {
   const q = QUESTIONS[currentIdx];
   const correct = (choice === q.ans);
 
-  // Update score
   if (correct) score++;
-  results.push(correct);
 
-  // Highlight buttons
   const btnSafe   = document.getElementById('btn-safe');
   const btnUnsafe = document.getElementById('btn-unsafe');
   btnSafe.disabled   = true;
   btnUnsafe.disabled = true;
 
-  // Always show correct answer in green
+  // Wiggle the button the player actually tapped
+  const clickedBtn = (choice === 'Safe') ? btnSafe : btnUnsafe;
+  clickedBtn.classList.add('chosen');
+
   if (q.ans === 'Safe')   btnSafe.classList.add('reveal-correct');
   else                    btnUnsafe.classList.add('reveal-correct');
 
-  // If user clicked wrong, mark it red
   if (!correct) {
     if (choice === 'Safe') btnSafe.classList.add('reveal-wrong');
     else                   btnUnsafe.classList.add('reveal-wrong');
   }
 
-  // Update score display
   document.getElementById('score-display').textContent = score;
 
-  // Show explanation
   const exBox    = document.getElementById('explanation-box');
   const exResult = document.getElementById('expl-result');
   const exText   = document.getElementById('expl-text');
@@ -600,12 +686,11 @@ function answer(choice) {
     exResult.className = 'expl-result correct-result';
   } else {
     exIcon.textContent = '💡';
-    exResult.textContent = '❌ Not quite — here\'s why:';
+    exResult.textContent = "❌ Not quite — here's why:";
     exResult.className = 'expl-result wrong-result';
   }
   exText.textContent = q.expl;
 
-  // Auto-advance after 2 s
   setTimeout(() => {
     currentIdx++;
     loadQuestion();
@@ -613,48 +698,33 @@ function answer(choice) {
 }
 
 /* ════════════════════════════════════════════════
-   RESULTS
+   RESULTS MODAL
 ════════════════════════════════════════════════ */
 function showResults() {
-  document.getElementById('quiz-screen').style.display = 'none';
-  document.getElementById('results-screen').classList.add('active');
+  const pct = Math.round(score / TOTAL * 100);
+  document.getElementById('modal-final-score').textContent = score;
+  document.getElementById('modal-accuracy-label').textContent = `Accuracy: ${pct}%`;
+  document.getElementById('modal-sub').textContent = `You answered ${score} out of ${TOTAL} correctly!`;
 
-  const pct = Math.round(score / 14 * 100);
-  document.getElementById('final-score').textContent = score;
-  document.getElementById('accuracy-label').textContent = `Accuracy: ${pct}%`;
+  let hero;
+  if (score <= 2) hero = '🌱';
+  else if (score <= 4) hero = '🦸‍♀️';
+  else hero = '🧑‍💻';
+  document.getElementById('modal-hero').textContent = hero;
 
-  // Animate bar after short delay
+  document.getElementById('modal-overlay').classList.add('active');
   setTimeout(() => {
-    document.getElementById('accuracy-fill').style.width = pct + '%';
-  }, 100);
-
-  // Badge
-  let emoji, title, msg, hero;
-  if (score <= 5) {
-    emoji='🌱'; title='Cyber Cadet';
-    msg='Keep practising — every expert started as a beginner! 💪';
-    hero='🦸';
-  } else if (score <= 10) {
-    emoji='🔵'; title='Cyber Explorer';
-    msg='Great effort! You know the basics well. Keep exploring! 🚀';
-    hero='🦸‍♀️';
-  } else {
-    emoji='🟣'; title='Cyber Detective';
-    msg='Outstanding! You\'re a true Cyber Detective — you spot risks like a pro! 🕵️';
-    hero='🧑‍💻';
-  }
-  document.getElementById('results-hero').textContent = hero;
-  document.getElementById('badge-emoji').textContent = emoji;
-  document.getElementById('badge-title').textContent = title;
-  document.getElementById('badge-msg').textContent = msg;
-  document.getElementById('results-sub').textContent =
-    `You answered ${score} out of 14 correctly!`;
+    document.getElementById('modal-accuracy-fill').style.width = pct + '%';
+  }, 150);
 }
 
 /* ════════════════════════════════════════════════
    RESTART
 ════════════════════════════════════════════════ */
-function restart() { init(); }
+function restart() {
+  document.getElementById('modal-accuracy-fill').style.width = '0%';
+  init();
+}
 
 /* ════════════════════════════════════════════════
    LISTEN BUTTON (Text-to-Speech)

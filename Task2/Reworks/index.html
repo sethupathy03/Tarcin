@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vint Cerf Lab: Protocol Selector</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #F5F7FA;
+  --surface:   #FFFFFF;
+  --border:    #E3E8F0;
+  --blue:      #3B82F6;
+  --blue-soft: #EFF6FF;
+  --blue-mid:  #DBEAFE;
+  --yellow:    #FBBF24;
+  --yellow-bg: #FFFBEB;
+  --green:     #10B981;
+  --green-bg:  #ECFDF5;
+  --red:       #EF4444;
+  --red-bg:    #FEF2F2;
+  --coral:     #EF4444;
+  --text:      #1E293B;
+  --text-mid:  #475569;
+  --text-soft: #94A3B8;
+  --radius:    14px;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.07);
+  --shadow:    0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,0.13);
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: var(--shadow-sm);
+}
+.btn-back {
+  background: var(--coral);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 9px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+  box-shadow: 0 2px 8px rgba(239,68,68,0.25);
+}
+.btn-back:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(239,68,68,0.35); background:#dc2626; }
+.header-title { font-size: clamp(18px,3vw,24px); font-weight:800; letter-spacing:-0.5px; color:var(--text); }
+.header-title .highlight { color: var(--blue); }
+.header-right { display:flex; align-items:center; gap:10px; }
+.score-pill {
+  background: var(--yellow); color:#78350F; border-radius:30px; padding:8px 18px;
+  font-size:13px; font-weight:800; min-width:100px; text-align:center;
+  box-shadow:0 2px 8px rgba(251,191,36,.30);
+}
+.score-pill.pop { animation: pop 0.32s ease; }
+.btn-listen {
+  background: var(--blue); color:#fff; border:none; border-radius:30px; padding:9px 18px;
+  font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:7px;
+  transition: transform 0.18s, background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(59,130,246,.28);
+}
+.btn-listen:hover { background:#2563EB; transform:translateY(-2px); box-shadow:0 6px 16px rgba(59,130,246,.38); }
+
+/* ── MAIN ── */
+main { flex:1; padding:28px 28px 16px; max-width:1060px; width:100%; margin:0 auto; }
+.section-label {
+  font-size:10.5px; font-weight:700; text-transform:uppercase;
+  letter-spacing:2px; color:var(--text-soft); margin-bottom:14px;
+}
+
+/* ── PROTOCOL CARDS ── */
+.protocol-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:30px; }
+.protocol-card {
+  background:var(--surface); border:2px solid var(--border); border-radius:var(--radius);
+  padding:18px 12px 16px; cursor:pointer; text-align:center;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  position:relative; user-select:none; box-shadow:var(--shadow-sm);
+  min-height: 140px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+}
+.protocol-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:#CBD5E1; }
+.protocol-card.active {
+  border-color:var(--blue); background:var(--blue-soft);
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.12), var(--shadow);
+  transform: translateY(-3px);
+}
+.protocol-card.active::after {
+  content:''; position:absolute; inset:-2px; border-radius:var(--radius);
+  border:2px solid var(--blue); animation:pulse-ring 1.8s ease-out infinite; pointer-events:none;
+}
+.protocol-anim-wrap { width:80px; height:70px; margin:0 auto 10px; position:relative; flex-shrink:0; }
+.protocol-name { font-size:15px; font-weight:800; margin-bottom:3px; color:var(--text); }
+.protocol-desc { font-size:11px; color:var(--text-soft); line-height:1.4; }
+
+/* ── TASK CARDS ── */
+.task-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.task-card {
+  background:var(--surface); border:2px solid var(--border); border-radius:var(--radius);
+  padding:20px 14px 14px; cursor:pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  display:flex; flex-direction:column; align-items:center; gap:9px;
+  user-select:none; box-shadow:var(--shadow-sm);
+}
+.task-card:hover { transform:translateY(-3px); box-shadow:var(--shadow); border-color:#CBD5E1; }
+.task-card.solved { opacity:.5; cursor:default; pointer-events:none; }
+.task-card.correct-flash { background:var(--green-bg); border-color:var(--green); transform:scale(1.02); }
+.task-card.wrong-flash { background:var(--red-bg); border-color:var(--red); animation:shake 0.42s ease; }
+.task-anim-wrap { width:72px; height:64px; position:relative; flex-shrink:0; }
+.task-title { font-size:13px; font-weight:700; text-align:center; line-height:1.35; color:var(--text); }
+.task-url {
+  font-size:10px; color:var(--text-soft); font-family:'Courier New',monospace;
+  text-align:center; word-break:break-all; background:var(--bg);
+  border-radius:6px; padding:3px 7px; width:100%; border:1px solid var(--border);
+}
+
+/* ── FOOTER ── */
+footer {
+  background:var(--yellow-bg); color:#92400E; text-align:center;
+  padding:14px 28px; font-size:13px; font-weight:600;
+  border-top:2px solid #FDE68A;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; top:74px; left:50%;
+  transform:translateX(-50%) translateY(-16px);
+  background:var(--text); color:#fff; border-radius:30px;
+  padding:10px 22px; font-size:13px; font-weight:600;
+  opacity:0; transition:opacity 0.22s, transform 0.22s;
+  pointer-events:none; z-index:100; white-space:nowrap; box-shadow:var(--shadow);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── WIN ── */
+.win-banner {
+  display:none; position:fixed; inset:0;
+  background:rgba(241,245,249,.94); z-index:200;
+  align-items:center; justify-content:center;
+  flex-direction:column; gap:16px; backdrop-filter:blur(6px);
+}
+.win-banner.show { display:flex; }
+.win-banner h2 { font-size:34px; font-weight:900; color:var(--text); }
+.win-banner p { color:var(--text-mid); font-size:16px; }
+.win-banner button {
+  background:var(--blue); color:#fff; border:none; border-radius:30px;
+  padding:13px 34px; font-size:15px; font-weight:800; cursor:pointer;
+  transition:transform .18s, background .18s; box-shadow:0 4px 14px rgba(59,130,246,.35);
+}
+.win-banner button:hover { transform:scale(1.04); background:#2563EB; }
+
+/* ══════════════════════════════════════════════
+   TCP — lock shackle releases then re-locks
+   ══════════════════════════════════════════════ */
+.tcp-shackle { transform-origin: 28px 23px; animation: tcp-release 2.4s ease-in-out infinite; }
+.tcp-body    { animation: tcp-body-flash 2.4s ease-in-out infinite; }
+.tcp-shield  { animation: tcp-shield-pulse 2.4s ease-in-out infinite; }
+@keyframes tcp-release {
+  0%,30%  { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+  70%,100%{ transform: translateY(0); }
+}
+@keyframes tcp-body-flash {
+  0%,35% { opacity:1; }
+  50%    { opacity:0.3; }
+  70%,100%{ opacity:1; }
+}
+@keyframes tcp-shield-pulse {
+  0%,40%  { fill:#DBEAFE; }
+  50%     { fill:#BFDBFE; }
+  65%,100%{ fill:#DBEAFE; }
+}
+
+/* ══════════════════════════════════════════════
+   HTTP — person sends arrow right, server sends arrow left simultaneously
+   ══════════════════════════════════════════════ */
+.http-req-arrow  { animation: http-req  2s ease-in-out infinite; }
+.http-res-arrow  { animation: http-res  2s ease-in-out infinite; }
+.http-req-dot    { animation: http-req-dot 2s ease-in-out infinite; }
+.http-res-dot    { animation: http-res-dot 2s ease-in-out infinite; }
+@keyframes http-req {
+  0%   { transform: scaleX(0); transform-origin: left; }
+  40%  { transform: scaleX(1); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: left; }
+}
+@keyframes http-res {
+  0%,40% { transform: scaleX(0); transform-origin: right; }
+  80%    { transform: scaleX(1); transform-origin: right; }
+  100%   { transform: scaleX(1); transform-origin: right; }
+}
+@keyframes http-req-dot {
+  0%   { cx: 14; opacity:1; }
+  40%  { cx: 62; opacity:1; }
+  41%  { opacity:0; }
+  100% { cx: 62; opacity:0; }
+}
+@keyframes http-res-dot {
+  0%,40% { cx: 62; opacity:0; }
+  41%    { opacity:1; }
+  80%    { cx: 14; opacity:1; }
+  81%    { opacity:0; }
+  100%   { cx: 14; opacity:0; }
+}
+/* person arm wave */
+.http-person-arm { transform-origin: 20px 32px; animation: http-arm-wave 2s ease-in-out infinite; }
+@keyframes http-arm-wave {
+  0%,60%,100% { transform: rotate(0deg); }
+  20%          { transform: rotate(-25deg); }
+}
+/* server blink */
+.http-server-light { animation: server-blink 2s ease-in-out infinite; }
+@keyframes server-blink {
+  0%,30%,100% { fill:#94A3B8; }
+  50%         { fill:#10B981; }
+  70%         { fill:#94A3B8; }
+}
+
+/* ══════════════════════════════════════════════
+   SMTP — envelope flies left→right, both persons lean
+   ══════════════════════════════════════════════ */
+.smtp-env    { animation: smtp-fly 2.2s ease-in-out infinite; }
+.smtp-p-left { animation: smtp-lean-l 2.2s ease-in-out infinite; transform-origin:12px 48px; }
+.smtp-p-right{ animation: smtp-lean-r 2.2s ease-in-out infinite; transform-origin:68px 48px; }
+@keyframes smtp-fly {
+  0%   { transform: translate(6px,0) scale(0.7) rotate(-5deg); opacity:0; }
+  15%  { opacity:1; }
+  50%  { transform: translate(34px,-10px) scale(1) rotate(0deg); opacity:1; }
+  85%  { opacity:1; }
+  100% { transform: translate(60px,0) scale(0.7) rotate(5deg); opacity:0; }
+}
+@keyframes smtp-lean-l {
+  0%,100% { transform: rotate(0deg); }
+  20%,40% { transform: rotate(-6deg); }
+}
+@keyframes smtp-lean-r {
+  0%,100% { transform: rotate(0deg); }
+  60%,80% { transform: rotate(6deg); }
+}
+
+/* ══════════════════════════════════════════════
+   FTP — file visible, download bar fills like Chrome
+   ══════════════════════════════════════════════ */
+.ftp-progress-bar { animation: ftp-fill 2.5s ease-in-out infinite; }
+.ftp-arrow-down   { animation: ftp-arrow-bounce 2.5s ease-in-out infinite; }
+.ftp-filename     { animation: ftp-text-appear 2.5s ease-in-out infinite; }
+@keyframes ftp-fill {
+  0%   { width: 0; }
+  20%  { width: 10px; }
+  60%  { width: 36px; }
+  85%  { width: 48px; }
+  95%,100% { width: 48px; }
+}
+@keyframes ftp-arrow-bounce {
+  0%,40%  { transform: translateY(0); }
+  55%     { transform: translateY(3px); }
+  70%     { transform: translateY(0); }
+  100%    { transform: translateY(0); }
+}
+@keyframes ftp-text-appear {
+  0%,10% { opacity:0; }
+  20%,90%{ opacity:1; }
+  100%   { opacity:0; }
+}
+
+/* ══════════════════════════════════════════════
+   TASK 1 — Globe rotates (latitude lines slide)
+   ══════════════════════════════════════════════ */
+.globe-spin { animation: globe-rotate 4s linear infinite; transform-origin:31px 31px; }
+.globe-lat  { animation: globe-lat-drift 4s linear infinite; }
+@keyframes globe-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+/* we simulate rotation by moving the equatorial ellipse rx */
+.globe-eq-ellipse { animation: globe-eq 4s linear infinite; }
+@keyframes globe-eq {
+  0%,100% { rx: 13; }
+  25%     { rx: 4;  }
+  50%     { rx: 13; }
+  75%     { rx: 4;  }
+}
+
+/* ══════════════════════════════════════════════
+   TASK 2 — Student sends mail to student (envelope flies)
+   ══════════════════════════════════════════════ */
+.stu-env    { animation: stu-fly 2.5s ease-in-out infinite; }
+.stu-arm-l  { transform-origin:16px 36px; animation: stu-arm-send 2.5s ease-in-out infinite; }
+.stu-arm-r  { transform-origin:56px 36px; animation: stu-arm-recv 2.5s ease-in-out infinite; }
+@keyframes stu-fly {
+  0%   { transform:translate(12px,0) scale(0.6); opacity:0; }
+  12%  { opacity:1; }
+  50%  { transform:translate(28px,-8px) scale(1); opacity:1; }
+  88%  { opacity:1; }
+  100% { transform:translate(46px,0) scale(0.6); opacity:0; }
+}
+@keyframes stu-arm-send {
+  0%,100% { transform:rotate(0deg); }
+  20%,40% { transform:rotate(-28deg); }
+}
+@keyframes stu-arm-recv {
+  0%,100% { transform:rotate(0deg); }
+  60%,80% { transform:rotate(28deg); }
+}
+
+/* ══════════════════════════════════════════════
+   TASK 4 — Stream bar pulses like live signal
+   ══════════════════════════════════════════════ */
+.stream-bar1 { animation: stream-b1 1.4s ease-in-out infinite; }
+.stream-bar2 { animation: stream-b2 1.4s ease-in-out infinite 0.2s; }
+.stream-bar3 { animation: stream-b3 1.4s ease-in-out infinite 0.4s; }
+@keyframes stream-b1 { 0%,100%{height:3px;y:26px} 50%{height:8px;y:21px} }
+@keyframes stream-b2 { 0%,100%{height:3px;y:26px} 50%{height:12px;y:17px} }
+@keyframes stream-b3 { 0%,100%{height:3px;y:26px} 50%{height:6px;y:23px} }
+.stream-signal { animation: stream-glow 1.4s ease-in-out infinite; }
+@keyframes stream-glow {
+  0%,100% { fill:#DBEAFE; }
+  50%     { fill:#BFDBFE; }
+}
+
+/* ══════════════════════════════════════════════
+   TASK 5 — Sun rises / cloud drifts
+   ══════════════════════════════════════════════ */
+.weather-sun   { animation: sun-rise 3s ease-in-out infinite; transform-origin:20px 26px; }
+.weather-cloud { animation: cloud-drift 3s ease-in-out infinite; }
+.weather-ray   { animation: ray-pulse 3s ease-in-out infinite; }
+@keyframes sun-rise {
+  0%,100% { transform:translateY(0) scale(1); }
+  50%     { transform:translateY(-3px) scale(1.06); }
+}
+@keyframes cloud-drift {
+  0%,100% { transform:translateX(0); }
+  50%     { transform:translateX(4px); }
+}
+@keyframes ray-pulse {
+  0%,100% { opacity:0.7; }
+  50%     { opacity:1; }
+}
+
+/* ══════════════════════════════════════════════
+   TASK 6 — Upload: file travels upward into cloud, progress bar
+   ══════════════════════════════════════════════ */
+.upload-file  { animation: upload-rise 2.6s ease-in-out infinite; }
+.upload-arrow { animation: upload-arrow-move 2.6s ease-in-out infinite; }
+.upload-prog  { animation: upload-fill 2.6s ease-in-out infinite; }
+.upload-cloud-fill { animation: upload-cloud-glow 2.6s ease-in-out infinite; }
+@keyframes upload-rise {
+  0%,10%  { transform:translateY(0); opacity:1; }
+  60%     { transform:translateY(-22px); opacity:0; }
+  61%,100%{ transform:translateY(0); opacity:0; }
+  /* reset */
+  0%      { opacity:1; }
+}
+@keyframes upload-arrow-move {
+  0%,100%{ transform:translateY(0); }
+  40%    { transform:translateY(-4px); }
+}
+@keyframes upload-fill {
+  0%      { width:0; }
+  50%     { width:30px; }
+  85%,95% { width:44px; }
+  100%    { width:0; }
+}
+@keyframes upload-cloud-glow {
+  0%,100%{ fill:#E2E8F0; }
+  60%    { fill:#BFDBFE; }
+}
+
+/* ══════════════════════════════════════════════
+   GLOBAL KEYFRAMES
+   ══════════════════════════════════════════════ */
+@keyframes pulse-ring {
+  0%  { transform:scale(1);    opacity:0.65; }
+  60% { transform:scale(1.04); opacity:0.18; }
+  100%{ transform:scale(1.07); opacity:0; }
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-7px)}
+  40%{transform:translateX(7px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
+}
+@keyframes pop {
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.18)}
+}
+
+@media(max-width:680px){
+  .protocol-row{grid-template-columns:repeat(2,1fr)}
+  .task-grid{grid-template-columns:repeat(2,1fr)}
+  main{padding:18px 14px 12px}
+}
+@media(max-width:420px){ .task-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="btn-back" onclick="history.back()">Back</button>
+  <h1 class="header-title">Vint Cerf <span class="highlight">Lab</span></h1>
+  <div class="header-right">
+    <div class="score-pill" id="score">Points: 0</div>
+    <button class="btn-listen" onclick="readInstructions()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+      Listen
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="section-label">Select a Protocol</div>
+  <div class="protocol-row" id="protocolRow">
+
+    <!-- TCP: shield with shackle releasing + re-locking -->
+    <div class="protocol-card" data-protocol="TCP" onclick="selectProtocol(this)">
+      <div class="protocol-anim-wrap">
+        <svg width="80" height="70" viewBox="0 0 80 70" fill="none">
+          <!-- shield -->
+          <path class="tcp-shield" d="M40 4L10 16v16c0 16 11 30 30 34 19-4 30-18 30-34V16L40 4z" fill="#DBEAFE" stroke="#3B82F6" stroke-width="2"/>
+          <!-- lock shackle (moves up/down) -->
+          <g class="tcp-shackle">
+            <path d="M31 30v-6a9 9 0 0 1 18 0v6" stroke="#3B82F6" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+          </g>
+          <!-- lock body -->
+          <g class="tcp-body">
+            <rect x="28" y="30" width="24" height="18" rx="4" fill="#3B82F6"/>
+            <circle cx="40" cy="39" r="3" fill="white"/>
+            <rect x="38.5" y="41" width="3" height="4" rx="1.5" fill="white"/>
+          </g>
+        </svg>
+      </div>
+      <div class="protocol-name">TCP</div>
+      <div class="protocol-desc">Reliable data delivery</div>
+    </div>
+
+    <!-- HTTP: person on left sends request arrow to server; server simultaneously sends response arrow back -->
+    <div class="protocol-card" data-protocol="HTTP" onclick="selectProtocol(this)">
+      <div class="protocol-anim-wrap">
+        <svg width="80" height="70" viewBox="0 0 80 70" fill="none">
+          <!-- Person (left) -->
+          <!-- head -->
+          <circle cx="12" cy="16" r="6" fill="#93C5FD"/>
+          <!-- body -->
+          <rect x="8" y="23" width="8" height="12" rx="3" fill="#3B82F6"/>
+          <!-- legs -->
+          <rect x="8" y="34" width="3" height="8" rx="1.5" fill="#3B82F6"/>
+          <rect x="13" y="34" width="3" height="8" rx="1.5" fill="#3B82F6"/>
+          <!-- arm (waves on send) -->
+          <g class="http-person-arm">
+            <rect x="16" y="27" width="9" height="3" rx="1.5" fill="#93C5FD"/>
+          </g>
+
+          <!-- Server (right) -->
+          <rect x="57" y="10" width="18" height="32" rx="4" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+          <!-- server slots -->
+          <rect x="60" y="15" width="12" height="3" rx="1.5" fill="#CBD5E1"/>
+          <rect x="60" y="21" width="12" height="3" rx="1.5" fill="#CBD5E1"/>
+          <rect x="60" y="27" width="12" height="3" rx="1.5" fill="#CBD5E1"/>
+          <!-- status light -->
+          <circle class="http-server-light" cx="63" cy="35" r="2.5" fill="#94A3B8"/>
+
+          <!-- REQUEST arrow (person → server), top lane -->
+          <line x1="26" y1="26" x2="56" y2="26" stroke="#DBEAFE" stroke-width="2" stroke-dasharray="4 3"/>
+          <line class="http-req-arrow" x1="26" y1="26" x2="56" y2="26" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- arrowhead right -->
+          <path d="M52 22.5L57 26l-5 3.5" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
+          <!-- request label -->
+          <text x="36" y="22" font-size="6" fill="#3B82F6" font-weight="700" text-anchor="middle">REQ</text>
+
+          <!-- RESPONSE arrow (server → person), bottom lane -->
+          <line x1="26" y1="38" x2="56" y2="38" stroke="#DCFCE7" stroke-width="2" stroke-dasharray="4 3"/>
+          <line class="http-res-arrow" x1="56" y1="38" x2="26" y2="38" stroke="#10B981" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- arrowhead left -->
+          <path d="M30 34.5L25 38l5 3.5" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
+          <!-- response label -->
+          <text x="40" y="34" font-size="6" fill="#10B981" font-weight="700" text-anchor="middle">RES</text>
+        </svg>
+      </div>
+      <div class="protocol-name">HTTP</div>
+      <div class="protocol-desc">Web pages and browsers</div>
+    </div>
+
+    <!-- SMTP: two persons, envelope flies between them -->
+    <div class="protocol-card" data-protocol="SMTP" onclick="selectProtocol(this)">
+      <div class="protocol-anim-wrap">
+        <svg width="80" height="70" viewBox="0 0 80 70" fill="none">
+          <!-- Left person -->
+          <g class="smtp-p-left">
+            <!-- head -->
+            <circle cx="12" cy="16" r="6" fill="#93C5FD"/>
+            <!-- body -->
+            <rect x="8" y="23" width="8" height="14" rx="3" fill="#3B82F6"/>
+            <!-- legs -->
+            <rect x="8" y="36" width="3" height="8" rx="1.5" fill="#3B82F6"/>
+            <rect x="13" y="36" width="3" height="8" rx="1.5" fill="#3B82F6"/>
+            <!-- arm reaching out -->
+            <rect x="16" y="27" width="10" height="3" rx="1.5" fill="#93C5FD"/>
+          </g>
+
+          <!-- Right person -->
+          <g class="smtp-p-right">
+            <!-- head -->
+            <circle cx="68" cy="16" r="6" fill="#C4B5FD"/>
+            <!-- body -->
+            <rect x="64" y="23" width="8" height="14" rx="3" fill="#8B5CF6"/>
+            <!-- legs -->
+            <rect x="64" y="36" width="3" height="8" rx="1.5" fill="#8B5CF6"/>
+            <rect x="69" y="36" width="3" height="8" rx="1.5" fill="#8B5CF6"/>
+            <!-- arm reaching in -->
+            <rect x="54" y="27" width="10" height="3" rx="1.5" fill="#C4B5FD"/>
+          </g>
+
+          <!-- Flying envelope -->
+          <g class="smtp-env">
+            <rect x="0" y="0" width="22" height="15" rx="3" fill="#3B82F6"/>
+            <path d="M1 1.5L11 9l11-7.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </g>
+        </svg>
+      </div>
+      <div class="protocol-name">SMTP</div>
+      <div class="protocol-desc">Sending emails</div>
+    </div>
+
+    <!-- FTP: folder + file visible + Chrome-style download progress bar -->
+    <div class="protocol-card" data-protocol="FTP" onclick="selectProtocol(this)">
+      <div class="protocol-anim-wrap">
+        <svg width="80" height="70" viewBox="0 0 80 70" fill="none">
+          <!-- Folder -->
+          <path d="M6 26a4 4 0 0 1 4-4h13l4 4h43a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V26z" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+          <path d="M6 30h68v20a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V30z" fill="#FDE68A"/>
+
+          <!-- File inside folder -->
+          <rect x="28" y="22" width="16" height="20" rx="2" fill="white" stroke="#CBD5E1" stroke-width="1.2"/>
+          <path d="M37 22v5h7" stroke="#CBD5E1" stroke-width="1" fill="none"/>
+          <path d="M37 22l7 5h-7V22z" fill="#E2E8F0"/>
+          <rect x="30" y="31" width="10" height="1.5" rx="0.7" fill="#CBD5E1"/>
+          <rect x="30" y="34" width="8" height="1.5" rx="0.7" fill="#CBD5E1"/>
+
+          <!-- Down arrow (bounces) -->
+          <g class="ftp-arrow-down">
+            <path d="M36 42v7" stroke="#92400E" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M33 46.5l3 3.5 3-3.5" stroke="#92400E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </g>
+
+          <!-- Chrome-style download bar (bottom of card) -->
+          <rect x="16" y="58" width="48" height="6" rx="3" fill="#E2E8F0"/>
+          <rect class="ftp-progress-bar" x="16" y="58" height="6" rx="3" fill="#3B82F6" width="0"/>
+          <!-- checkmark appears at end -->
+          <text class="ftp-filename" x="40" y="64" font-size="5.5" fill="#1E40AF" font-weight="700" text-anchor="middle">game.zip</text>
+        </svg>
+      </div>
+      <div class="protocol-name">FTP</div>
+      <div class="protocol-desc">Transferring files</div>
+    </div>
+  </div>
+
+  <!-- ── TASK CARDS ── -->
+  <div class="section-label">Assign the Right Protocol</div>
+  <div class="task-grid" id="taskGrid">
+
+    <!-- 1: Browser loads website — rotating globe -->
+    <div class="task-card" data-task="browser" onclick="assignProtocol(this)">
+      <div class="task-anim-wrap">
+        <svg width="72" height="64" viewBox="0 0 72 64" fill="none">
+          <circle cx="36" cy="32" r="24" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.8"/>
+          <!-- spinning longitude lines group -->
+          <g class="globe-spin">
+            <ellipse cx="36" cy="32" rx="11" ry="24" fill="none" stroke="#93C5FD" stroke-width="1.2"/>
+            <ellipse cx="36" cy="32" rx="20" ry="24" fill="none" stroke="#BFDBFE" stroke-width="0.8"/>
+          </g>
+          <!-- static latitude lines -->
+          <line x1="12" y1="32" x2="60" y2="32" stroke="#93C5FD" stroke-width="1.2"/>
+          <ellipse cx="36" cy="32" rx="24" ry="9" fill="none" stroke="#BFDBFE" stroke-width="0.8"/>
+          <ellipse cx="36" cy="32" rx="24" ry="16" fill="none" stroke="#BFDBFE" stroke-width="0.8"/>
+          <!-- outer ring -->
+          <circle cx="36" cy="32" r="24" fill="none" stroke="#3B82F6" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <div class="task-title">Browser loads website</div>
+      <div class="task-url">https://school.edu/news</div>
+    </div>
+
+    <!-- 2: Student sends mail to student -->
+    <div class="task-card" data-task="email" onclick="assignProtocol(this)">
+      <div class="task-anim-wrap">
+        <svg width="72" height="64" viewBox="0 0 72 64" fill="none">
+          <!-- Student left -->
+          <!-- head -->
+          <circle cx="10" cy="13" r="6" fill="#93C5FD"/>
+          <!-- backpack hint -->
+          <rect x="13" y="19" width="4" height="6" rx="1.5" fill="#BFDBFE"/>
+          <!-- body -->
+          <rect x="6" y="20" width="8" height="14" rx="3" fill="#3B82F6"/>
+          <!-- legs -->
+          <rect x="6" y="33" width="3" height="9" rx="1.5" fill="#3B82F6"/>
+          <rect x="11" y="33" width="3" height="9" rx="1.5" fill="#3B82F6"/>
+          <!-- send arm -->
+          <g class="stu-arm-l">
+            <rect x="14" y="25" width="10" height="3" rx="1.5" fill="#93C5FD"/>
+          </g>
+
+          <!-- Student right -->
+          <circle cx="62" cy="13" r="6" fill="#C4B5FD"/>
+          <rect x="55" y="19" width="4" height="6" rx="1.5" fill="#DDD6FE"/>
+          <rect x="58" y="20" width="8" height="14" rx="3" fill="#8B5CF6"/>
+          <rect x="58" y="33" width="3" height="9" rx="1.5" fill="#8B5CF6"/>
+          <rect x="63" y="33" width="3" height="9" rx="1.5" fill="#8B5CF6"/>
+          <g class="stu-arm-r">
+            <rect x="48" y="25" width="10" height="3" rx="1.5" fill="#C4B5FD"/>
+          </g>
+
+          <!-- Flying envelope -->
+          <g class="stu-env">
+            <rect x="0" y="0" width="20" height="14" rx="2.5" fill="#6366F1"/>
+            <path d="M1 1.5L10 8l9-6.5" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </g>
+        </svg>
+      </div>
+      <div class="task-title">Send a school email</div>
+      <div class="task-url">mailto:friend@school.edu</div>
+    </div>
+
+    <!-- 3: Download a file — same as FTP animation -->
+    <div class="task-card" data-task="download" onclick="assignProtocol(this)">
+      <div class="task-anim-wrap">
+        <svg width="72" height="64" viewBox="0 0 72 64" fill="none">
+          <!-- Folder -->
+          <path d="M4 28a4 4 0 0 1 4-4h12l4 4h40a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V28z" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5"/>
+          <path d="M4 32h64v18a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V32z" fill="#FDE68A"/>
+          <!-- File -->
+          <rect x="26" y="22" width="16" height="20" rx="2" fill="white" stroke="#CBD5E1" stroke-width="1.2"/>
+          <path d="M35 22v5h7" stroke="#CBD5E1" stroke-width="1" fill="none"/>
+          <path d="M35 22l7 5h-7V22z" fill="#E2E8F0"/>
+          <rect x="28" y="31" width="10" height="1.5" rx="0.7" fill="#CBD5E1"/>
+          <rect x="28" y="34" width="7" height="1.5" rx="0.7" fill="#CBD5E1"/>
+          <!-- down arrow -->
+          <g class="ftp-arrow-down">
+            <path d="M34 42v7" stroke="#92400E" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M31 46.5l3 3.5 3-3.5" stroke="#92400E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </g>
+          <!-- progress bar -->
+          <rect x="12" y="59" width="48" height="5" rx="2.5" fill="#E2E8F0"/>
+          <rect class="ftp-progress-bar" x="12" y="59" height="5" rx="2.5" fill="#F59E0B" width="0"/>
+          <text class="ftp-filename" x="36" y="64" font-size="5" fill="#92400E" font-weight="700" text-anchor="middle">game.zip</text>
+        </svg>
+      </div>
+      <div class="task-title">Download a file</div>
+      <div class="task-url">ftp://files.edu/game.zip</div>
+    </div>
+
+    <!-- 4: Stream reliable data — pulsing signal bars on console screen -->
+    <div class="task-card" data-task="stream" onclick="assignProtocol(this)">
+      <div class="task-anim-wrap">
+        <svg width="72" height="64" viewBox="0 0 72 64" fill="none">
+          <!-- console body -->
+          <rect x="8" y="10" width="56" height="38" rx="9" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+          <!-- screen -->
+          <rect class="stream-signal" x="14" y="16" width="30" height="22" rx="3" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+          <!-- animated signal bars -->
+          <rect class="stream-bar1" x="17" y="26" width="4" height="3" rx="1" fill="#3B82F6"/>
+          <rect class="stream-bar2" x="23" y="26" width="4" height="3" rx="1" fill="#3B82F6"/>
+          <rect class="stream-bar3" x="29" y="26" width="4" height="3" rx="1" fill="#3B82F6"/>
+          <rect class="stream-bar1" x="35" y="26" width="4" height="3" rx="1" fill="#93C5FD"/>
+          <!-- d-pad -->
+          <rect x="49" y="18" width="4" height="12" rx="2" fill="#CBD5E1"/>
+          <rect x="45" y="22" width="12" height="4" rx="2" fill="#CBD5E1"/>
+          <!-- buttons -->
+          <circle cx="54" cy="35" r="2.8" fill="#FCA5A5"/>
+          <circle cx="60" cy="30" r="2.8" fill="#FDE68A"/>
+          <!-- grips -->
+          <rect x="9" y="44" width="12" height="9" rx="5" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.2"/>
+          <rect x="51" y="44" width="12" height="9" rx="5" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="task-title">Stream reliable data</div>
+      <div class="task-url">https://192.168.1.5:443/</div>
+    </div>
+
+    <!-- 5: Visit weather page — sun rises, cloud drifts -->
+    <div class="task-card" data-task="weather" onclick="assignProtocol(this)">
+      <div class="task-anim-wrap">
+        <svg width="72" height="64" viewBox="0 0 72 64" fill="none">
+          <!-- sun rays -->
+          <g class="weather-ray" stroke="#FBBF24" stroke-width="2" stroke-linecap="round">
+            <line x1="20" y1="10" x2="20" y2="5"/>
+            <line x1="9" y1="21" x2="4" y2="21"/>
+            <line x1="12" y1="13" x2="8" y2="9"/>
+            <line x1="30" y1="10" x2="33" y2="6"/>
+            <line x1="11" y1="30" x2="7" y2="34"/>
+          </g>
+          <!-- sun -->
+          <g class="weather-sun">
+            <circle cx="20" cy="24" r="12" fill="#FDE68A" stroke="#FBBF24" stroke-width="1.3"/>
+          </g>
+          <!-- cloud -->
+          <g class="weather-cloud">
+            <circle cx="44" cy="36" r="12" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+            <circle cx="33" cy="39" r="10" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+            <circle cx="55" cy="39" r="10" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+            <rect x="23" y="39" width="40" height="12" fill="white"/>
+            <rect x="23" y="47" width="40" height="6" rx="3" fill="white"/>
+            <rect x="23" y="43" width="40" height="6" fill="white"/>
+          </g>
+        </svg>
+      </div>
+      <div class="task-title">Visit a weather page</div>
+      <div class="task-url">https://weather.com/today</div>
+    </div>
+
+    <!-- 6: Upload project files — file rises into cloud, progress bar -->
+    <div class="task-card" data-task="upload" onclick="assignProtocol(this)">
+      <div class="task-anim-wrap">
+        <svg width="72" height="64" viewBox="0 0 72 64" fill="none">
+          <!-- cloud -->
+          <circle class="upload-cloud-fill" cx="44" cy="22" r="13" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.2"/>
+          <circle class="upload-cloud-fill" cx="30" cy="25" r="11" fill="#E2E8F0" stroke="#94A3B8" stroke-width="1.2"/>
+          <rect x="19" y="25" width="40" height="13" fill="#E2E8F0"/>
+          <rect x="19" y="34" width="40" height="5" rx="3" fill="#E2E8F0"/>
+          <!-- static cloud outline overlay for clean edges -->
+          <path d="M19 38 Q19 30 30 30 Q32 20 44 20 Q56 20 57 30 Q64 30 64 38 Q64 42 57 42 H19 Q14 42 14 38 Z" fill="none" stroke="#94A3B8" stroke-width="1.2"/>
+
+          <!-- rising file -->
+          <g class="upload-file">
+            <rect x="27" y="40" width="14" height="18" rx="2" fill="white" stroke="#CBD5E1" stroke-width="1.2"/>
+            <path d="M34 40v5h7" stroke="#CBD5E1" stroke-width="1" fill="none"/>
+            <path d="M34 40l7 5h-7V40z" fill="#E2E8F0"/>
+            <rect x="29" y="49" width="8" height="1.5" rx="0.7" fill="#CBD5E1"/>
+            <rect x="29" y="52" width="6" height="1.5" rx="0.7" fill="#CBD5E1"/>
+          </g>
+
+          <!-- up arrow that also moves -->
+          <g class="upload-arrow">
+            <path d="M36 40v-8" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M33 35l3-4 3 4" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </g>
+
+          <!-- progress bar (upload progress) -->
+          <rect x="12" y="59" width="48" height="5" rx="2.5" fill="#E2E8F0"/>
+          <rect class="upload-prog" x="12" y="59" height="5" rx="2.5" fill="#3B82F6" width="0"/>
+        </svg>
+      </div>
+      <div class="task-title">Upload project files</div>
+      <div class="task-url">ftp://server.edu/upload/</div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Think about what is happening and choose the protocol that makes it possible!
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<div class="win-banner" id="winBanner">
+  <svg width="76" height="76" viewBox="0 0 76 76" fill="none">
+    <circle cx="38" cy="38" r="36" fill="#FBBF24" stroke="#F59E0B" stroke-width="2"/>
+    <path d="M22 38l10 10 22-22" stroke="#78350F" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+  <h2>All Protocols Matched!</h2>
+  <p id="finalScore">You scored 60 points. Excellent work!</p>
+  <button onclick="resetGame()">Play Again</button>
+</div>
+
+<script>
+const ANSWERS = { browser:'HTTP', email:'SMTP', download:'FTP', stream:'TCP', weather:'HTTP', upload:'FTP' };
+let selectedProtocol=null, points=0, solvedCount=0;
+const TOTAL=Object.keys(ANSWERS).length;
+let audioCtx;
+function getACtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function playChime(){
+  try{const c=getACtx();[523,659,784].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=f;o.type='sine';const s=c.currentTime+i*0.12;g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(0.16,s+0.04);g.gain.exponentialRampToValueAtTime(0.001,s+0.34);o.start(s);o.stop(s+0.38);});}catch(e){}
+}
+function playBuzz(){
+  try{const c=getACtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=140;o.type='sawtooth';g.gain.setValueAtTime(0.1,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.24);o.start();o.stop(c.currentTime+0.27);}catch(e){}
+}
+function selectProtocol(card){
+  document.querySelectorAll('.protocol-card').forEach(c=>c.classList.remove('active'));
+  card.classList.add('active');
+  selectedProtocol=card.dataset.protocol;
+  showToast(selectedProtocol+' selected — now click a task card!');
+}
+function assignProtocol(card){
+  if(!selectedProtocol){showToast('Pick a protocol card first!');return;}
+  if(card.classList.contains('solved'))return;
+  const task=card.dataset.task;
+  if(selectedProtocol===ANSWERS[task]){
+    card.classList.add('correct-flash','solved');
+    points+=10;solvedCount++;updateScore();playChime();
+    showToast('+10 points!  '+selectedProtocol+' is the right match.');
+    setTimeout(()=>{card.classList.remove('correct-flash');card.style.borderColor='var(--green)';card.style.background='var(--green-bg)';card.style.opacity='0.55';},820);
+    if(solvedCount===TOTAL)setTimeout(showWin,900);
+  } else {
+    card.classList.add('wrong-flash');playBuzz();
+    showToast('Not quite — try a different protocol!');
+    setTimeout(()=>card.classList.remove('wrong-flash'),480);
+  }
+}
+function updateScore(){const el=document.getElementById('score');el.textContent='Points: '+points;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500);}
+function showWin(){document.getElementById('finalScore').textContent='You scored '+points+' points — protocol expert!';document.getElementById('winBanner').classList.add('show');}
+function resetGame(){
+  points=0;solvedCount=0;selectedProtocol=null;
+  document.getElementById('score').textContent='Points: 0';
+  document.getElementById('winBanner').classList.remove('show');
+  document.querySelectorAll('.protocol-card').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.task-card').forEach(c=>{c.classList.remove('solved','correct-flash','wrong-flash');c.style.borderColor=c.style.background=c.style.opacity='';});
+}
+function readInstructions(){
+  if('speechSynthesis'in window){
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance('Welcome to Vint Cerf Lab! Select a protocol from the top row, then click a task card to match it. TCP handles streaming reliable data. HTTP loads web pages. SMTP sends emails. FTP transfers files. Earn ten points per correct match!');
+    u.rate=0.92;window.speechSynthesis.speak(u);
+  } else showToast('Speech not supported in this browser.');
+}
+</script>
+</body>
+</html>

@@ -1,141 +1,437 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Code History Timeline – A Time-Travel Adventure</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="game.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code History Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#F0F0F0;min-height:100vh;padding:16px;display:flex;justify-content:center;}
+.inner{width:100%;max-width:720px;display:flex;flex-direction:column;gap:14px;}
+.hdr{background:#fff;border-radius:20px;padding:16px 18px;border:1px solid #e0e0e0;display:flex;align-items:center;gap:12px;}
+.hdr-title{font-family:'Baloo 2',sans-serif;font-size:clamp(18px,4vw,24px);font-weight:800;color:#2d2a26;line-height:1.15;}
+.hdr-sub{font-size:12px;font-weight:700;color:#888;margin-top:2px;}
+#tl{display:flex;flex-direction:column;gap:10px;}
+.tl-card{background:#fff;border-radius:18px;padding:12px 14px;border:2px solid transparent;display:flex;align-items:center;gap:12px;transition:border-color .3s ease,box-shadow .3s ease;}
+.tl-card.correct{border-color:#4CAF7D;box-shadow:0 0 0 3px rgba(76,175,125,.15);}
+.ybadge{flex-shrink:0;width:60px;height:60px;border-radius:14px;background:#FFC83D;color:#2d2a26;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;transition:background .3s;}
+.tl-card.correct .ybadge{background:#4CAF7D;color:#fff;}
+.illus{flex-shrink:0;width:64px;height:64px;}
+.illus svg{width:100%;height:100%;overflow:visible;}
+.txt{flex:1;min-width:0;}
+.tl-ttl{font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:700;color:#2d2a26;line-height:1.2;}
+.tl-dsc{font-size:12px;color:#666;font-weight:600;margin-top:2px;line-height:1.4;}
+.arrows{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+.abtn{width:36px;height:30px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;color:#2d2a26;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .15s;}
+.abtn:active:not(:disabled){transform:scale(.88);}
+.abtn:disabled{opacity:.3;cursor:default;}
+.abtn:hover:not(:disabled){background:#FFC83D;}
+
+/* Header buttons */
+.hdr{position:relative;}
+.hdr-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+.btn-back{width:42px;height:42px;border-radius:50%;background:#FFC83D;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s,background .2s;font-size:18px;}
+.btn-back:hover{background:#f0b800;transform:scale(1.08);}
+.btn-back:active{transform:scale(.92);}
+.btn-listen{width:42px;height:42px;border-radius:50%;background:#f0f0f0;border:2px solid #e0e0e0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s,background .2s,border-color .2s;font-size:18px;position:relative;}
+.btn-listen:hover{background:#e8e8e8;}
+.btn-listen:active{transform:scale(.92);}
+.btn-listen.listening{background:#ff4757;border-color:#ff4757;animation:listenPulse .8s ease-in-out infinite;}
+@keyframes listenPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 8px rgba(255,71,87,0)}}
+
+/* Speech toast */
+.speech-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#2d2a26;color:#fff;padding:10px 20px;border-radius:50px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;opacity:0;transition:opacity .3s,transform .3s;z-index:500;pointer-events:none;white-space:nowrap;}
+.speech-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Modal */
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(20,20,30,.5);align-items:center;justify-content:center;z-index:999;padding:20px;}
+.modal-wrap.open{display:flex;}
+.modal-box{background:#fff;border-radius:22px;padding:28px 24px;max-width:340px;width:100%;text-align:center;border:1px solid #eee;animation:popIn .3s cubic-bezier(.175,.885,.32,1.275) forwards;}
+@keyframes popIn{from{transform:scale(.85);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal-trophy{font-size:52px;margin-bottom:8px;}
+.modal-title{font-family:'Baloo 2',sans-serif;font-size:22px;font-weight:800;color:#2d2a26;}
+.modal-sub{font-size:13px;font-weight:600;color:#666;margin:8px 0 18px;line-height:1.5;}
+.btn-again{background:#4CAF7D;color:#fff;border:none;border-radius:50px;padding:12px 28px;font-weight:800;font-size:14px;cursor:pointer;font-family:'Nunito',sans-serif;transition:transform .15s ease;}
+.btn-again:active{transform:scale(.95);}
+.confetti-canvas{position:fixed;pointer-events:none;top:0;left:0;width:100%;height:100%;z-index:1000;}
+
+/* ── SVG Animations ───────────────────────── */
+
+/* ENIAC: panel flicker */
+@keyframes eniacFlicker{0%,100%{opacity:1}50%{opacity:.85}}
+.eniac-panel{animation:eniacFlicker 2.4s ease-in-out infinite;}
+.eniac-panel:nth-child(2){animation-delay:.6s;}
+.eniac-panel:nth-child(3){animation-delay:1.2s;}
+.eniac-panel:nth-child(4){animation-delay:1.8s;}
+
+/* IC: pins pulse, dots grow */
+@keyframes pinWiggle{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.12)}}
+.ic-pin{transform-origin:center;animation:pinWiggle 1.8s ease-in-out infinite;}
+.ic-pin:nth-child(odd){animation-delay:.4s;}
+@keyframes dotPulse{0%,100%{r:2.6}50%{r:3.6}}
+.ic-dot{animation:dotPulse 1.4s ease-in-out infinite;}
+.ic-dot:nth-child(2){animation-delay:.35s;}
+.ic-dot:nth-child(3){animation-delay:.7s;}
+.ic-dot:nth-child(4){animation-delay:1.05s;}
+
+/* UNIX: cursor blinks */
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.unix-cursor{animation:blink .9s step-end infinite;}
+
+/* IBM PC: lines type in */
+@keyframes typeIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0% 0 0)}}
+.ibm-line1{animation:typeIn 1.2s steps(10,end) infinite alternate;}
+.ibm-line2{animation:typeIn 1.6s steps(10,end) .4s infinite alternate;}
+.ibm-line3{animation:typeIn 1s steps(8,end) .8s infinite alternate;}
+
+/* WWW: globe spins, nodes orbit */
+@keyframes globeSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.www-lines{transform-origin:50px 50px;animation:globeSpin 8s linear infinite;}
+@keyframes orbitNode{from{transform:rotate(0deg) translateX(34px) rotate(0deg)}to{transform:rotate(360deg) translateX(34px) rotate(-360deg)}}
+.www-node1{transform-origin:50px 50px;animation:orbitNode 4s linear infinite;}
+.www-node2{transform-origin:50px 50px;animation:orbitNode 4s linear -1s infinite;}
+.www-node3{transform-origin:50px 50px;animation:orbitNode 4s linear -2s infinite;}
+.www-node4{transform-origin:50px 50px;animation:orbitNode 4s linear -3s infinite;}
+
+/* iPhone: apps appear, screen glows */
+@keyframes appAppear{0%,60%{opacity:0;transform:scale(.6)}80%,100%{opacity:1;transform:scale(1)}}
+.iph-app1{animation:appAppear 2.4s ease .2s infinite;}
+.iph-app2{animation:appAppear 2.4s ease .7s infinite;}
+.iph-app3{animation:appAppear 2.4s ease 1.2s infinite;}
+@keyframes screenGlow{0%,100%{opacity:.9}50%{opacity:1}}
+.iph-screen{animation:screenGlow 2s ease-in-out infinite;}
+</style>
 </head>
 <body>
-  <!-- Floating background decorations -->
-  <div class="sky">
-    <div class="cloud cloud-1"></div>
-    <div class="cloud cloud-2"></div>
-    <div class="cloud cloud-3"></div>
-    <div class="cloud cloud-4"></div>
-    <div class="star star-1">★</div>
-    <div class="star star-2">✦</div>
-    <div class="star star-3">✧</div>
-    <div class="star star-4">★</div>
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
-    <div class="bubble bubble-3"></div>
+<div class="inner">
+  <div class="hdr">
+    <div class="hdr-left">
+      <button class="btn-back" onclick="window.history.back()" title="Go back">&#8592;</button>
+      <div>
+        <div class="hdr-title">Code History Timeline</div>
+        <div class="hdr-sub">Arrange the computing milestones in chronological order</div>
+      </div>
+    </div>
+    <button class="btn-listen" id="btn-listen" onclick="toggleListen()" title="Listen to descriptions">🎙️</button>
   </div>
+  <div class="speech-toast" id="speech-toast"></div>
+  <div id="tl"></div>
+</div>
 
-  <main class="game-shell" data-testid="game-shell">
-    <!-- Header -->
-    <header class="game-header">
-      <div class="title-wrap">
-        <h1 class="game-title" data-testid="game-title">
-          <span class="t-emoji">⏳</span>
-          Code History
-          <span class="t-accent">Timeline</span>
-        </h1>
-        <p class="game-subtitle">Drag the computer milestones into the right order — earliest to latest!</p>
+<div class="modal-wrap" id="modal">
+  <div class="modal-box">
+    <div class="modal-trophy">🏆</div>
+    <div class="modal-title">Timeline Complete!</div>
+    <div class="modal-sub">You arranged all 6 computing milestones in the correct chronological order. Brilliant!</div>
+    <button class="btn-again" onclick="restart()">Shuffle &amp; Try Again</button>
+  </div>
+</div>
+<canvas class="confetti-canvas" id="confetti"></canvas>
+
+<script>
+const ILLUS = {
+  eniac: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="15" width="84" height="68" rx="8" fill="#90A4AE"/>
+    <rect class="eniac-panel" x="14" y="22" width="18" height="26" rx="3" fill="#CFD8DC"/>
+    <rect class="eniac-panel" x="35" y="22" width="18" height="26" rx="3" fill="#CFD8DC"/>
+    <rect class="eniac-panel" x="56" y="22" width="18" height="26" rx="3" fill="#CFD8DC"/>
+    <rect x="14" y="52" width="72" height="5" rx="2" fill="#78909C"/>
+    <circle class="eniac-light" id="el0" cx="24" cy="66" r="6" fill="#555"/>
+    <circle class="eniac-light" id="el1" cx="40" cy="66" r="6" fill="#555"/>
+    <circle class="eniac-light" id="el2" cx="56" cy="66" r="6" fill="#555"/>
+    <circle class="eniac-light" id="el3" cx="72" cy="66" r="6" fill="#555"/>
+    <rect x="8" y="78" width="84" height="5" rx="2" fill="#607D8B"/>
+  </svg>`,
+
+  ic: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="28" y="28" width="44" height="44" rx="6" fill="#4CAF7D"/>
+    <rect x="37" y="37" width="26" height="26" rx="4" fill="#DFF3E8"/>
+    <circle class="ic-dot" cx="44" cy="44" r="2.6" fill="#2d2a26"/>
+    <circle class="ic-dot" cx="56" cy="44" r="2.6" fill="#2d2a26"/>
+    <circle class="ic-dot" cx="44" cy="56" r="2.6" fill="#2d2a26"/>
+    <circle class="ic-dot" cx="56" cy="56" r="2.6" fill="#2d2a26"/>
+    <line class="ic-pin" x1="28" y1="36" x2="14" y2="36" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="28" y1="50" x2="14" y2="50" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="28" y1="64" x2="14" y2="64" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="72" y1="36" x2="86" y2="36" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="72" y1="50" x2="86" y2="50" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="72" y1="64" x2="86" y2="64" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="36" y1="28" x2="36" y2="14" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="50" y1="28" x2="50" y2="14" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="64" y1="28" x2="64" y2="14" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="36" y1="72" x2="36" y2="86" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="50" y1="72" x2="50" y2="86" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+    <line class="ic-pin" x1="64" y1="72" x2="64" y2="86" stroke="#37474F" stroke-width="3" stroke-linecap="round"/>
+  </svg>`,
+
+  unix: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="12" y="18" width="76" height="52" rx="6" fill="#37474F"/>
+    <rect x="19" y="26" width="62" height="36" rx="3" fill="#1B1F22"/>
+    <text x="25" y="44" font-size="11" fill="#4CAF7D" font-family="monospace">$ ls -la</text>
+    <text x="25" y="56" font-size="11" fill="#8BC34A" font-family="monospace">drwxr-xr-x</text>
+    <text class="unix-cursor" x="25" y="68" font-size="11" fill="#4CAF7D" font-family="monospace">█</text>
+    <rect x="38" y="70" width="24" height="8" rx="3" fill="#90A4AE"/>
+    <rect x="26" y="78" width="48" height="8" rx="3" fill="#78909C"/>
+  </svg>`,
+
+  ibmpc: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="16" y="12" width="68" height="48" rx="6" fill="#4F8EF7"/>
+    <rect x="23" y="19" width="54" height="34" rx="3" fill="#D8EBFF"/>
+    <line class="ibm-line1" x1="29" y1="28" x2="71" y2="28" stroke="#4F8EF7" stroke-width="3" stroke-linecap="round"/>
+    <line class="ibm-line2" x1="29" y1="37" x2="63" y2="37" stroke="#4F8EF7" stroke-width="3" stroke-linecap="round"/>
+    <line class="ibm-line3" x1="29" y1="46" x2="55" y2="46" stroke="#4F8EF7" stroke-width="3" stroke-linecap="round"/>
+    <rect x="38" y="60" width="24" height="8" rx="2" fill="#90A4AE"/>
+    <rect x="26" y="68" width="48" height="20" rx="3" fill="#FFC83D"/>
+    <rect x="32" y="75" width="14" height="5" rx="2" fill="#fff"/>
+    <rect x="54" y="75" width="14" height="5" rx="2" fill="#fff"/>
+  </svg>`,
+
+  www: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="34" fill="#4F8EF7"/>
+    <g class="www-lines">
+      <ellipse cx="50" cy="50" rx="34" ry="15" fill="none" stroke="#D8EBFF" stroke-width="2"/>
+      <ellipse cx="50" cy="50" rx="15" ry="34" fill="none" stroke="#D8EBFF" stroke-width="2"/>
+      <line x1="16" y1="50" x2="84" y2="50" stroke="#D8EBFF" stroke-width="2"/>
+      <line x1="50" y1="16" x2="50" y2="84" stroke="#D8EBFF" stroke-width="2"/>
+    </g>
+    <circle class="www-node1" cx="50" cy="16" r="5" fill="#FFC83D"/>
+    <circle class="www-node2" cx="50" cy="16" r="5" fill="#FF8A5B"/>
+    <circle class="www-node3" cx="50" cy="16" r="5" fill="#4CAF7D"/>
+    <circle class="www-node4" cx="50" cy="16" r="5" fill="#fff"/>
+  </svg>`,
+
+  iphone: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="28" y="6" width="44" height="88" rx="13" fill="#37474F"/>
+    <rect class="iph-screen" x="34" y="16" width="32" height="64" rx="3" fill="#D8EBFF"/>
+    <rect x="43" y="8" width="14" height="3" rx="1.5" fill="#546E7A"/>
+    <rect class="iph-app1" x="38" y="22" width="12" height="12" rx="3" fill="#4F8EF7"/>
+    <rect class="iph-app2" x="38" y="38" width="12" height="12" rx="3" fill="#FFC83D"/>
+    <rect class="iph-app3" x="38" y="54" width="12" height="12" rx="3" fill="#4CAF7D"/>
+    <circle cx="50" cy="89" r="4.5" fill="#546E7A"/>
+  </svg>`
+};
+
+const MILESTONES = [
+  {id:'eniac', year:1945, title:'ENIAC', desc:"One of the world's first general-purpose electronic computers."},
+  {id:'ic', year:1958, title:'Integrated Circuit', desc:'A tiny chip that made modern computers possible.'},
+  {id:'unix', year:1969, title:'UNIX Operating System', desc:'An operating system that influenced many modern systems.'},
+  {id:'ibmpc', year:1981, title:'IBM Personal Computer', desc:'Helped bring computers into homes and offices.'},
+  {id:'www', year:1991, title:'World Wide Web', desc:'Made it possible to browse websites across the internet.'},
+  {id:'iphone', year:2007, title:'iPhone', desc:'Combined phone, internet, and computing into one device.'},
+];
+
+let order = [], eniacTimer = null;
+
+function shuffledOrder() {
+  const ids = MILESTONES.map(m => m.id);
+  let arr = [...ids];
+  do {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  } while (arr.every((id, i) => id === ids[i]));
+  return arr;
+}
+
+function init() {
+  order = shuffledOrder();
+  document.getElementById('modal').classList.remove('open');
+  render();
+}
+
+function startEniacLights() {
+  if (eniacTimer) clearInterval(eniacTimer);
+  const colors = ['#FF8A5B', '#FFC83D', '#4CAF7D', '#4F8EF7'];
+  let step = 0;
+  function tick() {
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById('el' + i);
+      if (el) el.style.fill = i <= step ? colors[i] : '#555';
+    }
+    step = (step + 1) % 5;
+  }
+  tick();
+  eniacTimer = setInterval(tick, 500);
+}
+
+function render() {
+  if (eniacTimer) { clearInterval(eniacTimer); eniacTimer = null; }
+  const list = document.getElementById('tl');
+  list.innerHTML = '';
+  const allCorrect = order.every((id, i) => id === MILESTONES[i].id);
+
+  order.forEach((id, idx) => {
+    const m = MILESTONES.find(x => x.id === id);
+    const isCorrect = id === MILESTONES[idx].id;
+    const card = document.createElement('div');
+    card.className = 'tl-card' + (isCorrect ? ' correct' : '');
+    card.innerHTML = `
+      <div class="ybadge">${m.year}</div>
+      <div class="illus">${ILLUS[m.id]}</div>
+      <div class="txt">
+        <div class="tl-ttl">${m.title}</div>
+        <div class="tl-dsc">${m.desc}</div>
       </div>
+      ${allCorrect ? '' : `<div class="arrows">
+        <button class="abtn" ${idx === 0 ? 'disabled' : ''} onclick="move(${idx},-1)">▲</button>
+        <button class="abtn" ${idx === order.length - 1 ? 'disabled' : ''} onclick="move(${idx},1)">▼</button>
+      </div>`}
+    `;
+    list.appendChild(card);
+  });
 
-      <div class="controls">
-        <div class="score-pill" data-testid="score-pill">
-          <span class="score-label">Score</span>
-          <span class="score-value" id="score">0</span>
-        </div>
-        <button class="btn btn-primary" id="checkBtn" data-testid="check-btn">
-          <span>✨</span> Check Answers
-        </button>
-        <button class="btn btn-ghost" id="soundBtn" data-testid="sound-btn" title="Toggle sound">
-          <span id="soundIcon">🔊</span>
-        </button>
-      </div>
-    </header>
+  startEniacLights();
 
-    <!-- Timeline slots -->
-    <section class="timeline-section" data-testid="timeline-section">
-      <div class="timeline-labels">
-        <span class="t-label oldest">⬅ Oldest</span>
-        <span class="t-label newest">Newest ➡</span>
-      </div>
-      <div class="timeline-track" id="timelineTrack">
-        <div class="track-line"></div>
-        <!-- 6 slots get injected here -->
-      </div>
-    </section>
+  if (allCorrect) {
+    setTimeout(() => {
+      document.getElementById('modal').classList.add('open');
+      launchConfetti();
+    }, 700);
+  }
+}
 
-    <!-- Card pool -->
-    <section class="pool-section">
-      <h2 class="pool-title">🎴 Pick up the cards & drop them in order!</h2>
-      <div class="card-pool" id="cardPool" data-testid="card-pool"></div>
-    </section>
+function move(idx, dir) {
+  const t = idx + dir;
+  if (t < 0 || t >= order.length) return;
+  [order[idx], order[t]] = [order[t], order[idx]];
+  render();
+}
 
-    <!-- Superhero hint helper -->
-    <div class="hero-corner" data-testid="hero-corner">
-      <div class="speech-bubble" id="speechBubble" data-testid="speech-bubble">
-        <p id="speechText">Hi! I'm <strong>Captain Code</strong> 🦸 Drag the cards onto the timeline. I'll help if you get stuck!</p>
-        <span class="bubble-tail"></span>
-      </div>
-      <div class="hero" id="hero" data-testid="hero">
-        <!-- SVG superhero -->
-        <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
-          <!-- Cape -->
-          <path d="M55 110 Q30 160 50 220 L100 180 L150 220 Q170 160 145 110 Z" fill="#ef4444" stroke="#7f1d1d" stroke-width="3"/>
-          <path d="M55 110 Q30 160 50 220 L100 180 L150 220 Q170 160 145 110 Z" fill="url(#capeGrad)" opacity="0.4"/>
-          <!-- Body -->
-          <rect x="65" y="105" width="70" height="80" rx="14" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/>
-          <!-- Belt -->
-          <rect x="65" y="158" width="70" height="12" fill="#fbbf24" stroke="#92400e" stroke-width="2"/>
-          <!-- Star on chest -->
-          <polygon points="100,118 106,134 122,134 109,144 114,160 100,150 86,160 91,144 78,134 94,134" fill="#fde047" stroke="#a16207" stroke-width="2"/>
-          <!-- Arms -->
-          <rect x="48" y="110" width="20" height="50" rx="10" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/>
-          <rect x="132" y="110" width="20" height="50" rx="10" fill="#3b82f6" stroke="#1e3a8a" stroke-width="3"/>
-          <!-- Hands -->
-          <circle cx="58" cy="168" r="11" fill="#fcd5b5" stroke="#7c2d12" stroke-width="2"/>
-          <circle cx="142" cy="168" r="11" fill="#fcd5b5" stroke="#7c2d12" stroke-width="2"/>
-          <!-- Legs -->
-          <rect x="72" y="183" width="22" height="40" rx="8" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
-          <rect x="106" y="183" width="22" height="40" rx="8" fill="#1e40af" stroke="#1e3a8a" stroke-width="3"/>
-          <!-- Boots -->
-          <ellipse cx="83" cy="225" rx="14" ry="6" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
-          <ellipse cx="117" cy="225" rx="14" ry="6" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
-          <!-- Head -->
-          <circle cx="100" cy="75" r="34" fill="#fcd5b5" stroke="#7c2d12" stroke-width="3"/>
-          <!-- Hair -->
-          <path d="M68 65 Q75 38 100 40 Q125 38 132 65 Q120 55 100 58 Q80 55 68 65 Z" fill="#1f2937"/>
-          <!-- Mask -->
-          <path d="M70 70 Q70 60 80 60 L120 60 Q130 60 130 70 L130 82 Q120 88 100 84 Q80 88 70 82 Z" fill="#1e3a8a" stroke="#0f172a" stroke-width="2"/>
-          <!-- Eyes -->
-          <circle cx="88" cy="74" r="4" fill="#fff"/>
-          <circle cx="112" cy="74" r="4" fill="#fff"/>
-          <circle cx="89" cy="75" r="2" fill="#0f172a"/>
-          <circle cx="113" cy="75" r="2" fill="#0f172a"/>
-          <!-- Smile -->
-          <path d="M88 95 Q100 102 112 95" stroke="#7c2d12" stroke-width="3" fill="none" stroke-linecap="round"/>
-          <!-- Cheeks -->
-          <circle cx="78" cy="92" r="4" fill="#fda4af" opacity="0.7"/>
-          <circle cx="122" cy="92" r="4" fill="#fda4af" opacity="0.7"/>
-          <defs>
-            <linearGradient id="capeGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#fff" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-    </div>
+function restart() {
+  document.getElementById('modal').classList.remove('open');
+  stopConfetti();
+  init();
+}
 
-    <!-- Win modal -->
-    <div class="modal-backdrop hidden" id="winModal" data-testid="win-modal">
-      <div class="modal">
-        <div class="modal-emoji">🎉</div>
-        <h2 class="modal-title">You did it!</h2>
-        <p class="modal-text" id="modalText">Brilliant work, time-traveler! You got every event in the right order.</p>
-        <div class="modal-score" id="finalScore">+600 pts</div>
-      </div>
-    </div>
+/* ── Confetti ─────────────────────────────────── */
+let cAnim = null, cParts = [];
 
-    <!-- Confetti canvas -->
-    <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
-  </main>
+function launchConfetti() {
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cParts = [];
+  const colors = ['#FFC83D', '#4CAF7D', '#4F8EF7', '#FF8A5B', '#e96fff', '#fff'];
+  for (let i = 0; i < 140; i++) {
+    cParts.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * -canvas.height * 0.5,
+      w: Math.random() * 10 + 5,
+      h: Math.random() * 5 + 3,
+      r: Math.random() * Math.PI * 2,
+      dr: Math.random() * 0.2 - 0.1,
+      vx: Math.random() * 2 - 1,
+      vy: Math.random() * 3 + 2,
+      c: colors[Math.floor(Math.random() * colors.length)],
+      op: 1
+    });
+  }
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    cParts.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.op;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.r += p.dr;
+      if (p.y > canvas.height * 0.7) p.op -= 0.015;
+    });
+    cParts = cParts.filter(p => p.op > 0);
+    if (cParts.length > 0) cAnim = requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
 
-  <script src="game.js"></script>
+function stopConfetti() {
+  if (cAnim) { cancelAnimationFrame(cAnim); cAnim = null; }
+  const c = document.getElementById('confetti');
+  c.getContext('2d').clearRect(0, 0, c.width, c.height);
+}
+
+/* ── Speech API ───────────────────────────────── */
+let isListening = false;
+let synth = window.speechSynthesis;
+let speakQueue = [];
+let isSpeaking = false;
+
+function showToast(msg, duration = 2800) {
+  const t = document.getElementById('speech-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function speakNext() {
+  if (!speakQueue.length) { isSpeaking = false; return; }
+  isSpeaking = true;
+  const utt = new SpeechSynthesisUtterance(speakQueue.shift());
+  utt.rate = 0.95;
+  utt.pitch = 1;
+  utt.onend = speakNext;
+  utt.onerror = speakNext;
+  synth.speak(utt);
+}
+
+function speakAll() {
+  synth.cancel();
+  speakQueue = [];
+  order.forEach((id, idx) => {
+    const m = MILESTONES.find(x => x.id === id);
+    speakQueue.push(`Position ${idx + 1}: ${m.title}, from ${m.year}. ${m.desc}`);
+  });
+  speakNext();
+  showToast('🔊 Reading timeline aloud…', 60000);
+}
+
+function stopSpeech() {
+  synth.cancel();
+  speakQueue = [];
+  isSpeaking = false;
+  showToast('🔇 Stopped');
+}
+
+function toggleListen() {
+  const btn = document.getElementById('btn-listen');
+  if (!('speechSynthesis' in window)) {
+    showToast('❌ Speech not supported in this browser');
+    return;
+  }
+  if (isSpeaking) {
+    isListening = false;
+    btn.classList.remove('listening');
+    btn.title = 'Listen to descriptions';
+    btn.textContent = '🎙️';
+    stopSpeech();
+  } else {
+    isListening = true;
+    btn.classList.add('listening');
+    btn.title = 'Stop listening';
+    btn.textContent = '🔊';
+    speakAll();
+  }
+}
+
+// Auto-stop listen state when speech ends naturally
+setInterval(() => {
+  if (isListening && !synth.speaking && !speakQueue.length) {
+    isListening = false;
+    isSpeaking = false;
+    const btn = document.getElementById('btn-listen');
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎙️'; btn.title = 'Listen to descriptions'; }
+    document.getElementById('speech-toast').classList.remove('show');
+  }
+}, 500);
+
+init();
+</script>
 </body>
 </html>
