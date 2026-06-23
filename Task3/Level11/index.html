@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Drone Diagnostics</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #7ecafb 0%, #bde4ff 60%, #9be244 100%);
+            --panel-blue: #2374cc;
+            --panel-bg: #2a82ea;
+            --slider-track: #e0e7ff;
+            
+            --front-left-color: #3ca2f4;
+            --front-right-color: #59cd39;
+            --rear-left-color: #964bf5;
+            --rear-right-color: #ff8200;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Layout */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            gap: 10px;
+        }
+
+        .btn-back {
+            background: white;
+            border: 3px solid #b3d1ff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2374cc;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b3d1ff;
+            transition: all 0.1s ease;
+            white-space: nowrap;
+        }
+        .btn-back:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #b3d1ff;
+        }
+
+        .title-container {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .main-title {
+            font-size: clamp(24px, 4vw, 36px);
+            color: white;
+            margin: 0;
+            font-weight: 900;
+            text-shadow: 0 4px 0 #1b5ba3, 0 4px 10px rgba(0,0,0,0.2);
+            -webkit-text-stroke: 1px #1b5ba3;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #1b5ba3;
+            margin: 3px 0 0 0;
+            font-weight: bold;
+        }
+
+        .btn-listen {
+            background: #ffcc00;
+            border: 3px solid #d4aa00;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #4a3c00;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #d4aa00;
+            white-space: nowrap;
+        }
+
+        /* Responsive Grid Workspace */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Diagnostic Blueprint Panel */
+        .blueprint-panel {
+            background: var(--panel-bg);
+            border: 4px solid var(--panel-blue);
+            border-radius: 24px;
+            position: relative;
+            height: 420px;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.15);
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+            perspective: 800px;
+        }
+
+        .telemetry-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #39cd49;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .telemetry-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        /* 2D Drone Model Container */
+        .drone-display-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .drone-model {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
+        }
+
+        .drone-chassis {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: #eef2f7;
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2), inset -5px -5px 10px rgba(0,0,0,0.1);
+            border: 4px solid #ccd1d9;
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .drone-lens {
+            width: 50px;
+            height: 50px;
+            background: #111;
+            border-radius: 50%;
+            border: 5px solid #656d78;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .drone-glare {
+            width: 24px;
+            height: 24px;
+            background: #4cd964;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #4cd964;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .drone-arm {
+            position: absolute;
+            width: 160px;
+            height: 16px;
+            background: #aab2bd;
+            border: 3px solid #656d78;
+            top: 62px;
+            left: -10px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        .drone-arm.arm-1 { transform: rotate(45deg); }
+        .drone-arm.arm-2 { transform: rotate(-45deg); }
+
+        .rotor {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            z-index: 4;
+        }
+        .rotor-motor {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 20px;
+            height: 20px;
+            background: #434a54;
+            border-radius: 50%;
+            border: 2px solid #111;
+        }
+        .propeller {
+            position: absolute;
+            top: 22px;
+            left: -15px;
+            width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(255,255,255,0.8);
+            transform-origin: center center;
+            animation: spin linear infinite;
+            animation-duration: 0s;
+            transition: animation-duration 0.3s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .rotor.fl { top: -25px; left: -25px; }
+        .rotor.fr { top: -25px; left: 115px; }
+        .rotor.rl { top: 115px; left: -25px; }
+        .rotor.rr { top: 115px; left: 115px; }
+
+        .status-node {
+            position: absolute;
+            width: 75px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            z-index: 5;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .status-node .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 4px auto;
+            border: 2px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            font-size: 18px;
+            /* Added smooth rotation transition for the hamburger layout */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .status-node .percentage-pill {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 10px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .status-node.fl { top: 20px; left: 20px; --accent: var(--front-left-color); }
+        .status-node.fr { top: 20px; right: 20px; --accent: var(--front-right-color); }
+        .status-node.rl { bottom: 20px; left: 20px; --accent: var(--rear-left-color); }
+        .status-node.rr { bottom: 20px; right: 20px; --accent: var(--rear-right-color); }
+
+        .status-node .icon-circle { background: var(--accent); }
+
+        /* Right Control Panel */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .mission-card {
+            background: #e1f7e7;
+            border: 3px solid #a3e4b4;
+            border-radius: 20px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.4s ease;
+            min-height: 95px;
+        }
+
+        .mission-card.mission-2-active {
+            background: #ffeeda;
+            border-color: #ffcc99;
+        }
+
+        .mission-badge {
+            background: #ffcc00;
+            color: #4a3c00;
+            font-weight: 800;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            align-self: flex-start;
+        }
+
+        .mission-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e5a2e;
+            margin: 6px 0 4px 0;
+            text-transform: uppercase;
+        }
+        .mission-card.mission-2-active .mission-title {
+            color: #804000;
+        }
+
+        .mission-desc {
+            font-size: 13px;
+            color: #437c53;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .mission-card.mission-2-active .mission-desc {
+            color: #995c1a;
+        }
+
+        /* Sliders Panel Container */
+        .sliders-card {
+            background: white;
+            border-radius: 24px;
+            padding: 15px 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+            /* Added smooth rotation transition for right sliders context */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slider-label-spec {
+            width: 80px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #656d78;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .slider-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .modern-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 6px;
+            background: var(--slider-track);
+            outline: none;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .modern-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #2374cc;
+            cursor: pointer;
+            border: 4px solid white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        .modern-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .value-output {
+            width: 45px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            border: 1px solid #e6e9ed;
+            flex-shrink: 0;
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 2D Rocket and Confirm button */
+        .btn-confirm {
+            background: #2cd154;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 18px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 0 #209d3e, 0 8px 15px rgba(0,0,0,0.1);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-confirm:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #209d3e;
+        }
+        .btn-confirm:disabled {
+            background: #aab2bd;
+            box-shadow: 0 5px 0 #ccd1d9;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .rocket-model-2d {
+            width: 20px;
+            height: 35px;
+            position: relative;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .btn-confirm:hover:not(:disabled) .rocket-model-2d {
+            transform: translateY(-4px) scale(1.1);
+        }
+
+        .rocket-body {
+            position: absolute;
+            top: 5px;
+            left: 4px;
+            width: 12px;
+            height: 22px;
+            background: white;
+            border-radius: 50% 50% 20% 20%;
+        }
+
+        .rocket-nose {
+            position: absolute;
+            top: 0;
+            left: 4px;
+            width: 12px;
+            height: 8px;
+            background: #ff3b30;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .rocket-fin-left {
+            position: absolute;
+            bottom: 6px;
+            left: 0;
+            width: 5px;
+            height: 10px;
+            background: #ff3b30;
+            border-radius: 50% 0 0 50%;
+        }
+
+        .rocket-fin-right {
+            position: absolute;
+            bottom: 6px;
+            right: 0;
+            width: 5px;
+            height: 10px;
+            background: #ff3b30;
+            border-radius: 0 50% 50% 0;
+        }
+
+        .rocket-window {
+            position: absolute;
+            top: 10px;
+            left: 8px;
+            width: 4px;
+            height: 4px;
+            background: #3498db;
+            border-radius: 50%;
+        }
+
+        .rocket-fire {
+            position: absolute;
+            bottom: 0;
+            left: 7px;
+            width: 6px;
+            height: 7px;
+            background: linear-gradient(to bottom, #ff9500, #ffcc00);
+            border-radius: 0 0 50% 50%;
+            animation: thrust 0.15s infinite alternate;
+            opacity: 0;
+        }
+
+        .btn-confirm:hover:not(:disabled) .rocket-fire {
+            opacity: 1;
+        }
+
+        @keyframes thrust {
+            0% { height: 5px; transform: translateX(0); }
+            100% { height: 9px; transform: translateX(-0.5px); }
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: #2374cc;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+            padding: 5px;
+            align-self: center;
+        }
+        .btn-reset:hover {
+            text-decoration: underline;
+        }
+
+        svg.connector-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        /* POP-UP MODAL SYSTEM & CONFETTI PAPERS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(27, 91, 163, 0.4);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow: hidden;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: white;
+            width: 90%;
+            max-width: 440px;
+            padding: 35px 30px;
+            border-radius: 28px;
+            box-shadow: 0 24px 50px rgba(0,0,0,0.25);
+            text-align: center;
+            transform: scale(0.8) translateY(30px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 4px solid #b3d1ff;
+            position: relative;
+            z-index: 102;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1) translateY(0);
+        }
+
+        /* 2D CSS ARTWORK TROPHY MODEL */
+        .trophy-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .trophy-cup {
+            width: 60px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            top: -10px;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1), 0 8px 15px rgba(255,215,0,0.2);
+        }
+
+        /* Trophy Handles */
+        .trophy-cup::before, .trophy-cup::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            width: 16px;
+            height: 26px;
+            border: 5px solid #ffcc00;
+            border-radius: 50%;
+        }
+        .trophy-cup::before {
+            left: -17px;
+            border-right-color: transparent;
+            transform: rotate(-15deg);
+        }
+        .trophy-cup::after {
+            right: -17px;
+            border-left-color: transparent;
+            transform: rotate(15deg);
+        }
+
+        .trophy-stem {
+            position: absolute;
+            bottom: 25px;
+            width: 12px;
+            height: 20px;
+            background: #ffa100;
+            left: 44px;
+        }
+
+        .trophy-base {
+            position: absolute;
+            bottom: 12px;
+            width: 46px;
+            height: 14px;
+            background: #656d78;
+            border-radius: 6px;
+            left: 27px;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #1b5ba3;
+            margin: 0 0 10px 0;
+            font-weight: 800;
+        }
+
+        .modal-body {
+            font-size: 15px;
+            color: #656d78;
+            margin: 0 0 25px 0;
+            line-height: 1.5;
+        }
+
+        .btn-modal-close {
+            background: #2cd154;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #209d3e;
+            transition: all 0.1s ease;
+        }
+        .btn-modal-close:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #209d3e;
+        }
+
+        /* CONFTETTI PAPERS FLOWING STYLES */
+        .confetti-paper {
+            position: absolute;
+            width: 10px;
+            height: 12px;
+            background: #ff0;
+            opacity: 0.8;
+            top: -20px;
+            z-index: 101;
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    
+    <div class="header">
+        <button class="btn-back" onclick="resetApp()">&larr; Back</button>
+        <div class="title-container">
+            <h1 class="main-title">The Drone Diagnostics</h1>
+            <p class="subtitle">Grade 6 &bull; Autonomous Systems</p>
+        </div>
+        <button class="btn-listen">&#128266; Listen</button>
+    </div>
+
+    <div class="workspace">
+        
+        <div class="blueprint-panel">
+            <div class="telemetry-badge">TELEMETRY LINK: ACTIVE</div>
+            
+            <svg class="connector-lines">
+                <path d="M 115 80 L 190 140" stroke="white" stroke-width="3" stroke-dasharray="5,5" fill="none" opacity="0.6" />
+                <path d="M 460 80 L 380 140" stroke="white" stroke-width="3" stroke-dasharray="5,5" fill="none" opacity="0.6" />
+                <path d="M 115 400 L 190 340" stroke="white" stroke-width="3" stroke-dasharray="5,5" fill="none" opacity="0.6" />
+                <path d="M 460 400 L 380 340" stroke="white" stroke-width="3" stroke-dasharray="5,5" fill="none" opacity="0.6" />
+            </svg>
+
+            <div class="status-node fl" id="node-fl">
+                <div class="icon-circle" id="ham-fl">&equiv;</div>
+                <div>FRONT LEFT</div>
+                <div class="percentage-pill" id="pill-fl">50%</div>
+            </div>
+
+            <div class="status-node fr" id="node-fr">
+                <div class="icon-circle" id="ham-fr">&equiv;</div>
+                <div>FRONT RIGHT</div>
+                <div class="percentage-pill" id="pill-fr">50%</div>
+            </div>
+
+            <div class="status-node rl" id="node-rl">
+                <div class="icon-circle" id="ham-rl">&equiv;</div>
+                <div>REAR LEFT</div>
+                <div class="percentage-pill" id="pill-rl">50%</div>
+            </div>
+
+            <div class="status-node rr" id="node-rr">
+                <div class="icon-circle" id="ham-rr">&equiv;</div>
+                <div>REAR RIGHT</div>
+                <div class="percentage-pill" id="pill-rr">50%</div>
+            </div>
+
+            <div class="drone-display-container">
+                <div class="drone-model" id="droneModel">
+                    <div class="drone-arm arm-1"></div>
+                    <div class="drone-arm arm-2"></div>
+                    
+                    <div class="rotor fl"><div class="rotor-motor"></div><div class="propeller" id="prop-fl"></div></div>
+                    <div class="rotor fr"><div class="rotor-motor"></div><div class="propeller" id="prop-fr"></div></div>
+                    <div class="rotor rl"><div class="rotor-motor"></div><div class="propeller" id="prop-rl"></div></div>
+                    <div class="rotor rr"><div class="rotor-motor"></div><div class="propeller" id="prop-rr"></div></div>
+
+                    <div class="drone-chassis">
+                        <div class="drone-lens">
+                            <div class="drone-glare" id="droneEye"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            
+            <div class="mission-card" id="missionCard">
+                <span class="mission-badge" id="missionMeta">MISSION 1 OF 2</span>
+                <h3 class="mission-title" id="missionTitle">HOVER SEQUENCE</h3>
+                <p class="mission-desc" id="missionDescription">Drone is hovering perfectly.</p>
+            </div>
+
+            <div class="sliders-card">
+                
+                <div class="slider-row">
+                    <div class="slider-icon" id="icon-fl" style="background: var(--front-left-color);">&equiv;</div>
+                    <div class="slider-label-spec">Front Left</div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="50" class="modern-slider" id="slider-fl" oninput="updateDiagnostics()">
+                    </div>
+                    <div class="value-output" id="out-fl" style="color: var(--front-left-color); border-color: var(--front-left-color);">50%</div>
+                </div>
+
+                <div class="slider-row">
+                    <div class="slider-icon" id="icon-fr" style="background: var(--front-right-color);">&equiv;</div>
+                    <div class="slider-label-spec">Front Right</div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="50" class="modern-slider" id="slider-fr" oninput="updateDiagnostics()">
+                    </div>
+                    <div class="value-output" id="out-fr" style="color: var(--front-right-color); border-color: var(--front-right-color);">50%</div>
+                </div>
+
+                <div class="slider-row">
+                    <div class="slider-icon" id="icon-rl" style="background: var(--rear-left-color);">&equiv;</div>
+                    <div class="slider-label-spec">Rear Left</div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="50" class="modern-slider" id="slider-rl" oninput="updateDiagnostics()">
+                    </div>
+                    <div class="value-output" id="out-rl" style="color: var(--rear-left-color); border-color: var(--rear-left-color);">50%</div>
+                </div>
+
+                <div class="slider-row">
+                    <div class="slider-icon" id="icon-rr" style="background: var(--rear-right-color);">&equiv;</div>
+                    <div class="slider-label-spec">Rear Right</div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="50" class="modern-slider" id="slider-rr" oninput="updateDiagnostics()">
+                    </div>
+                    <div class="value-output" id="out-rr" style="color: var(--rear-right-color); border-color: var(--rear-right-color);">50%</div>
+                </div>
+
+            </div>
+
+            <button class="btn-confirm" id="actionBtn" onclick="handleAdvance()">
+                <div class="rocket-model-2d">
+                    <div class="rocket-nose"></div>
+                    <div class="rocket-fin-left"></div>
+                    <div class="rocket-fin-right"></div>
+                    <div class="rocket-body"></div>
+                    <div class="rocket-window"></div>
+                    <div class="rocket-fire"></div>
+                </div>
+                <span id="btnText">CONFIRM & ADVANCE</span>
+            </button>
+            
+            <button class="btn-reset" onclick="resetDiagnostics()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                RESET DIAGNOSTICS
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+    <div class="modal-card">
+        <div class="trophy-container">
+            <div class="trophy-cup"></div>
+            <div class="trophy-stem"></div>
+            <div class="trophy-base"></div>
+        </div>
+        <h2 class="modal-title">Diagnostics Complete!</h2>
+        <p class="modal-body">Awesome job! All autonomous drone systems have been fully calibrated and verified functional.</p>
+        <button class="btn-modal-close" onclick="closeModal()">FINISH</button>
+    </div>
+</div>
+
+<script>
+    let activeMission = 1; 
+    let missionComplete = true; 
+
+    const sliders = {
+        fl: document.getElementById('slider-fl'),
+        fr: document.getElementById('slider-fr'),
+        rl: document.getElementById('slider-rl'),
+        rr: document.getElementById('slider-rr')
+    };
+
+    const outputs = {
+        fl: document.getElementById('out-fl'),
+        fr: document.getElementById('out-fr'),
+        rl: document.getElementById('out-rl'),
+        rr: document.getElementById('out-rr')
+    };
+
+    const pills = {
+        fl: document.getElementById('pill-fl'),
+        fr: document.getElementById('pill-fr'),
+        rl: document.getElementById('pill-rl'),
+        rr: document.getElementById('pill-rr')
+    };
+
+    const props = {
+        fl: document.getElementById('prop-fl'),
+        fr: document.getElementById('prop-fr'),
+        rl: document.getElementById('prop-rl'),
+        rr: document.getElementById('prop-rr')
+    };
+
+    const nodes = {
+        fl: document.getElementById('node-fl'),
+        fr: document.getElementById('node-fr'),
+        rl: document.getElementById('node-rl'),
+        rr: document.getElementById('node-rr')
+    };
+
+    // Hamburger reference nodes mapping
+    const hams = {
+        fl: document.getElementById('ham-fl'),
+        fr: document.getElementById('ham-fr'),
+        rl: document.getElementById('ham-rl'),
+        rr: document.getElementById('ham-rr')
+    };
+
+    const icons = {
+        fl: document.getElementById('icon-fl'),
+        fr: document.getElementById('icon-fr'),
+        rl: document.getElementById('icon-rl'),
+        rr: document.getElementById('icon-rr')
+    };
+
+    const droneModel = document.getElementById('droneModel');
+    const droneEye = document.getElementById('droneEye');
+    const actionBtn = document.getElementById('actionBtn');
+    const btnText = document.getElementById('btnText');
+    const missionCard = document.getElementById('missionCard');
+    const successModal = document.getElementById('successModal');
+
+    function updateDiagnostics() {
+        const valFL = parseInt(sliders.fl.value);
+        const valFR = parseInt(sliders.fr.value);
+        const valRL = parseInt(sliders.rl.value);
+        const valRR = parseInt(sliders.rr.value);
+
+        for (let key in sliders) {
+            let currentVal = parseInt(sliders[key].value);
+            outputs[key].innerText = currentVal + "%";
+            pills[key].innerText = currentVal + "%";
+            
+            // Adjust propeller rotation speeds dynamically
+            if (currentVal === 0) {
+                props[key].style.animationDuration = '0s';
+            } else {
+                let duration = (100 - currentVal) * 0.004 + 0.02; 
+                props[key].style.animationDuration = `${duration}s`;
+            }
+
+            // Calculate dynamic rotation angle for the hamburger icon elements based on value 
+            let rotateAngle = (currentVal - 50) * 3.6; // Maps center (50%) to 0deg, full range -180deg to 180deg
+            hams[key].style.transform = `rotate(${rotateAngle}deg)`;
+            icons[key].style.transform = `rotate(${rotateAngle}deg)`;
+        }
+
+        calculatePhysics(valFL, valFR, valRL, valRR);
+        checkMissionCriteria(valFL, valFR, valRL, valRR);
+    }
+
+    function calculatePhysics(fl, fr, rl, rr) {
+        const frontAverage = (fl + fr) / 2;
+        const rearAverage = (rl + rr) / 2;
+        const pitchDelta = rearAverage - frontAverage; 
+
+        const leftAverage = (fl + rl) / 2;
+        const rightAverage = (fr + rr) / 2;
+        const rollDelta = leftAverage - rightAverage;
+
+        let targetPitch = Math.max(-25, Math.min(25, pitchDelta * 0.4));
+        let targetRoll = Math.max(-15, Math.min(15, rollDelta * 0.3));
+
+        droneModel.style.transform = `rotateX(${targetPitch}deg) rotateY(${targetRoll}deg) scale(${1 + (frontAverage + rearAverage)/300})`;
+        
+        const offsetMultiplier = 0.25;
+        nodes.fl.style.transform = `translate(${targetRoll * offsetMultiplier}px, ${targetPitch * offsetMultiplier}px)`;
+        nodes.fr.style.transform = `translate(${targetRoll * offsetMultiplier}px, ${targetPitch * offsetMultiplier}px)`;
+        nodes.rl.style.transform = `translate(${targetRoll * offsetMultiplier}px, ${targetPitch * offsetMultiplier}px)`;
+        nodes.rr.style.transform = `translate(${targetRoll * offsetMultiplier}px, ${targetPitch * offsetMultiplier}px)`;
+    }
+
+    function checkMissionCriteria(fl, fr, rl, rr) {
+        if (activeMission === 1) {
+            if (fl === 50 && fr === 50 && rl === 50 && rr === 50) {
+                setMissionState(true, "Drone is hovering perfectly.");
+            } else {
+                setMissionState(false, "Adjust all four systems back to 50% power to re-stabilize target hover sequence state.");
+            }
+        } else if (activeMission === 2) {
+            if (fl === 20 && fr === 20 && rl === 80 && rr === 80) {
+                setMissionState(true, "Target pitch achieved! The drone is moving forward efficiently.");
+            } else {
+                setMissionState(false, "To fly forward, the rear rotors must spin faster than the front. Set rear to 80% and front to 20%.");
+            }
+        }
+    }
+
+    function setMissionState(isComplete, descText) {
+        missionComplete = isComplete;
+        document.getElementById('missionDescription').innerText = descText;
+
+        if (isComplete) {
+            actionBtn.disabled = false;
+            droneEye.style.background = '#4cd964';
+            droneEye.style.boxShadow = '0 0 12px #4cd964';
+        } else {
+            actionBtn.disabled = true;
+            droneEye.style.background = '#ff9500';
+            droneEye.style.boxShadow = '0 0 12px #ff9500';
+        }
+    }
+
+    function handleAdvance() {
+        if (!missionComplete) return;
+
+        if (activeMission === 1) {
+            activeMission = 2;
+            
+            document.getElementById('missionMeta').innerText = "MISSION 2 OF 2";
+            document.getElementById('missionTitle').innerText = "PITCH FORWARD";
+            missionCard.classList.add('mission-2-active');
+            btnText.innerHTML = "COMPLETE DIAGNOSTICS";
+            
+            setMissionState(false, "To fly forward, the rear rotors must spin faster than the front. Set rear to 80% and front to 20%.");
+        } else {
+            successModal.classList.add('active');
+            spawnConfettiEffect();
+        }
+    }
+
+    function spawnConfettiEffect() {
+        const colors = ['#ff2a6d', '#05d9e8', '#01012b', '#f5a623', '#7ecafb', '#9be244', '#ff3b30'];
+        
+        for (let i = 0; i < 60; i++) {
+            const paper = document.createElement('div');
+            paper.classList.add('confetti-paper');
+            
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const startX = Math.random() * 100; 
+            const delay = Math.random() * 0.6;
+            const duration = Math.random() * 2.5 + 1.5;
+            const sizeWidth = Math.random() * 6 + 6;
+            const sizeHeight = Math.random() * 6 + 10;
+
+            paper.style.background = randomColor;
+            paper.style.left = startX + 'vw';
+            paper.style.width = sizeWidth + 'px';
+            paper.style.height = sizeHeight + 'px';
+            paper.style.animation = `confettiFall ${duration}s cubic-bezier(0.1, 0.8, 0.3, 1) ${delay}s forwards`;
+
+            successModal.appendChild(paper);
+
+            setTimeout(() => {
+                paper.remove();
+            }, (duration + delay) * 1000);
+        }
+    }
+
+    function closeModal() {
+        successModal.classList.remove('active');
+        const activeConfetti = successModal.querySelectorAll('.confetti-paper');
+        activeConfetti.forEach(item => item.remove());
+        resetApp();
+    }
+
+    function resetDiagnostics() {
+        for(let key in sliders) {
+            sliders[key].value = 50;
+        }
+        updateDiagnostics();
+    }
+
+    function resetApp() {
+        activeMission = 1;
+        missionCard.classList.remove('mission-2-active');
+        document.getElementById('missionMeta').innerText = "MISSION 1 OF 2";
+        document.getElementById('missionTitle').innerText = "HOVER SEQUENCE";
+        btnText.innerHTML = "CONFIRM & ADVANCE";
+        resetDiagnostics();
+    }
+
+    updateDiagnostics();
+</script>
+
+</body>
+</html>
