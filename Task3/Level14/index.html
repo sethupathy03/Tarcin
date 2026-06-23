@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Security in Ubuntu OS • Grade 6 Operating Systems</title>
-  <meta name="description" content="Learn file permissions and the chmod command in Ubuntu Linux with interactive mascots, dynamic terminal commands, and playful visual audits.">
-  
+  <meta name="description"
+    content="Learn file permissions and the chmod command in Ubuntu Linux with interactive mascots, dynamic terminal commands, and playful visual audits.">
+
   <!-- Playful, modern typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+
   <!-- FontAwesome for minor button and layout icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -20,23 +24,24 @@
       --bg-sky: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 65%, #dcfce7 100%);
       --text-main: #1e1b4b;
       --text-muted: #475569;
-      
-      --color-primary: #e95420; /* Ubuntu Orange */
+
+      --color-primary: #e95420;
+      /* Ubuntu Orange */
       --color-primary-hover: #c94418;
-      
+
       --color-owner: #22c55e;
       --color-group: #f97316;
       --color-others: #a855f7;
-      
+
       --color-success: #10b981;
       --color-error: #ef4444;
       --color-gray: #cbd5e1;
       --color-gray-dark: #64748b;
-      
+
       --radius-lg: 24px;
       --radius-md: 18px;
       --radius-sm: 12px;
-      
+
       --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
       --shadow-lg: 0 20px 40px -15px rgba(15, 23, 42, 0.15);
       --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.06);
@@ -62,7 +67,10 @@
       overflow-x: hidden;
     }
 
-    h1, h2, h3, .font-display {
+    h1,
+    h2,
+    h3,
+    .font-display {
       font-family: 'Fredoka', sans-serif;
       font-weight: 700;
     }
@@ -77,7 +85,7 @@
       z-index: -2;
       pointer-events: none;
     }
-    
+
     .bg-star {
       position: absolute;
       color: #fff;
@@ -86,10 +94,19 @@
       pointer-events: none;
       z-index: -3;
     }
-    
+
     @keyframes pulseStar {
-      0%, 100% { opacity: 0.3; transform: scale(0.8); }
-      50% { opacity: 0.8; transform: scale(1.2); }
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+
+      50% {
+        opacity: 0.8;
+        transform: scale(1.2);
+      }
     }
 
     /* --- APP HEADER --- */
@@ -103,7 +120,8 @@
       z-index: 10;
     }
 
-    .btn-nav, .btn-listen {
+    .btn-nav,
+    .btn-listen {
       background: #ffffff;
       color: var(--text-main);
       border: 3px solid #e2e8f0;
@@ -119,22 +137,26 @@
       gap: 8px;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .btn-nav:hover, .btn-listen:hover {
+
+    .btn-nav:hover,
+    .btn-listen:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
       border-color: #cbd5e1;
     }
-    
-    .btn-nav:active, .btn-listen:active {
+
+    .btn-nav:active,
+    .btn-listen:active {
       transform: translateY(0);
     }
 
     .btn-listen {
-      background: #fef08a; /* Soft bright yellow */
+      background: #fef08a;
+      /* Soft bright yellow */
       border-color: #fef08a;
       color: #713f12;
     }
+
     .btn-listen:hover {
       background: #fde047;
       border-color: #fde047;
@@ -190,7 +212,8 @@
 
     /* --- LEFT SIDE: TERMINAL & ACCESS AUDIT --- */
     .terminal-container {
-      background: #170d24; /* Dark violet purple Ubuntu console */
+      background: #170d24;
+      /* Dark violet purple Ubuntu console */
       border: 4px solid #3c1e54;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
       border-radius: var(--radius-lg);
@@ -199,14 +222,23 @@
       flex-direction: column;
       position: relative;
     }
-    
+
     .terminal-container.victory-glow {
       animation: victoryPulseBorder 2s infinite;
     }
-    
+
     @keyframes victoryPulseBorder {
-      0%, 100% { border-color: #3c1e54; box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
-      50% { border-color: #10b981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
+
+      0%,
+      100% {
+        border-color: #3c1e54;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      }
+
+      50% {
+        border-color: #10b981;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+      }
     }
 
     .terminal-header {
@@ -238,9 +270,18 @@
       height: 12px;
       border-radius: 50%;
     }
-    .td-red { background: #ef4444; }
-    .td-yellow { background: #f59e0b; }
-    .td-green { background: #10b981; }
+
+    .td-red {
+      background: #ef4444;
+    }
+
+    .td-yellow {
+      background: #f59e0b;
+    }
+
+    .td-green {
+      background: #10b981;
+    }
 
     .terminal-body {
       padding: 24px;
@@ -254,9 +295,20 @@
       margin-bottom: 12px;
     }
 
-    .term-user { color: #86efac; font-weight: 700; }
-    .term-host { color: #a78bfa; font-weight: 700; }
-    .term-cmd { color: #38bdf8; font-weight: 700; }
+    .term-user {
+      color: #86efac;
+      font-weight: 700;
+    }
+
+    .term-host {
+      color: #a78bfa;
+      font-weight: 700;
+    }
+
+    .term-cmd {
+      color: #38bdf8;
+      font-weight: 700;
+    }
 
     .terminal-highlight-box {
       background: #0f071a;
@@ -269,7 +321,7 @@
       align-items: center;
       justify-content: space-between;
     }
-    
+
     .terminal-highlight-box.error-state {
       border-left-color: #ef4444;
     }
@@ -280,7 +332,7 @@
       font-size: 16px;
       letter-spacing: 1.5px;
     }
-    
+
     .permissions-details {
       color: #94a3b8;
       font-size: 13px;
@@ -333,11 +385,19 @@
       transition: all 0.3s ease;
       border: 2px solid transparent;
     }
-    
-    .audit-card.owner-card { border-top: 5px solid var(--color-owner); }
-    .audit-card.group-card { border-top: 5px solid var(--color-group); }
-    .audit-card.others-card { border-top: 5px solid var(--color-others); }
-    
+
+    .audit-card.owner-card {
+      border-top: 5px solid var(--color-owner);
+    }
+
+    .audit-card.group-card {
+      border-top: 5px solid var(--color-group);
+    }
+
+    .audit-card.others-card {
+      border-top: 5px solid var(--color-others);
+    }
+
     .audit-card:hover {
       background: rgba(255, 255, 255, 0.08);
       transform: translateY(-2px);
@@ -352,9 +412,18 @@
       align-items: center;
       gap: 6px;
     }
-    .ac-owner { color: #4ade80; }
-    .ac-group { color: #fb923c; }
-    .ac-others { color: #c084fc; }
+
+    .ac-owner {
+      color: #4ade80;
+    }
+
+    .ac-group {
+      color: #fb923c;
+    }
+
+    .ac-others {
+      color: #c084fc;
+    }
 
     .audit-avatar-wrapper {
       width: 50px;
@@ -386,6 +455,7 @@
       align-items: center;
       gap: 5px;
     }
+
     .audit-label i {
       width: 14px;
       text-align: center;
@@ -400,12 +470,12 @@
       align-items: center;
       gap: 4px;
     }
-    
+
     .status-yes {
       background: rgba(16, 185, 129, 0.15);
       color: #34d399;
     }
-    
+
     .status-no {
       background: rgba(239, 68, 68, 0.15);
       color: #f87171;
@@ -427,8 +497,14 @@
       font-size: 22px;
       margin-right: 10px;
     }
-    .header-goal { color: var(--color-success); }
-    .header-modify { color: #0284c7; }
+
+    .header-goal {
+      color: var(--color-success);
+    }
+
+    .header-modify {
+      color: #0284c7;
+    }
 
     .card-title {
       display: flex;
@@ -462,7 +538,7 @@
       gap: 8px;
       line-height: 1.4;
     }
-    
+
     .goal-rule-bullet {
       width: 8px;
       height: 8px;
@@ -470,27 +546,23 @@
       margin-top: 5px;
       flex-shrink: 0;
     }
-    .bullet-owner { background: var(--color-owner); }
-    .bullet-group { background: var(--color-group); }
-    .bullet-others { background: var(--color-others); }
+
+    .bullet-owner {
+      background: var(--color-owner);
+    }
+
+    .bullet-group {
+      background: var(--color-group);
+    }
+
+    .bullet-others {
+      background: var(--color-others);
+    }
 
     .goal-castle-wrapper {
       width: 70px;
       height: 70px;
       flex-shrink: 0;
-    }
-
-    .level-indicator {
-      position: absolute;
-      top: 16px;
-      right: 18px;
-      background: #f1f5f9;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 800;
-      color: #0369a1;
-      border: 1px solid #e2e8f0;
     }
 
     /* --- MODIFY ATTRIBUTES CARD --- */
@@ -519,7 +591,7 @@
       align-items: center;
       gap: 8px;
     }
-    
+
     .modify-toggles-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -552,7 +624,7 @@
       background: #bdc8d7;
       transform: translateY(-1px);
     }
-    
+
     .btn-toggle:active {
       transform: translateY(1px);
     }
@@ -562,20 +634,36 @@
       color: white;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
-    
-    .btn-owner.active { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
-    .btn-owner.active:hover { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
-    
-    .btn-group.active { background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); }
-    .btn-group.active:hover { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
-    
-    .btn-others.active { background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); }
-    .btn-others.active:hover { background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); }
+
+    .btn-owner.active {
+      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    }
+
+    .btn-owner.active:hover {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    }
+
+    .btn-group.active {
+      background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    }
+
+    .btn-group.active:hover {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    }
+
+    .btn-others.active {
+      background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+    }
+
+    .btn-others.active:hover {
+      background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    }
 
     /* Button specific transitions */
     .btn-toggle i {
       transition: transform 0.3s ease;
     }
+
     .btn-toggle:hover i {
       transform: scale(1.2);
     }
@@ -597,7 +685,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       transition: all 0.25s ease;
     }
 
@@ -607,7 +695,7 @@
       color: var(--text-main);
       transform: translateY(-2px);
     }
-    
+
     .btn-revert:active {
       transform: translateY(0);
     }
@@ -620,14 +708,21 @@
       width: 36px;
       height: 36px;
       transform: rotate(18deg);
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
       animation: crownBounce 3s infinite ease-in-out;
       z-index: 10;
     }
-    
+
     @keyframes crownBounce {
-      0%, 100% { transform: translateY(0) rotate(18deg) scale(1); }
-      50% { transform: translateY(-4px) rotate(22deg) scale(1.05); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(18deg) scale(1);
+      }
+
+      50% {
+        transform: translateY(-4px) rotate(22deg) scale(1.05);
+      }
     }
 
     /* --- PEAKING KIDS DECORATION --- */
@@ -641,14 +736,14 @@
       z-index: 8;
       overflow: hidden;
     }
-    
+
     .peaking-kids-svg {
       width: 100%;
       height: 100%;
       transform: translateX(5px);
       transition: transform 0.4s ease;
     }
-    
+
     .glass-card:hover .peaking-kids-svg {
       transform: translateX(-5px) rotate(-4deg);
     }
@@ -677,17 +772,24 @@
       height: 100px;
       position: relative;
     }
-    
+
     .padlock-svg {
       width: 100%;
       height: 100%;
       filter: drop-shadow(0 8px 16px rgba(124, 58, 237, 0.15));
       animation: padlockBob 4s infinite ease-in-out;
     }
-    
+
     @keyframes padlockBob {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-6px) rotate(2deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-6px) rotate(2deg);
+      }
     }
 
     /* Status Pill Banner */
@@ -710,7 +812,7 @@
       border-color: #34d399;
       box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2), 0 0 15px rgba(16, 185, 129, 0.1);
     }
-    
+
     .status-pill-banner.insecure {
       background: #fff1f2;
       border-color: #fda4af;
@@ -728,12 +830,12 @@
       color: white;
       transition: all 0.3s ease;
     }
-    
+
     .status-pill-banner.secured .status-banner-icon-shield {
       background: #10b981;
       box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
     }
-    
+
     .status-pill-banner.insecure .status-banner-icon-shield {
       background: #f43f5e;
       box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3);
@@ -750,18 +852,18 @@
     .status-banner-text span {
       font-family: 'JetBrains Mono', monospace;
       font-size: 15px;
-      background: rgba(0,0,0,0.05);
+      background: rgba(0, 0, 0, 0.05);
       padding: 2px 10px;
       border-radius: 6px;
       margin-left: 6px;
       font-weight: 700;
     }
-    
+
     .status-pill-banner.secured .status-banner-text span {
       background: rgba(16, 185, 129, 0.1);
       color: #065f46;
     }
-    
+
     .status-pill-banner.insecure .status-banner-text span {
       background: rgba(244, 63, 94, 0.1);
       color: #9f1239;
@@ -776,21 +878,59 @@
       overflow: hidden;
       opacity: 0.18;
     }
+
     .floating-ubuntu-logo {
       position: absolute;
       width: 80px;
       height: 80px;
       animation: floatUbuntu 16s infinite ease-in-out;
     }
+
     @keyframes floatUbuntu {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-35px) rotate(15deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-35px) rotate(15deg);
+      }
     }
+
     /* Position variations */
-    .u-logo-1 { top: 12%; left: 8%; animation-delay: 0s; width: 70px; height: 70px; }
-    .u-logo-2 { top: 22%; right: 10%; animation-delay: 3s; width: 110px; height: 110px; opacity: 0.7; }
-    .u-logo-3 { bottom: 18%; left: 14%; animation-delay: 6s; width: 60px; height: 60px; }
-    .u-logo-4 { bottom: 28%; right: 12%; animation-delay: 9s; width: 90px; height: 90px; }
+    .u-logo-1 {
+      top: 12%;
+      left: 8%;
+      animation-delay: 0s;
+      width: 70px;
+      height: 70px;
+    }
+
+    .u-logo-2 {
+      top: 22%;
+      right: 10%;
+      animation-delay: 3s;
+      width: 110px;
+      height: 110px;
+      opacity: 0.7;
+    }
+
+    .u-logo-3 {
+      bottom: 18%;
+      left: 14%;
+      animation-delay: 6s;
+      width: 60px;
+      height: 60px;
+    }
+
+    .u-logo-4 {
+      bottom: 28%;
+      right: 12%;
+      animation-delay: 9s;
+      width: 90px;
+      height: 90px;
+    }
 
     /* Next Level button floating inside status bar */
     .btn-next-level {
@@ -811,21 +951,33 @@
       animation: bouncePulse 1.5s infinite;
       transition: all 0.2s ease;
     }
-    
+
     .btn-next-level:hover {
       transform: scale(1.05);
       background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
-    
+
     @keyframes bouncePulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
-      50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5); }
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+      }
     }
 
     /* --- LIGHT-THEMED POP-UP MODAL OVERLAY --- */
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(23, 13, 36, 0.5);
       backdrop-filter: blur(12px);
       display: flex;
@@ -836,12 +988,12 @@
       pointer-events: none;
       transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .modal-overlay.open {
       opacity: 1;
       pointer-events: auto;
     }
-    
+
     .modal-card {
       background: #ffffff;
       border: 5px solid #10b981;
@@ -855,18 +1007,18 @@
       transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
     }
-    
+
     .modal-overlay.open .modal-card {
       transform: scale(1) translateY(0);
     }
-    
+
     .modal-celebration-grid {
       display: flex;
       justify-content: center;
       gap: 20px;
       margin-bottom: 24px;
     }
-    
+
     .modal-mascot-container {
       width: 90px;
       height: 90px;
@@ -878,7 +1030,7 @@
       margin-bottom: 12px;
       line-height: 1.2;
     }
-    
+
     .modal-card p {
       font-size: 16px;
       color: var(--text-muted);
@@ -886,7 +1038,7 @@
       margin-bottom: 28px;
       font-weight: 600;
     }
-    
+
     .btn-modal-action {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
@@ -900,27 +1052,36 @@
       box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
       transition: all 0.25s ease;
     }
-    
+
     .btn-modal-action:hover {
       transform: scale(1.05) translateY(-2px);
       box-shadow: 0 12px 24px rgba(16, 185, 129, 0.4);
     }
-    
+
     .btn-modal-action:active {
       transform: scale(1) translateY(0);
     }
 
     /* --- MASCOTS SVG INTERACTION STYLES --- */
-    
+
     /* Blinking padlock eyes */
-    #padlock-eye-l, #padlock-eye-r {
+    #padlock-eye-l,
+    #padlock-eye-r {
       animation: padlockEyeBlink 4s infinite;
       transform-origin: center;
     }
-    
+
     @keyframes padlockEyeBlink {
-      0%, 90%, 100% { transform: scaleY(1); }
-      94% { transform: scaleY(0.1); }
+
+      0%,
+      90%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      94% {
+        transform: scaleY(0.1);
+      }
     }
 
     /* Typing cursor animation */
@@ -933,31 +1094,43 @@
       margin-left: 4px;
       animation: termCursorBlink 1s infinite steps(2);
     }
-    
+
     @keyframes termCursorBlink {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
-    
+
     .hidden {
       display: none !important;
     }
   </style>
 </head>
+
 <body>
 
   <!-- BACKGROUND DECORATIONS -->
   <div class="background-hills">
-    <svg width="100%" height="140" viewBox="0 0 1440 140" preserveAspectRatio="none" style="position: absolute; bottom: 0; left: 0;">
+    <svg width="100%" height="140" viewBox="0 0 1440 140" preserveAspectRatio="none"
+      style="position: absolute; bottom: 0; left: 0;">
       <path d="M0,80 C320,110 420,30 720,70 C1020,110 1120,40 1440,80 L1440,140 L0,140 Z" fill="#86efac" />
-      <path d="M0,105 C240,65 480,115 720,85 C960,55 1200,105 1440,90 L1440,140 L0,140 Z" fill="#4ade80" opacity="0.6" />
+      <path d="M0,105 C240,65 480,115 720,85 C960,55 1200,105 1440,90 L1440,140 L0,140 Z" fill="#4ade80"
+        opacity="0.6" />
     </svg>
   </div>
-  
+
   <!-- Tiny decorative background elements -->
   <div class="bg-star" style="top: 8%; left: 5%; font-size: 24px;"><i class="fa-solid fa-star"></i></div>
-  <div class="bg-star" style="top: 15%; right: 6%; font-size: 18px; animation-delay: 1.5s;"><i class="fa-solid fa-cloud"></i></div>
-  <div class="bg-star" style="bottom: 25%; left: 3%; font-size: 14px; animation-delay: 0.8s;"><i class="fa-solid fa-sparkles"></i></div>
+  <div class="bg-star" style="top: 15%; right: 6%; font-size: 18px; animation-delay: 1.5s;"><i
+      class="fa-solid fa-cloud"></i></div>
+  <div class="bg-star" style="bottom: 25%; left: 3%; font-size: 14px; animation-delay: 0.8s;"><i
+      class="fa-solid fa-sparkles"></i></div>
 
   <!-- NAVIGATION HEADER -->
   <header class="app-header">
@@ -975,10 +1148,10 @@
 
   <!-- MAIN CONTAINER -->
   <main class="game-layout">
-    
+
     <!-- LEFT PANEL: TERMINAL & CURRENT AUDIT -->
     <div class="terminal-container" id="terminalWindow">
-      
+
       <!-- OS Window Title Bar -->
       <div class="terminal-header">
         <div class="terminal-title">
@@ -991,27 +1164,31 @@
           <div class="terminal-dot td-green"></div>
         </div>
       </div>
-      
+
       <!-- Terminal Console Interface -->
       <div class="terminal-body">
-        
+
         <!-- Live Terminal Instruction Commands -->
         <div class="terminal-prompt">
-          <span class="term-user">student</span><span style="color:#94a3b8;">@</span><span class="term-host">ubuntu</span><span style="color:#e2e8f0;">:~$</span>
+          <span class="term-user">student</span><span style="color:#94a3b8;">@</span><span
+            class="term-host">ubuntu</span><span style="color:#e2e8f0;">:~$</span>
           <span class="term-cmd">ls -l <span id="termFileName">secret_project.txt</span></span>
         </div>
-        
+
         <!-- Highlight Box showing direct output of ls -l -->
         <div class="terminal-highlight-box" id="termOutputBox">
           <span class="permissions-string" id="termOutputString">-rw-r-----</span>
           <span class="permissions-details">
-            1 student engineers <span id="termFileSize">4096</span> <span id="termFileDate">Nov 12 10:45</span> <span style="color: #f59e0b;" id="termFileNameHighlight">secret_project.txt</span>
+            1 student engineers <span id="termFileSize">4096</span> <span id="termFileDate">Nov 12 10:45</span> <span
+              style="color: #f59e0b;" id="termFileNameHighlight">secret_project.txt</span>
           </span>
         </div>
-        
+
         <div class="terminal-prompt" style="margin-bottom: 24px;">
-          <span class="term-user">student</span><span style="color:#94a3b8;">@</span><span class="term-host">ubuntu</span><span style="color:#e2e8f0;">:~$</span>
-          <span class="term-cmd">chmod <span style="color: #a855f7;" id="termChmodVal">640</span> <span id="termFileNameCmd">secret_project.txt</span></span><span class="terminal-cursor"></span>
+          <span class="term-user">student</span><span style="color:#94a3b8;">@</span><span
+            class="term-host">ubuntu</span><span style="color:#e2e8f0;">:~$</span>
+          <span class="term-cmd">chmod <span style="color: #a855f7;" id="termChmodVal">640</span> <span
+              id="termFileNameCmd">secret_project.txt</span></span><span class="terminal-cursor"></span>
         </div>
 
         <!-- Floating Ubuntu Logos in Background -->
@@ -1072,9 +1249,9 @@
             <i class="fa-solid fa-magnifying-glass-chart" style="color: #38bdf8;"></i>
             Current Access Audit
           </div>
-          
+
           <div class="audit-grid">
-            
+
             <!-- OWNER COLUMN -->
             <div class="audit-card owner-card">
               <div class="audit-title ac-owner">
@@ -1089,11 +1266,12 @@
                   <circle cx="48" cy="36" r="2.5" fill="#1e293b" />
                   <circle cx="28" cy="40" r="3" fill="#f43f5e" opacity="0.4" />
                   <circle cx="52" cy="40" r="3" fill="#f43f5e" opacity="0.4" />
-                  <path d="M35 44 Q40 48 45 44" stroke="#1e293b" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                  <path d="M35 44 Q40 48 45 44" stroke="#1e293b" stroke-width="2.5" fill="none"
+                    stroke-linecap="round" />
                   <path d="M22 58 C22 53, 58 53, 58 58 L58 75 L22 75 Z" fill="#22c55e" />
                 </svg>
               </div>
-              
+
               <div class="audit-list">
                 <div class="audit-item">
                   <div class="audit-label"><i class="fa-solid fa-book-open"></i> Read</div>
@@ -1126,7 +1304,8 @@
                     <circle cx="41" cy="37" r="2" fill="#1e293b" />
                     <circle cx="25" cy="40" r="2.5" fill="#f43f5e" opacity="0.4" />
                     <circle cx="45" cy="40" r="2.5" fill="#f43f5e" opacity="0.4" />
-                    <path d="M31 44 Q35 47 39 44" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round" />
+                    <path d="M31 44 Q35 47 39 44" stroke="#1e293b" stroke-width="2" fill="none"
+                      stroke-linecap="round" />
                     <path d="M21 54 C21 50, 49 50, 49 54 L49 72 L21 72 Z" fill="#f97316" />
                   </g>
                   <!-- Kid 2 (Right girl in Yellow) -->
@@ -1141,12 +1320,13 @@
                     <circle cx="51" cy="37" r="2" fill="#1e293b" />
                     <circle cx="35" cy="40" r="2.5" fill="#f43f5e" opacity="0.4" />
                     <circle cx="55" cy="40" r="2.5" fill="#f43f5e" opacity="0.4" />
-                    <path d="M41 44 Q45 47 49 44" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round" />
+                    <path d="M41 44 Q45 47 49 44" stroke="#1e293b" stroke-width="2" fill="none"
+                      stroke-linecap="round" />
                     <path d="M31 54 C31 50, 59 50, 59 54 L59 72 L31 72 Z" fill="#eab308" />
                   </g>
                 </svg>
               </div>
-              
+
               <div class="audit-list">
                 <div class="audit-item">
                   <div class="audit-label"><i class="fa-solid fa-book-open"></i> Read</div>
@@ -1192,12 +1372,13 @@
                     <circle cx="28" cy="32" r="3.5" fill="none" stroke="#1e293b" stroke-width="1.5" />
                     <circle cx="42" cy="32" r="3.5" fill="none" stroke="#1e293b" stroke-width="1.5" />
                     <line x1="31.5" y1="32" x2="38.5" y2="32" stroke="#1e293b" stroke-width="1.5" />
-                    <path d="M31 40 Q35 43 39 40" stroke="#1e293b" stroke-width="2" fill="none" stroke-linecap="round" />
+                    <path d="M31 40 Q35 43 39 40" stroke="#1e293b" stroke-width="2" fill="none"
+                      stroke-linecap="round" />
                     <path d="M21 48 C21 44, 49 44, 49 48 L49 68 L21 68 Z" fill="#2563eb" />
                   </g>
                 </svg>
               </div>
-              
+
               <div class="audit-list">
                 <div class="audit-item">
                   <div class="audit-label"><i class="fa-solid fa-book-open"></i> Read</div>
@@ -1219,18 +1400,17 @@
 
       </div>
     </div>
-    
+
     <!-- RIGHT SIDE: CONTROL PANEL (GOALS & TOGGLES) -->
     <div class="sidebar-container">
-      
+
       <!-- DATA POLICY GOAL CARD -->
       <div class="glass-card goal-card" id="goalCard">
-        <div class="level-indicator" id="levelLabel">MISSION 1 OF 4</div>
         <div class="card-title header-goal">
           <i class="fa-solid fa-shield-halved card-header-icon"></i>
           Data Policy Goal
         </div>
-        
+
         <div class="goal-content-wrapper">
           <div class="goal-text-list" id="goalTextList">
             <div class="goal-rule-item">
@@ -1246,7 +1426,7 @@
               <span>Others must have absolutely no access.</span>
             </div>
           </div>
-          
+
           <div class="goal-castle-wrapper">
             <!-- SVG Castle graphic -->
             <svg viewBox="0 0 100 100" style="width:100%; height:100%;">
@@ -1267,7 +1447,8 @@
               <!-- Flag on left tower -->
               <line x1="20" y1="10" x2="20" y2="1" stroke="#cbd5e1" stroke-width="2" />
               <polygon points="20,1 34,5 20,9" fill="#10b981">
-                <animateTransform attributeName="transform" type="skewY" values="0; 6; 0; -6; 0" dur="2s" repeatCount="indefinite" />
+                <animateTransform attributeName="transform" type="skewY" values="0; 6; 0; -6; 0" dur="2s"
+                  repeatCount="indefinite" />
               </polygon>
             </svg>
           </div>
@@ -1276,8 +1457,6 @@
 
       <!-- MODIFY ATTRIBUTES CARD -->
       <div class="glass-card modify-card">
-        
-
         <div class="card-title header-modify">
           <i class="fa-solid fa-gears card-header-icon"></i>
           Modify Attributes
@@ -1347,13 +1526,15 @@
 
     <!-- BOTTOM SECTION: MASCOT & STATUS PILL -->
     <div class="bottom-status-section">
-      
+
       <!-- Padlock kawaii mascot -->
       <div class="padlock-mascot-wrapper">
         <svg class="padlock-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <!-- Shackle group that rotates open/closed -->
-          <g id="padlock-shackle" style="transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 32px 42px;">
-            <path d="M 32,45 V 24 A 18,18 0 0,1 68,24 V 45" fill="none" stroke="#94a3b8" stroke-width="8" stroke-linecap="round" />
+          <g id="padlock-shackle"
+            style="transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 32px 42px;">
+            <path d="M 32,45 V 24 A 18,18 0 0,1 68,24 V 45" fill="none" stroke="#94a3b8" stroke-width="8"
+              stroke-linecap="round" />
           </g>
           <!-- Body -->
           <rect x="18" y="38" width="64" height="52" rx="18" fill="#a78bfa" stroke="#7c3aed" stroke-width="4.5" />
@@ -1371,7 +1552,8 @@
           <!-- Sweating drop (visible on worries) -->
           <path id="padlock-sweat" d="M 12,50 Q 8,58 12,62 Q 16,58 12,50" fill="#38bdf8" class="hidden" />
           <!-- Dynamic mouth path -->
-          <path id="padlock-mouth" d="M 44,66 Q 50,72 56,66" stroke="#1e293b" stroke-width="3" fill="none" stroke-linecap="round" />
+          <path id="padlock-mouth" d="M 44,66 Q 50,72 56,66" stroke="#1e293b" stroke-width="3" fill="none"
+            stroke-linecap="round" />
         </svg>
       </div>
 
@@ -1383,10 +1565,10 @@
         <div class="status-banner-text" id="statusBannerText">
           FILE INSECURE <span id="statusBannerPermString">---------</span>
         </div>
-        
-        <!-- NEXT LEVEL BUTTON -->
+
+        <!-- SUBMIT BUTTON -->
         <button class="btn-next-level hidden" id="btnNextLevel" onclick="nextLevel()">
-          NEXT MISSION <i class="fa-solid fa-chevron-right"></i>
+          SUBMIT <i class="fa-solid fa-chevron-right"></i>
         </button>
       </div>
 
@@ -1440,10 +1622,11 @@
           </svg>
         </div>
       </div>
-      
+
       <h2>Ubuntu Security Expert!</h2>
-      <p>Sensational work! You correctly configured all operating system file permissions. You understand how the <strong>chmod</strong> command works and how to protect files from unauthorized access!</p>
-      
+      <p>Sensational work! You correctly configured all operating system file permissions. You understand how the
+        <strong>chmod</strong> command works and how to protect files from unauthorized access!</p>
+
       <button class="btn-modal-action" onclick="resetGame()">
         <i class="fa-solid fa-gamepad"></i> Play Again
       </button>
@@ -1451,7 +1634,7 @@
   </div>
 
   <!-- --- JAVASCRIPT GAME LOGIC --- -->
-  <script>
+  <script {id="game-logic" }>
     // Audio Synthesizer Interface using Web Audio API
     function playTone(freq, dur = 0.15, type = "sine") {
       try {
@@ -1459,16 +1642,16 @@
         const ctx = new AC();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        
+
         osc.type = type;
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
         osc.connect(gain);
         gain.connect(ctx.destination);
-        
+
         gain.gain.setValueAtTime(0.0001, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-        
+
         osc.start();
         osc.stop(ctx.currentTime + dur);
       } catch (e) {
@@ -1492,7 +1675,7 @@
       playTone(600, 0.04, "sine");
     }
 
-    // Interactive Missions Data (4 unique levels)
+    // Interactive Missions Data (1 complete mission configuration remaining)
     const MISSIONS = [
       {
         id: 1,
@@ -1512,46 +1695,6 @@
           owner: { r: true, w: true, x: true },
           group: { r: true, w: true, x: false },
           others: { r: true, w: false, x: false }
-        }
-      },
-      {
-        id: 2,
-        title: "Mission 2: Webpage Draft",
-        fileName: "index.html",
-        fileSize: "1280",
-        fileDate: "Jun 23 10:50",
-        fileOwner: "student",
-        fileGroup: "webdevs",
-        policyGoalText: "Make the homepage visible to everyone! Owner can read & write (no execute), Group can read only, and Others can read only.",
-        target: {
-          owner: { r: true, w: true, x: false },
-          group: { r: true, w: false, x: false },
-          others: { r: true, w: false, x: false }
-        },
-        start: {
-          owner: { r: true, w: true, x: false },
-          group: { r: false, w: false, x: false },
-          others: { r: false, w: false, x: false }
-        }
-      },
-      {
-        id: 3,
-        title: "Mission 3: Interactive Script",
-        fileName: "math_game.py",
-        fileSize: "8192",
-        fileDate: "Feb 14 15:30",
-        fileOwner: "student",
-        fileGroup: "coders",
-        policyGoalText: "Configure a python game script. Owner gets full access (read, write, execute). Group and Others can read & execute, but not edit.",
-        target: {
-          owner: { r: true, w: true, x: true },
-          group: { r: true, w: false, x: true },
-          others: { r: true, w: false, x: true }
-        },
-        start: {
-          owner: { r: true, w: true, x: false },
-          group: { r: true, w: true, x: false },
-          others: { r: false, w: false, x: false }
         }
       }
     ];
@@ -1575,8 +1718,7 @@
     const termOutputString = document.getElementById("termOutputString");
     const termChmodVal = document.getElementById("termChmodVal");
     const termOutputBox = document.getElementById("termOutputBox");
-    
-    const levelLabel = document.getElementById("levelLabel");
+
     const goalTextList = document.getElementById("goalTextList");
     const statusBanner = document.getElementById("statusBanner");
     const statusShieldIcon = document.getElementById("statusShieldIcon");
@@ -1585,7 +1727,7 @@
     const statusBannerPermString = document.getElementById("statusBannerPermString");
     const btnNextLevel = document.getElementById("btnNextLevel");
     const victoryModal = document.getElementById("victoryModal");
-    
+
     const robotVisorText = document.getElementById("robotVisorText");
     const padlockShackle = document.getElementById("padlock-shackle");
     const padlockMouth = document.getElementById("padlock-mouth");
@@ -1597,24 +1739,22 @@
         triggerVictory();
         return;
       }
-      
+
       currentMissionIndex = index;
       const m = MISSIONS[index];
-      
+
       // Load static details into terminal text
       termFileName.textContent = m.fileName;
       termFileNameHighlight.textContent = m.fileName;
       termFileNameCmd.textContent = m.fileName;
       termFileSize.textContent = m.fileSize;
       termFileDate.textContent = m.fileDate;
-      
+
       // Reset permissions state to start configuration
       currentPerms = JSON.parse(JSON.stringify(m.start));
       isGoalMet = false;
-      
-      // Sync level label and goal text descriptions
-      levelLabel.textContent = `MISSION ${m.id} OF ${MISSIONS.length}`;
-      
+
+      // Sync goal text descriptions
       goalTextList.innerHTML = `
         <div class="goal-rule-item">
           <div class="goal-rule-bullet bullet-owner"></div>
@@ -1632,7 +1772,7 @@
 
       // Update robot visor screen if exists
       if (robotVisorText) robotVisorText.textContent = `M${m.id}_SYS`;
-      
+
       // Remove visual victory indicators
       terminalWindow.classList.remove("victory-glow");
       btnNextLevel.classList.add("hidden");
@@ -1645,7 +1785,7 @@
       if (perms.r) parts.push("read");
       if (perms.w) parts.push("write");
       if (perms.x) parts.push("execute");
-      
+
       if (parts.length === 0) return "have absolutely no access";
       if (parts.length === 1) return parts[0] + " only";
       if (parts.length === 2) return `${parts[0]} and ${parts[1]} (no ${["read", "write", "execute"].find(p => !parts.includes(p))})`;
@@ -1655,7 +1795,7 @@
     // Toggle handler for buttons
     function togglePermission(role, action) {
       if (isGoalMet) return; // Freeze when correct until Next Mission clicked
-      
+
       currentPerms[role][action] = !currentPerms[role][action];
       playClickPop();
       syncUI();
@@ -1673,13 +1813,13 @@
       // 1. Update button classes
       const roles = ['owner', 'group', 'others'];
       const actions = ['r', 'w', 'x'];
-      
+
       roles.forEach(role => {
         actions.forEach(action => {
           const btn = document.getElementById(`toggle-${role}-${action}`);
           const auditStatus = document.getElementById(`audit-${role}-${action}`);
           const isActive = currentPerms[role][action];
-          
+
           if (isActive) {
             btn.classList.add('active');
             auditStatus.className = "audit-status status-yes";
@@ -1696,10 +1836,10 @@
       const oVal = calculateOctal(currentPerms.owner);
       const gVal = calculateOctal(currentPerms.group);
       const tVal = calculateOctal(currentPerms.others);
-      
+
       const chmodCode = `${oVal}${gVal}${tVal}`;
       termChmodVal.textContent = chmodCode;
-      
+
       const pString = `-${formatSymbol(currentPerms.owner)}-${formatSymbol(currentPerms.group)}-${formatSymbol(currentPerms.others)}`.replace(/--/g, '-');
       termOutputString.textContent = pString;
       statusBannerPermString.textContent = pString;
@@ -1720,7 +1860,7 @@
     // Core validation check
     function checkGoalConditions() {
       const m = MISSIONS[currentMissionIndex];
-      
+
       const match = (
         currentPerms.owner.r === m.target.owner.r &&
         currentPerms.owner.w === m.target.owner.w &&
@@ -1736,41 +1876,41 @@
       if (match) {
         // Correct path
         isGoalMet = true;
-        
+
         statusBanner.className = "status-pill-banner secured";
         statusShieldIcon.style.transform = "rotate(360deg)";
         statusShieldSymbol.className = "fa-solid fa-shield-halved";
         statusBannerText.innerHTML = `FILE SECURED <span id="statusBannerPermString">${statusBannerPermString.textContent}</span>`;
-        
+
         terminalWindow.classList.add("victory-glow");
         termOutputBox.classList.remove("error-state");
         btnNextLevel.classList.remove("hidden");
-        
+
         // Padlock Mascots Happy Expression
         padlockShackle.style.transform = "translate(0, 0)";
         padlockMouth.setAttribute("d", "M 40,66 Q 50,76 60,66"); // wide smile
         padlockSweat.classList.add("hidden");
-        
+
         // Robot celebrate Visor State
         if (robotVisorText) robotVisorText.textContent = "^_^ OK";
-        
+
         playSuccessChime();
       } else {
         // Insecure path
         isGoalMet = false;
-        
+
         statusBanner.className = "status-pill-banner insecure";
         statusShieldSymbol.className = "fa-solid fa-lock-open";
         statusBannerText.innerHTML = `FILE INSECURE <span id="statusBannerPermString">${statusBannerPermString.textContent}</span>`;
-        
+
         termOutputBox.classList.add("error-state");
         btnNextLevel.classList.add("hidden");
-        
+
         // Padlock Mascots Worried Expression
         padlockShackle.style.transform = "translate(0, -6px) rotate(-18deg)";
         padlockMouth.setAttribute("d", "M 44,68 Q 50,62 56,68"); // frowning curve
         padlockSweat.classList.remove("hidden");
-        
+
         // Robot alerting Visor State
         if (robotVisorText) robotVisorText.textContent = "WARN";
       }
@@ -1785,7 +1925,7 @@
     // Game Win popup modal triggers
     function triggerVictory() {
       victoryModal.classList.add("open");
-      
+
       // Grand celebratory sound flourish
       playSuccessChime();
       setTimeout(() => playSuccessChime(), 150);
@@ -1802,10 +1942,10 @@
     document.getElementById("listenButton").addEventListener("click", () => {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        
+
         const m = MISSIONS[currentMissionIndex];
         const msg = `${m.title}. Data policy goal. Owner must: ${formatGoalRuleText(m.target.owner)}. Group must: ${formatGoalRuleText(m.target.group)}. Others must: ${formatGoalRuleText(m.target.others)}. Edit the attributes on the right panel to secure the file.`;
-        
+
         const utterance = new SpeechSynthesisUtterance(msg);
         utterance.rate = 0.95;
         utterance.pitch = 1.05;
@@ -1819,4 +1959,5 @@
     loadMission(0);
   </script>
 </body>
+
 </html>
