@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Encryption Lab – 6 Stage Cipher Challenge</title>
+<style>
+:root {
+  --sky-top: #bfe7ff;
+  --sky-bot: #e9f7ff;
+  --primary: #2b5bc4;
+  --accent: #9b6ad6;
+  --yellow: #ffd84a;
+  --green: #2ecc71;
+  --green-dark: #27ae60;
+  --ink: #2a2a2a;
+  --subtle-ink: #5b6b8a;
+  --card: #ffffff;
+  --panel-bg: #fffdeb;
+  --card-border: #e2e8f0;
+  --shadow: 0 14px 40px rgba(70,90,140,.15);
+  --font: 'Quicksand', 'Comic Sans MS', system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font);
+  color:var(--ink);
+  overflow-x:hidden;
+  background:linear-gradient(180deg,var(--sky-top),var(--sky-bot));
+  min-height:100vh;
+  position:relative;
+}
+
+/* Background light landscape scene */
+.scene{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#aee0ff 0%, #d8f0ff 55%, #eaf9e8 100%)}
+.clouds{position:absolute;top:0;left:0;width:200%;height:auto;animation:drift 60s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.hills{position:absolute;bottom:0;left:0;width:100%;height:34vh}
+.hills path:nth-child(1) { fill: #86d36a; }
+.hills path:nth-child(2) { fill: #62b94c; }
+
+.bushes{position:absolute;bottom:6vh;left:0;width:100%;height:80px}
+.bush{position:absolute;bottom:0;width:120px;height:60px;background:radial-gradient(circle at 30% 40%, #67d34f, #3f9a30);border-radius:60px 60px 30px 30px / 60px 60px 20px 20px;}
+.bush.b1{left:4%}.bush.b2{left:28%;width:160px;height:70px}.bush.b3{right:24%;width:140px;height:64px}
+
+/* Fullscreen Background Floating Texts */
+.bg-text-stream {
+  position: absolute;
+  font-size: clamp(1.2rem, 3vw, 2.2rem);
+  font-weight: 900;
+  opacity: 0.25;
+  color: var(--primary);
+  letter-spacing: 2px;
+  animation: bgFloatingTrack 6s ease-in-out infinite;
+  user-select: none;
+  pointer-events: none;
+}
+.bg-text-stream.cipher-type {
+  color: var(--accent);
+  animation-duration: 8s;
+  animation-delay: -3s;
+}
+.bg-text-stream.t1 { top: 12%; left: 8%; }
+.bg-text-stream.t2 { top: 22%; right: 10%; }
+.bg-text-stream.t3 { bottom: 28%; left: 5%; }
+
+@keyframes bgFloatingTrack {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-25px) rotate(3deg); }
+}
+
+/* Header Navbar */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;max-width:1200px;margin:0 auto;position:relative;z-index:5;
+}
+.iconbtn{
+  padding:10px 24px;border-radius:999px;border:none;cursor:pointer;
+  background:#9b6ad6;color:#fff;box-shadow:var(--shadow);
+  font-family:var(--font);font-weight:800;font-size:1rem;
+  display:flex;align-items:center;gap:8px;transition:transform .2s;
+}
+.iconbtn.listen { background: var(--yellow); color: #3a4a72; }
+.iconbtn:hover{transform:translateY(-2px)}
+.iconbtn:active{transform:scale(.95)}
+
+.brand-title { text-align: center; }
+.brand-title h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; color: #2b5bc4;
+  text-shadow: 0 4px 0 #fff, 0 6px 0 rgba(0,0,0,0.1); letter-spacing: -0.5px;
+}
+.brand-title p { color: #3a4a72; font-weight: 700; font-size: 1.1rem; margin-top: 4px; }
+
+/* Status Bar Row Layout */
+.status-row-container {
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin: 15px 0;
+}
+.mode-badge {
+  background: #ffffff; padding: 6px 20px; border-radius: 999px;
+  font-weight: 800; font-size: 1rem; letter-spacing: 0.5px; text-transform: uppercase;
+  border: 3px solid #e2e8f0; color: var(--primary);
+  box-shadow: 0 4px 0 #e2e8f0;
+}
+.mode-badge.decrypt-type {
+  color: var(--accent);
+}
+
+/* Dots Tracking Node Indicator */
+.dots-container { display: flex; justify-content: center; gap: 8px; }
+.dot {
+  width: 14px; height: 14px; border-radius: 50%; background: #b0c9f0;
+  border: 2px solid #fff; transition: background 0.3s;
+}
+.dot.active { background: #2ecc71; }
+.dot.completed { background: #3498db; }
+
+/* Stage Workspace */
+.stage{padding:10px 20px 50px;max-width:1050px;margin:0 auto;position:relative;z-index:2}
+.main-card {
+  background: var(--card); border: 8px solid #fff; border-radius: 36px;
+  box-shadow: var(--shadow); padding: 35px; position: relative;
+}
+
+/* Character Decorative Models */
+.decor-char {
+  position: absolute; top: -65px; width: 110px; height: 110px; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12));
+}
+.decor-char.robot { left: 25px; }
+.decor-char.lock { right: 25px; }
+
+/* Floating Effect Engine Classes for Interior Items */
+.float-move { animation: floatingArt 3.5s ease-in-out infinite; }
+.float-move.alt-delay { animation-delay: -1.75s; }
+
+@keyframes floatingArt {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* Input Output Word Board Display Elements */
+.io-header-label {
+  text-align: center; font-weight: 800; color: #2b5bc4; font-size: 1.1rem;
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;
+}
+.io-header-label.decrypt-text { color: var(--accent); }
+.word-tile-row {
+  display: flex; justify-content: center; gap: 10px; margin-bottom: 12px;
+}
+.letter-tile {
+  background: #f8fafc; border: 3px solid #e2e8f0; border-radius: 16px;
+  width: 58px; height: 58px; display: grid; place-items: center;
+  font-size: 1.7rem; font-weight: 800; color: #2c3e50;
+  box-shadow: 0 6px 0 #cbd5e1; text-transform: uppercase;
+}
+.context-hint {
+  text-align: center; color: var(--subtle-ink); font-weight: 700; font-size: 1.1rem; margin-bottom: 25px;
+}
+
+/* Cipher Map Grid Board Panel */
+.cipher-board {
+  background: var(--panel-bg); border: 2px dashed #cbd5e1; border-radius: 24px;
+  padding: 20px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 14px;
+}
+.cipher-row-label {
+  font-size: 0.85rem; font-weight: 800; color: #64748b; letter-spacing: 0.5px; text-align: center;
+}
+.alpha-strip {
+  display: flex; justify-content: space-between; overflow-x: auto; gap: 4px; padding-bottom: 5px;
+}
+.alpha-pair {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; background: white;
+  border-radius: 10px; padding: 6px 4px; border: 1px solid #e2e8f0; min-width: 34px;
+}
+.alpha-pair span { font-weight: 800; font-size: 0.95rem; }
+.alpha-pair .source-char { color: #2b5bc4; }
+.alpha-pair .arrow-char { color: #94a3b8; font-size: 0.75rem; }
+.alpha-pair .target-char { color: #e67e22; background: #fef5e7; border-radius: 4px; padding: 0 4px; }
+
+/* Interactive Submission Input Row Elements */
+.input-action-bar {
+  display: flex; gap: 12px; max-width: 600px; margin: 0 auto;
+}
+.cipher-input-field {
+  flex: 1; border: 3px solid #cbd5e1; border-radius: 20px; padding: 0 24px;
+  font-family: var(--font); font-size: 1.3rem; font-weight: 800; color: #2c3e50;
+  text-transform: uppercase; letter-spacing: 2px; outline: none; transition: border 0.2s;
+  background: #f8fafc;
+}
+.cipher-input-field:focus { border-color: #2ecc71; }
+.submit-btn {
+  background: #2ecc71; border: none; width: 60px; height: 60px; border-radius: 20px;
+  cursor: pointer; display: grid; place-items: center; color: white;
+  box-shadow: 0 6px 0 #27ae60; transition: transform 0.1s, box-shadow 0.1s;
+}
+.submit-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #27ae60; }
+.submit-btn svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 3; }
+
+/* Success Popup Modal Window Box Layout */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(13,27,62,0.4); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.win-modal {
+  background: #fff; border-radius: 36px; padding: 40px 30px; text-align: center;
+  max-width: 480px; width: 100%; box-shadow: 0 30px 70px rgba(0,0,0,0.15);
+  position: relative; animation: popUp 0.4s cubic-bezier(.17,1.2,.4,1.1);
+}
+@keyframes popUp { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+.modal-trophy-art { width: 140px; height: 140px; margin: 0 auto 15px; }
+
+.win-modal h2 { font-size: 2.3rem; color: #2b5bc4; font-weight: 900; }
+.win-modal p { color: var(--subtle-ink); font-weight: 700; margin-top: 8px; font-size: 1.1rem; }
+.restart-btn {
+  background: linear-gradient(135deg, var(--yellow), #ffb600); border: none;
+  padding: 14px 45px; font-family: var(--font); font-weight: 900; font-size: 1.2rem;
+  color: #3a4a72; border-radius: 999px; cursor: pointer; margin-top: 25px;
+  box-shadow: 0 8px 20px rgba(255,182,0,0.3);
+}
+
+/* Particle Configurations */
+.confetti-box { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.conf-bit { position: absolute; top: -10px; width: 10px; height: 10px; animation: fall 2.5s linear forwards; }
+@keyframes fall { to { transform: translateY(400px) rotate(360deg); opacity: 0; } }
+
+@media (max-width: 640px) {
+  .decor-char { display: none; }
+  .alpha-strip { padding-bottom: 10px; }
+  .status-row-container { flex-direction: column; gap: 10px; }
+  .bg-text-stream { opacity: 0.12; }
+}
+</style>
+</head>
+<body>
+
+  <div class="scene" aria-hidden="true">
+    <div class="sky"></div>
+    
+    <div class="bg-text-stream t1">LOZMWB</div>
+    <div class="bg-text-stream cipher-type t2">RIGJUE</div>
+    <div class="bg-text-stream t3">QTWFSI</div>
+
+    <svg class="clouds" viewBox="0 0 1200 300" preserveAspectRatio="none">
+      <g fill="#ffffff" opacity="0.85">
+        <ellipse cx="150" cy="70" rx="75" ry="20"/>
+        <ellipse cx="550" cy="110" rx="95" ry="26"/>
+        <ellipse cx="950" cy="60" rx="80" ry="22"/>
+      </g>
+    </svg>
+    <svg class="hills" viewBox="0 0 1200 300" preserveAspectRatio="none">
+      <path d="M0,210 C250,130 350,250 650,170 C900,110 1050,230 1200,150 L1200,300 L0,300 Z" />
+      <path d="M0,250 C200,190 450,280 700,220 C900,160 1050,270 1200,210 L1200,300 L0,300 Z" />
+    </svg>
+    <div class="bushes">
+      <span class="bush b1"></span><span class="bush b2"></span><span class="bush b3"></span>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <button class="iconbtn back" onclick="alert('Returning to main hub...')" aria-label="Back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back
+    </button>
+    <div class="brand-title">
+      <h1>Encryption Lab</h1>
+      <p>Caesar Cipher - each letter shifts by 3</p>
+    </div>
+    <button class="iconbtn listen" id="narrationBtn" aria-label="Listen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      Listen
+    </button>
+  </header>
+
+  <div class="status-row-container">
+    <div class="mode-badge" id="modeBadgeText">Encrypt</div>
+    <div class="dots-container" id="indicators"></div>
+  </div>
+
+  <main class="stage">
+    <div class="main-card">
+      
+      <div class="decor-char robot float-move">
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <rect x="20" y="30" width="60" height="50" rx="15" fill="#d6e4ff" stroke="#4a90e2" stroke-width="3"/>
+          <rect x="30" y="42" width="40" height="24" rx="8" fill="#ffffff" stroke="#4a90e2" stroke-width="2"/>
+          <circle cx="42" cy="54" r="5" fill="#2c3e50"/><circle cx="58" cy="54" r="5" fill="#2c3e50"/>
+          <circle cx="44" cy="52" r="1.5" fill="#fff"/><circle cx="60" cy="52" r="1.5" fill="#fff"/>
+          <path d="M44 72 Q50 78 56 72" stroke="#2c3e50" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <rect x="47" y="15" width="6" height="15" fill="#9bafc6"/>
+          <circle cx="50" cy="14" r="5" fill="#ff7eb6"/>
+          <rect x="12" y="45" width="8" height="20" rx="4" fill="#9bafc6"/>
+          <rect x="80" y="45" width="8" height="20" rx="4" fill="#9bafc6"/>
+        </svg>
+      </div>
+
+      <div class="decor-char lock float-move alt-delay">
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <path d="M30 45 V30 C30 18, 70 18, 70 45" fill="none" stroke="#bdc3c7" stroke-width="8" stroke-linecap="round"/>
+          <rect x="20" y="42" width="60" height="48" rx="12" fill="#ffd84a" stroke="#e67e22" stroke-width="3"/>
+          <circle cx="50" cy="62" r="6" fill="#e67e22"/>
+          <path d="M50 68 V78" stroke="#e67e22" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="40" cy="52" r="2" fill="#fff" opacity="0.6"/>
+        </svg>
+      </div>
+
+      <div class="challenge-body">
+        <div class="io-header-label" id="panelLabel">Plain Text To Encrypt:</div>
+        
+        <div class="word-tile-row" id="sourceWordRow"></div>
+        
+        <div class="context-hint" id="contextHint">Loading Hint...</div>
+
+        <div class="cipher-board">
+          <div class="cipher-row-label">CIPHER KEY MATRIX (+3 POSITION SHIFT):</div>
+          <div class="alpha-strip" id="alphabetStrip"></div>
+        </div>
+
+        <div class="input-action-bar">
+          <input type="text" class="cipher-input-field" id="userSolutionInput" placeholder="Type answer..." autocomplete="off" maxlength="8">
+          <button class="submit-btn" id="btnSubmitGuess" aria-label="Verify Answer">
+            <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="completionScreen">
+    <div class="win-modal">
+      <div class="confetti-box" id="modalConfettiContainer"></div>
+      <div class="modal-trophy-art float-move">
+         <svg viewBox="0 0 100 100" width="100%" height="100%">
+           <path d="M28 24 H72 V34 C72 49 62 59 50 59 C38 59 28 49 28 34 Z" fill="#ffd84a" stroke="#ffb600" stroke-width="4" stroke-linejoin="round"/>
+           <path d="M72 28 C82 28 84 40 79 46 C75 51 69 54 64 54" fill="none" stroke="#ffb600" stroke-width="5" stroke-linecap="round"/>
+           <path d="M28 28 C18 28 16 40 21 46 C25 51 31 54 36 54" fill="none" stroke="#ffb600" stroke-width="5" stroke-linecap="round"/>
+           <rect x="45" y="56" width="10" height="14" rx="2" fill="#ffbf00"/>
+           <path d="M38 70 H62 L58 82 H42 Z" fill="#34495e"/>
+           <path d="M43 38 L47 45 L55 45 L49 50 L51 58 L43 54 L35 58 L37 50 L31 45 L39 45 Z" fill="#ffffff" opacity="0.95"/>
+           <path d="M36 18 Q50 10 64 18" fill="none" stroke="#fff3b0" stroke-width="4" stroke-linecap="round"/>
+         </svg>
+      </div>
+      <h2>Lab Matrix Secured!</h2>
+      <p id="modalWinDescription">Sensational! You verified all 6 encryption layers and validated the encryption logic perfectly!</p>
+      <button class="restart-btn" id="btnResetAll">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    // 6 Connected continuous items (3 Encrypt followed directly by 3 Decrypt tasks)
+    const MASTER_ROUNDS = [
+      { type: "encrypt", word: "HELLO", target: "KHOOR", hint: "A common greeting" },
+      { type: "encrypt", word: "CODE", target: "FRGH", hint: "What programmers write" },
+      { type: "encrypt", word: "SAFE", target: "VDIH", hint: "Protected from danger" },
+      { type: "decrypt", word: "KHOOR", target: "HELLO", hint: "A common greeting" },
+      { type: "decrypt", word: "FRGH", target: "CODE", hint: "What programmers write" },
+      { type: "decrypt", word: "VDIH", target: "SAFE", hint: "Protected from danger" }
+    ];
+
+    let currentIndex = 0;
+
+    const panelLabel = document.getElementById('panelLabel');
+    const sourceWordRow = document.getElementById('sourceWordRow');
+    const contextHint = document.getElementById('contextHint');
+    const alphabetStrip = document.getElementById('alphabetStrip');
+    const userSolutionInput = document.getElementById('userSolutionInput');
+    const btnSubmitGuess = document.getElementById('btnSubmitGuess');
+    const indicators = document.getElementById('indicators');
+    const completionScreen = document.getElementById('completionScreen');
+    const btnResetAll = document.getElementById('btnResetAll');
+    const modeBadgeText = document.getElementById('modeBadgeText');
+    const narrationBtn = document.getElementById('narrationBtn');
+
+    function compileAlphabetLookupGrid() {
+      alphabetStrip.innerHTML = '';
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      letters.forEach((char) => {
+        const idx = letters.indexOf(char);
+        const shiftedIdx = (idx + 3) % 26;
+        const cipherChar = letters[shiftedIdx];
+
+        const box = document.createElement('div');
+        box.className = 'alpha-pair';
+        box.innerHTML = `
+          <span class="source-char">${char}</span>
+          <span class="arrow-char">↓</span>
+          <span class="target-char">${cipherChar}</span>
+        `;
+        alphabetStrip.appendChild(box);
+      });
+    }
+
+    function setupProgressDots() {
+      indicators.innerHTML = '';
+      MASTER_ROUNDS.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        if (idx < currentIndex) {
+          dot.className = 'dot completed';
+        } else if (idx === currentIndex) {
+          dot.className = 'dot active';
+        } else {
+          dot.className = 'dot';
+        }
+        indicators.appendChild(dot);
+      });
+    }
+
+    function renderActiveChallengeCard() {
+      setupProgressDots();
+      userSolutionInput.value = '';
+      userSolutionInput.style.borderColor = '#cbd5e1';
+
+      const activeItem = MASTER_ROUNDS[currentIndex];
+      
+      if(activeItem.type === 'encrypt') {
+        panelLabel.textContent = "Plain Text To Encrypt:";
+        panelLabel.className = "io-header-label";
+        modeBadgeText.textContent = `Encrypt`;
+        modeBadgeText.className = "mode-badge";
+        userSolutionInput.placeholder = "Type encrypted word...";
+      } else {
+        panelLabel.textContent = "Cipher Text To Decrypt:";
+        panelLabel.className = "io-header-label decrypt-text";
+        modeBadgeText.textContent = `Decrypt`;
+        modeBadgeText.className = "mode-badge decrypt-type";
+        userSolutionInput.placeholder = "Type decrypted word...";
+      }
+
+      contextHint.textContent = activeItem.hint;
+
+      sourceWordRow.innerHTML = '';
+      activeItem.word.split("").forEach(letter => {
+        const tile = document.createElement('div');
+        tile.className = 'letter-tile';
+        tile.textContent = letter;
+        sourceWordRow.appendChild(tile);
+      });
+    }
+
+    function checkUserAnswer() {
+      const activeItem = MASTER_ROUNDS[currentIndex];
+      const sanitizedInput = userSolutionInput.value.trim().toUpperCase();
+
+      if(sanitizedInput === activeItem.target) {
+        userSolutionInput.style.borderColor = 'var(--green)';
+        currentIndex++;
+        
+        setTimeout(() => {
+          if(currentIndex < MASTER_ROUNDS.length) {
+            renderActiveChallengeCard();
+          } else {
+            launchSuccessModal();
+          }
+        }, 800);
+      } else {
+        userSolutionInput.style.borderColor = '#ef4444';
+        userSolutionInput.animate([
+          { transform: 'translateX(-6px)' },
+          { transform: 'translateX(6px)' },
+          { transform: 'translateX(0)' }
+        ], { duration: 200, iterations: 2 });
+      }
+    }
+
+    function launchSuccessModal() {
+      setupProgressDots();
+      completionScreen.classList.add('active');
+      generateConfettiStorm();
+    }
+
+    function generateConfettiStorm() {
+      const container = document.getElementById('modalConfettiContainer');
+      container.innerHTML = '';
+      const palette = ['#ffd84a', '#ff7eb6', '#7ed0ff', '#2ecc71', '#9b6ad6'];
+      for(let i=0; i<40; i++) {
+        const bit = document.createElement('span');
+        bit.className = 'conf-bit';
+        bit.style.background = palette[i % palette.length];
+        bit.style.left = (Math.random() * 100) + '%';
+        bit.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+        bit.style.animationDelay = (Math.random() * 0.4) + 's';
+        bit.style.width = bit.style.height = (6 + Math.random() * 8) + 'px';
+        bit.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        container.appendChild(bit);
+      }
+    }
+
+    narrationBtn.addEventListener('click', () => {
+      if('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const activeItem = MASTER_ROUNDS[currentIndex];
+        const speechString = `${panelLabel.textContent} ${activeItem.word}. ${activeItem.hint}`;
+        const speechUnit = new SpeechSynthesisUtterance(speechString);
+        speechUnit.rate = 0.95;
+        window.speechSynthesis.speak(speechUnit);
+      } else {
+        alert("Audio narration speech synthesis is not fully supported on this device browser.");
+      }
+    });
+
+    btnSubmitGuess.addEventListener('click', checkUserAnswer);
+    userSolutionInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter') checkUserAnswer();
+    });
+
+    btnResetAll.addEventListener('click', () => {
+      currentIndex = 0;
+      completionScreen.classList.remove('active');
+      renderActiveChallengeCard();
+    });
+
+    compileAlphabetLookupGrid();
+    renderActiveChallengeCard();
+
+  })();
+  </script>
+</body>
+</html>

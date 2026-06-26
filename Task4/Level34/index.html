@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Morse Code Adventure</title>
+<style>
+    :root {
+  --purple: #7b5cf5;
+  --purple-dark: #5b3fd6;
+  --orange: #ff9f43;
+  --yellow: #ffd43b;
+  --pink: #ffb3c1;
+  --pink-dark: #e0598b;
+  --blue: #a5d8ff;
+  --blue-dark: #1c7ed6;
+  --green: #b2f2bb;
+  --green-dark: #2f9e44;
+  --peach: #ffe8a3;
+  --peach-dark: #e8a33d;
+  --card-bg: #fffdf3;
+  --shadow-lg: 0 18px 40px -12px rgba(40, 30, 90, 0.25);
+  --shadow-md: 0 8px 20px -6px rgba(40, 30, 90, 0.2);
+  --radius-xl: 32px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --font: "Nunito", "Comic Sans MS", "Baloo", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  color: #2b2557;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #6cc3ff 0%, #a5e1ff 60%, #c8f0d2 100%);
+  position: relative;
+}
+
+/* ---------- Scene ---------- */
+.scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.sky { position: absolute; inset: 0; background: linear-gradient(180deg, #5fb8ff 0%, #9fd9ff 55%, #d6f3e0 100%); }
+.rainbow { position: absolute; left: -3%; bottom: 8%; width: 35%; height: 55%; opacity: .85; }
+.hills { position: absolute; bottom: 0; left: 0; width: 100%; height: 30%; }
+.hills svg { width: 100%; height: 100%; display: block; }
+
+.cloud { position: absolute; width: 140px; height: 70px; opacity: .95; animation: float 8s ease-in-out infinite; }
+.c1 { top: 8%; left: 18%; animation-delay: 0s; }
+.c2 { top: 14%; right: 22%; width: 180px; animation-delay: 1.5s; }
+.c3 { top: 4%; left: 55%; width: 110px; animation-delay: 3s; }
+
+.tree { position: absolute; bottom: 12%; right: 4%; width: 160px; height: 200px; animation: float 7s ease-in-out infinite; }
+
+.flower { position: absolute; width: 46px; height: 46px; animation: float 6s ease-in-out infinite; }
+.f1 { bottom: 4%; left: 3%; }
+.f2 { bottom: 8%; left: 9%; width: 38px; animation-delay: 1s; }
+.f3 { bottom: 3%; right: 8%; width: 42px; animation-delay: 2s; }
+.f4 { bottom: 10%; right: 14%; width: 36px; animation-delay: .5s; }
+
+.butterfly { position: absolute; width: 48px; height: 48px; animation: float 5s ease-in-out infinite; }
+.b1 { top: 30%; left: 5%; }
+.b2 { top: 38%; right: 6%; animation-delay: 1.5s; }
+
+.spark { position: absolute; width: 18px; height: 18px; opacity: .9; animation: twinkle 3s ease-in-out infinite; }
+.s1 { top: 12%; left: 35%; }
+.s2 { top: 20%; right: 40%; animation-delay: .8s; }
+.s3 { top: 6%; right: 12%; animation-delay: 1.6s; }
+.s4 { top: 18%; left: 8%; animation-delay: 2.2s; }
+.star { position: absolute; width: 22px; height: 22px; animation: twinkle 4s ease-in-out infinite; }
+.sa { top: 25%; left: 28%; }
+.sb { top: 16%; right: 30%; animation-delay: 1.2s; }
+
+@keyframes float { 0%,100%{transform: translateY(0)} 50%{transform: translateY(-12px)} }
+@keyframes twinkle { 0%,100%{opacity:.4; transform:scale(.9)} 50%{opacity:1; transform:scale(1.1)} }
+
+/* ---------- App ---------- */
+.app {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px 24px 60px;
+}
+
+/* topbar */
+.topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 16px;
+}
+.title-wrap { text-align: center; padding-top: 4px; }
+.title { font-size: clamp(34px, 5vw, 60px); font-weight: 900; letter-spacing: 1px; text-shadow: 0 4px 0 rgba(0,0,0,.08); }
+.t-purple { color: #7b5cf5; -webkit-text-stroke: 2px #fff; }
+.t-orange { color: #ff9f43; -webkit-text-stroke: 2px #fff; margin-left: 12px; }
+.subtitle { color: #1c4f9c; font-weight: 700; margin-top: 6px; font-size: clamp(13px, 1.4vw, 17px); }
+.progress { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
+.dot-prog { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid #fff; box-shadow: 0 2px 0 rgba(0,0,0,.08); transition: all .3s; }
+.dot-prog.active { background: var(--yellow); transform: scale(1.2); }
+.dot-prog.done { background: var(--green-dark); }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: none; cursor: pointer;
+  font-family: var(--font); font-weight: 800; font-size: 16px; color: #fff;
+  padding: 12px 22px; border-radius: 999px;
+  box-shadow: 0 6px 0 rgba(0,0,0,.15), 0 8px 18px rgba(0,0,0,.12);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.15); }
+.btn-back { background: linear-gradient(180deg, #9775fa, #7b5cf5); }
+.btn-listen { background: linear-gradient(180deg, #ffd43b, #f5a623); color: #5a3a00; }
+.btn-listen svg path { fill: #5a3a00; stroke: #5a3a00; }
+
+/* Characters */
+.char { position: absolute; width: 150px; height: 150px; z-index: 3; animation: float 4s ease-in-out infinite; }
+.puppy { top: 60px; left: 14%; }
+.robot { top: 50px; right: 14%; animation-delay: 1s; }
+
+/* Panel */
+.panel {
+  position: relative;
+  margin-top: 90px;
+  background: linear-gradient(180deg, #fffef5, #fff7d6);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px 28px;
+  box-shadow: var(--shadow-lg);
+  border: 3px dashed #f0d77a;
+  z-index: 2;
+}
+.panel-title { text-align: center; color: var(--purple-dark); font-size: 20px; font-weight: 900; letter-spacing: 2px; }
+
+.morse-display {
+  display: flex; justify-content: center; align-items: center; gap: 14px;
+  margin: 22px 0 8px; min-height: 50px;
+}
+.morse-display .dot,
+.morse-display .dash {
+  background: linear-gradient(180deg, #8b6cf7, #5b3fd6);
+  box-shadow: 0 4px 0 #3b2aa0, 0 8px 14px rgba(91,63,214,.35);
+  animation: pop .4s ease;
+}
+.morse-display .dot { width: 28px; height: 28px; border-radius: 50%; }
+.morse-display .dash { width: 70px; height: 28px; border-radius: 999px; }
+@keyframes pop { from { transform: scale(0); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+
+.legend { display: flex; justify-content: center; gap: 26px; color: var(--purple-dark); font-weight: 800; margin-bottom: 20px; }
+.legend .leg { display: inline-flex; align-items: center; gap: 8px; }
+.legend .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--purple); display: inline-block; }
+.legend .dash { width: 30px; height: 14px; border-radius: 999px; background: var(--purple); display: inline-block; }
+
+/* Cards */
+.cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  margin: 18px 0 22px;
+}
+.card {
+  position: relative;
+  border: none; cursor: pointer;
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font); font-weight: 900;
+  font-size: 56px;
+  color: #fff; -webkit-text-stroke: 2px #fff;
+  box-shadow: 0 8px 0 rgba(0,0,0,.08), var(--shadow-md);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s;
+  overflow: hidden;
+  min-height: 110px;
+  display: flex; align-items: center; justify-content: center;
+}
+.card .letter { position: relative; z-index: 2; display: inline-block; }
+.card.c-pink   { background: linear-gradient(180deg, #ffd3df, #ffb3c1); color: var(--pink-dark); }
+.card.c-blue   { background: linear-gradient(180deg, #d0ebff, #a5d8ff); color: var(--blue-dark); }
+.card.c-green  { background: linear-gradient(180deg, #d3f9d8, #b2f2bb); color: var(--green-dark); }
+.card.c-peach  { background: linear-gradient(180deg, #fff3bf, #ffe8a3); color: var(--peach-dark); }
+.card::before, .card::after {
+  content: ""; position: absolute; border-radius: 50%; background: rgba(255,255,255,.65);
+}
+.card::before { width: 40px; height: 18px; top: 18px; left: 22px; box-shadow: 22px 6px 0 -2px rgba(255,255,255,.65); }
+.card::after  { width: 30px; height: 14px; bottom: 16px; right: 22px; box-shadow: -18px 4px 0 -2px rgba(255,255,255,.55); }
+.card .mini-star {
+  position: absolute; width: 14px; height: 14px; z-index: 1;
+}
+.card .mini-star.ms1 { top: 12px; right: 18px; }
+.card .mini-star.ms2 { bottom: 14px; left: 20px; }
+
+.card:hover:not(.locked) { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 0 10px rgba(255,255,255,.7)); }
+.card:active:not(.locked) { transform: scale(.98); }
+.card.correct { outline: 5px solid #2f9e44; outline-offset: -5px; }
+.card.wrong { outline: 5px solid #e03131; outline-offset: -5px; animation: shake .5s; }
+.card.locked { cursor: default; }
+@keyframes shake {
+  0%,100%{transform: translateX(0)} 20%{transform: translateX(-8px)} 40%{transform: translateX(8px)}
+  60%{transform: translateX(-6px)} 80%{transform: translateX(6px)}
+}
+
+/* Ripple */
+.ripple {
+  position: absolute; border-radius: 50%; transform: scale(0);
+  background: rgba(255,255,255,.7); pointer-events: none;
+  animation: ripple .6s ease-out forwards;
+}
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+/* Sparkles on correct */
+.sparkle-burst { position: absolute; inset: 0; pointer-events: none; }
+.sparkle-burst span {
+  position: absolute; width: 10px; height: 10px; border-radius: 50%;
+  background: #ffd43b; animation: burst .9s ease-out forwards;
+}
+@keyframes burst {
+  to { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+/* Quick reference */
+.quick-ref { margin-top: 8px; padding-top: 18px; border-top: 2px dashed #f0d77a; }
+.quick-ref h3 { text-align: center; color: var(--purple-dark); letter-spacing: 2px; margin-bottom: 12px; font-size: 16px; }
+.ref-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 18px; }
+.ref-item { font-weight: 800; font-size: 14px; color: var(--purple-dark); }
+.ref-item .rc { color: #1c7ed6; margin-left: 4px; letter-spacing: 2px; font-family: monospace; }
+
+/* panel decorations */
+.panel-deco { position: absolute; }
+.pd1 { top: 18px; left: 26px; width: 22px; height: 22px; animation: twinkle 3s infinite; }
+.pd2 { top: 22px; right: 28px; width: 22px; height: 22px; animation: twinkle 4s infinite; }
+.pd3 { top: 60px; left: 40px; width: 36px; height: 36px; animation: float 6s infinite; }
+
+/* Modal */
+.modal {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(20, 15, 50, .45);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn .3s ease;
+}
+.modal[hidden] { display: none; }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.modal-card {
+  position: relative;
+  background: linear-gradient(180deg, #fffdf3, #fff3c4);
+  border-radius: 28px;
+  padding: 30px 28px;
+  max-width: 460px; width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  border: 3px dashed #f0d77a;
+  animation: pop .4s ease;
+}
+.trophy { position: relative; width: 120px; height: 140px; margin: 0 auto 8px; }
+.floaty { animation: float 3s ease-in-out infinite; }
+.t-spark { position: absolute; width: 16px; height: 16px; animation: twinkle 1.6s infinite; }
+.ts1 { top: 0; left: -10px; }
+.ts2 { top: 30px; right: -12px; animation-delay: .4s; }
+.ts3 { bottom: 30px; left: -6px; animation-delay: .8s; }
+.m-title { font-size: 32px; color: var(--purple-dark); }
+.m-sub { color: #4a3f8a; font-weight: 700; margin: 6px 0 18px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 22px; }
+.stat { background: #fff; border-radius: 14px; padding: 12px 6px; box-shadow: var(--shadow-md); }
+.sv { display: block; font-size: 22px; font-weight: 900; color: var(--purple-dark); }
+.sl { display: block; font-size: 11px; font-weight: 800; color: #4a3f8a; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.m-btns { display: flex; gap: 12px; justify-content: center; }
+.btn-play { background: linear-gradient(180deg, #69db7c, #2f9e44); }
+.btn-home { background: linear-gradient(180deg, #9775fa, #7b5cf5); }
+
+/* Confetti */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; border-radius: 28px; }
+.confetti i {
+  position: absolute; top: -10px; width: 10px; height: 14px;
+  background: var(--c, #ffd43b);
+  animation: fall var(--d, 3s) linear infinite;
+  border-radius: 2px;
+}
+@keyframes fall {
+  to { transform: translateY(600px) rotate(720deg); opacity: 0; }
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .char { width: 90px; height: 90px; }
+  .puppy { top: 80px; left: 2%; }
+  .robot { top: 70px; right: 2%; }
+  .panel { margin-top: 80px; padding: 26px 18px; }
+  .cards { grid-template-columns: 1fr; }
+  .card { font-size: 44px; min-height: 80px; padding: 18px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .btn { padding: 10px 16px; font-size: 14px; }
+  .title { font-size: 38px; }
+}
+@media (max-width: 460px) {
+  .char { display: none; }
+  .ref-grid { font-size: 12px; }
+}
+
+</style>
+</head>
+<body>
+  <!-- Background scene (pure SVG/CSS) -->
+  <div class="scene" aria-hidden="true">
+    <div class="sky"></div>
+    <svg class="rainbow" viewBox="0 0 400 400" preserveAspectRatio="none">
+      <g fill="none" stroke-width="18" stroke-linecap="round">
+        <path d="M-40,380 A220,220 0 0 1 400,380" stroke="#ff6b6b"/>
+        <path d="M-40,380 A200,200 0 0 1 400,380" stroke="#ffa94d"/>
+        <path d="M-40,380 A180,180 0 0 1 400,380" stroke="#ffd43b"/>
+        <path d="M-40,380 A160,160 0 0 1 400,380" stroke="#69db7c"/>
+        <path d="M-40,380 A140,140 0 0 1 400,380" stroke="#4dabf7"/>
+        <path d="M-40,380 A120,120 0 0 1 400,380" stroke="#9775fa"/>
+      </g>
+    </svg>
+
+    <div class="hills">
+      <svg viewBox="0 0 1440 300" preserveAspectRatio="none">
+        <path d="M0,200 Q360,80 720,180 T1440,160 L1440,300 L0,300 Z" fill="#7ed957"/>
+        <path d="M0,240 Q360,160 720,230 T1440,220 L1440,300 L0,300 Z" fill="#5ec24a"/>
+      </svg>
+    </div>
+
+    <!-- Clouds -->
+    <svg class="cloud c1" viewBox="0 0 120 60"><g fill="#fff"><circle cx="30" cy="35" r="22"/><circle cx="60" cy="25" r="26"/><circle cx="90" cy="38" r="20"/><ellipse cx="60" cy="48" rx="55" ry="14"/></g></svg>
+    <svg class="cloud c2" viewBox="0 0 120 60"><g fill="#fff"><circle cx="30" cy="35" r="22"/><circle cx="60" cy="25" r="26"/><circle cx="90" cy="38" r="20"/><ellipse cx="60" cy="48" rx="55" ry="14"/></g></svg>
+    <svg class="cloud c3" viewBox="0 0 120 60"><g fill="#fff"><circle cx="30" cy="35" r="22"/><circle cx="60" cy="25" r="26"/><circle cx="90" cy="38" r="20"/><ellipse cx="60" cy="48" rx="55" ry="14"/></g></svg>
+
+    <!-- Tree -->
+    <svg class="tree" viewBox="0 0 120 160">
+      <rect x="52" y="100" width="16" height="50" rx="6" fill="#8b5a2b"/>
+      <circle cx="60" cy="70" r="48" fill="#4caf50"/>
+      <circle cx="35" cy="85" r="30" fill="#5cb85c"/>
+      <circle cx="85" cy="85" r="30" fill="#5cb85c"/>
+      <circle cx="60" cy="45" r="28" fill="#6dc96d"/>
+    </svg>
+
+    <!-- Flowers -->
+    <svg class="flower f1" viewBox="0 0 60 60"><g><circle cx="30" cy="15" r="9" fill="#ff8fab"/><circle cx="45" cy="30" r="9" fill="#ff8fab"/><circle cx="30" cy="45" r="9" fill="#ff8fab"/><circle cx="15" cy="30" r="9" fill="#ff8fab"/><circle cx="30" cy="30" r="8" fill="#ffd43b"/></g></svg>
+    <svg class="flower f2" viewBox="0 0 60 60"><g><circle cx="30" cy="15" r="9" fill="#a78bfa"/><circle cx="45" cy="30" r="9" fill="#a78bfa"/><circle cx="30" cy="45" r="9" fill="#a78bfa"/><circle cx="15" cy="30" r="9" fill="#a78bfa"/><circle cx="30" cy="30" r="8" fill="#ffd43b"/></g></svg>
+    <svg class="flower f3" viewBox="0 0 60 60"><g><circle cx="30" cy="15" r="9" fill="#74c0fc"/><circle cx="45" cy="30" r="9" fill="#74c0fc"/><circle cx="30" cy="45" r="9" fill="#74c0fc"/><circle cx="15" cy="30" r="9" fill="#74c0fc"/><circle cx="30" cy="30" r="8" fill="#ffd43b"/></g></svg>
+    <svg class="flower f4" viewBox="0 0 60 60"><g><circle cx="30" cy="15" r="9" fill="#ffa8a8"/><circle cx="45" cy="30" r="9" fill="#ffa8a8"/><circle cx="30" cy="45" r="9" fill="#ffa8a8"/><circle cx="15" cy="30" r="9" fill="#ffa8a8"/><circle cx="30" cy="30" r="8" fill="#fff"/></g></svg>
+
+    <!-- Butterflies -->
+    
+    <svg class="butterfly b2" viewBox="0 0 60 60"><g><ellipse cx="20" cy="25" rx="14" ry="10" fill="#74c0fc"/><ellipse cx="40" cy="25" rx="14" ry="10" fill="#74c0fc"/><ellipse cx="20" cy="40" rx="10" ry="8" fill="#a5d8ff"/><ellipse cx="40" cy="40" rx="10" ry="8" fill="#a5d8ff"/><rect x="29" y="20" width="2" height="22" fill="#333" rx="1"/></g></svg>
+
+    <!-- Sparkles & stars -->
+    <svg class="spark s1" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#fff"/></svg>
+    <svg class="spark s2" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#fff"/></svg>
+    <svg class="spark s3" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#fff"/></svg>
+    <svg class="spark s4" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#fff"/></svg>
+    <svg class="star sa" viewBox="0 0 24 24"><path d="M12 2 L14.5 9 L22 9.5 L16 14 L18 21.5 L12 17 L6 21.5 L8 14 L2 9.5 L9.5 9 Z" fill="#ffd43b"/></svg>
+    <svg class="star sb" viewBox="0 0 24 24"><path d="M12 2 L14.5 9 L22 9.5 L16 14 L18 21.5 L12 17 L6 21.5 L8 14 L2 9.5 L9.5 9 Z" fill="#ffd43b"/></svg>
+  </div>
+
+  <!-- App shell -->
+  <main class="app">
+    <header class="topbar">
+      <button class="btn btn-back" id="backBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 6l-6 6 6 6" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Back</span>
+      </button>
+
+      <div class="title-wrap">
+        <h1 class="title">
+          <span class="t-purple">Morse</span>
+          <span class="t-orange">Code</span>
+        </h1>
+        <p class="subtitle">Read the dots and dashes — pick the letter they spell</p>
+        <div class="progress" id="progress" aria-label="Progress"></div>
+      </div>
+
+      <button class="btn btn-listen" id="listenBtn" aria-label="Listen">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="#fff"/><path d="M16 8a5 5 0 010 8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        <span>Listen</span>
+      </button>
+    </header>
+
+    <!-- Characters -->
+
+    <div class="char robot" aria-hidden="true">
+      <svg viewBox="0 0 160 160">
+        <ellipse cx="80" cy="140" rx="55" ry="14" fill="rgba(0,0,0,.08)"/>
+        <!-- antenna -->
+        <line x1="80" y1="30" x2="80" y2="15" stroke="#9aa5b1" stroke-width="3"/>
+        <circle cx="80" cy="12" r="6" fill="#4dabf7"/>
+        <!-- head -->
+        <rect x="30" y="35" width="100" height="85" rx="30" fill="#f1f3f5"/>
+        <rect x="40" y="55" width="80" height="50" rx="22" fill="#1f3a57"/>
+        <!-- eyes (closed happy) -->
+        <path d="M60 80 Q68 72 76 80" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M84 80 Q92 72 100 80" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- cheeks -->
+        <circle cx="58" cy="92" r="5" fill="#ff8fab" opacity=".8"/>
+        <circle cx="102" cy="92" r="5" fill="#ff8fab" opacity=".8"/>
+        <!-- mouth -->
+        <path d="M72 95 Q80 102 88 95" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- side ears -->
+        <rect x="20" y="65" width="14" height="25" rx="6" fill="#4dabf7"/>
+        <rect x="126" y="65" width="14" height="25" rx="6" fill="#4dabf7"/>
+        <!-- body hint -->
+        <rect x="55" y="120" width="50" height="20" rx="10" fill="#dee2e6"/>
+        <circle cx="80" cy="130" r="4" fill="#4dabf7"/>
+      </svg>
+    </div>
+
+    <!-- Question Panel -->
+    <section class="panel" aria-live="polite">
+      <h2 class="panel-title">DECODE THIS SIGNAL:</h2>
+
+      <div class="morse-display" id="morseDisplay"></div>
+
+      <div class="legend">
+        <span class="leg"><span class="dot"></span> dot</span>
+        <span class="leg"><span class="dash"></span> dash</span>
+      </div>
+
+      <div class="cards" id="cards"></div>
+
+      <div class="quick-ref">
+        <h3>QUICK REFERENCE</h3>
+        <div class="ref-grid" id="refGrid"></div>
+      </div>
+
+      <!-- panel decoration -->
+      <svg class="panel-deco pd1" viewBox="0 0 24 24"><path d="M12 2 L14.5 9 L22 9.5 L16 14 L18 21.5 L12 17 L6 21.5 L8 14 L2 9.5 L9.5 9 Z" fill="#ffd43b"/></svg>
+      <svg class="panel-deco pd2" viewBox="0 0 24 24"><path d="M12 2 L14.5 9 L22 9.5 L16 14 L18 21.5 L12 17 L6 21.5 L8 14 L2 9.5 L9.5 9 Z" fill="#ff8fab"/></svg>
+      <svg class="panel-deco pd3" viewBox="0 0 60 60"><g><circle cx="30" cy="15" r="9" fill="#ffb3c1"/><circle cx="45" cy="30" r="9" fill="#ffb3c1"/><circle cx="30" cy="45" r="9" fill="#ffb3c1"/><circle cx="15" cy="30" r="9" fill="#ffb3c1"/><circle cx="30" cy="30" r="8" fill="#ffd43b"/></g></svg>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+      <div class="trophy floaty">
+        <svg viewBox="0 0 120 140">
+          <path d="M30 20 H90 V55 A30 30 0 0 1 30 55 Z" fill="#ffd43b" stroke="#e0a800" stroke-width="3"/>
+          <path d="M30 30 Q10 30 10 50 Q10 65 30 65" fill="none" stroke="#e0a800" stroke-width="4"/>
+          <path d="M90 30 Q110 30 110 50 Q110 65 90 65" fill="none" stroke="#e0a800" stroke-width="4"/>
+          <rect x="50" y="80" width="20" height="20" fill="#e0a800"/>
+          <rect x="35" y="100" width="50" height="12" rx="3" fill="#8b5a2b"/>
+          <rect x="25" y="112" width="70" height="14" rx="4" fill="#a36b3d"/>
+          <circle cx="60" cy="45" r="10" fill="#fff" opacity=".5"/>
+        </svg>
+        <svg class="t-spark ts1" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#ffd43b"/></svg>
+        <svg class="t-spark ts2" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#ff8fab"/></svg>
+        <svg class="t-spark ts3" viewBox="0 0 20 20"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8 Z" fill="#74c0fc"/></svg>
+      </div>
+      <h2 id="mTitle" class="m-title">Congratulations!</h2>
+      <p class="m-sub">You decoded all the Morse Code messages!</p>
+      <div class="stats">
+        <div class="stat"><span class="sv" id="sScore">0</span><span class="sl">Score</span></div>
+        <div class="stat"><span class="sv" id="sCorrect">0</span><span class="sl">Correct</span></div>
+        <div class="stat"><span class="sv" id="sWrong">0</span><span class="sl">Incorrect</span></div>
+        <div class="stat"><span class="sv" id="sAcc">0%</span><span class="sl">Accuracy</span></div>
+      </div>
+      <div class="m-btns">
+        <button class="btn btn-play" id="playAgain">Play Again</button>
+        <button class="btn btn-home" id="goHome">Back to Home</button>
+      </div>
+      <div class="confetti" id="confetti"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+  "use strict";
+
+  const QUESTIONS = [
+    { answer: "A", morse: ".-" },
+    { answer: "E", morse: "." },
+    { answer: "H", morse: "...." },
+    { answer: "D", morse: "-.." },
+    { answer: "G", morse: "--." },
+    { answer: "I", morse: ".." },
+    { answer: "J", morse: ".---" },
+    { answer: "C", morse: "-.-." },
+  ];
+
+  const MORSE_MAP = {
+    A: ".-", B: "-...", C: "-.-.", D: "-..", E: ".", F: "..-.",
+    G: "--.", H: "....", I: "..", J: ".---", K: "-.-", L: ".-..",
+    M: "--", N: "-.", O: "---", P: ".--.", Q: "--.-", R: ".-.",
+    S: "...", T: "-", U: "..-", V: "...-", W: ".--", X: "-..-",
+    Y: "-.--", Z: "--.."
+  };
+
+  const CARD_THEMES = ["c-pink", "c-blue", "c-green", "c-peach"];
+
+  const els = {
+    progress: document.getElementById("progress"),
+    morse: document.getElementById("morseDisplay"),
+    cards: document.getElementById("cards"),
+    refGrid: document.getElementById("refGrid"),
+    listenBtn: document.getElementById("listenBtn"),
+    backBtn: document.getElementById("backBtn"),
+    modal: document.getElementById("modal"),
+    sScore: document.getElementById("sScore"),
+    sCorrect: document.getElementById("sCorrect"),
+    sWrong: document.getElementById("sWrong"),
+    sAcc: document.getElementById("sAcc"),
+    playAgain: document.getElementById("playAgain"),
+    goHome: document.getElementById("goHome"),
+    confetti: document.getElementById("confetti"),
+  };
+
+  let state = { idx: 0, correct: 0, wrong: 0, score: 0, locked: false };
+
+  /* ---------- Audio ---------- */
+  let audioCtx;
+  function tone(freq, duration, when = 0) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const t = audioCtx.currentTime + when;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine"; osc.frequency.value = freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.25, t + 0.01);
+    gain.gain.linearRampToValueAtTime(0, t + duration);
+    osc.start(t); osc.stop(t + duration + 0.02);
+  }
+  function playSuccess() {
+    tone(660, 0.12, 0); tone(880, 0.18, 0.13);
+  }
+  function playError() {
+    tone(220, 0.25, 0);
+  }
+  function playMorseSequence(morse) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let t = 0;
+    const unit = 0.12;
+    for (const ch of morse) {
+      const d = ch === "." ? unit : unit * 3;
+      tone(700, d, t);
+      t += d + unit;
+    }
+  }
+
+  /* ---------- Rendering ---------- */
+  function renderProgress() {
+    els.progress.innerHTML = "";
+    QUESTIONS.forEach((_, i) => {
+      const d = document.createElement("div");
+      d.className = "dot-prog";
+      if (i < state.idx) d.classList.add("done");
+      else if (i === state.idx) d.classList.add("active");
+      els.progress.appendChild(d);
+    });
+  }
+
+  function renderMorse(morse) {
+    els.morse.innerHTML = "";
+    [...morse].forEach((ch, i) => {
+      const el = document.createElement("span");
+      el.className = ch === "." ? "dot" : "dash";
+      el.style.animationDelay = (i * 0.08) + "s";
+      els.morse.appendChild(el);
+    });
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildOptions(answer) {
+    const pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").filter(c => c !== answer);
+    const distractors = shuffle(pool).slice(0, 3);
+    return shuffle([answer, ...distractors]);
+  }
+
+  function renderCards(answer) {
+    const options = buildOptions(answer);
+    els.cards.innerHTML = "";
+    const themes = shuffle(CARD_THEMES);
+    options.forEach((letter, i) => {
+      const btn = document.createElement("button");
+      btn.className = `card ${themes[i]}`;
+      btn.type = "button";
+      btn.setAttribute("aria-label", `Letter ${letter}`);
+      btn.innerHTML = `
+        <svg class="mini-star ms1" viewBox="0 0 24 24"><path d="M12 2 L14 9 L22 10 L16 14 L18 22 L12 17 L6 22 L8 14 L2 10 L10 9 Z" fill="#fff" opacity=".8"/></svg>
+        <svg class="mini-star ms2" viewBox="0 0 24 24"><path d="M12 2 L14 9 L22 10 L16 14 L18 22 L12 17 L6 22 L8 14 L2 10 L10 9 Z" fill="#fff" opacity=".8"/></svg>
+        <span class="letter">${letter}</span>`;
+      btn.addEventListener("click", (ev) => onAnswer(ev, btn, letter, answer));
+      els.cards.appendChild(btn);
+    });
+  }
+
+  function renderRef() {
+    const letters = "ABCDEFGHIJ".split("");
+    els.refGrid.innerHTML = letters.map(L =>
+      `<span class="ref-item">${L}:<span class="rc">${MORSE_MAP[L]}</span></span>`
+    ).join("");
+  }
+
+  /* ---------- Interaction ---------- */
+  function ripple(ev, el) {
+    const r = el.getBoundingClientRect();
+    const size = Math.max(r.width, r.height);
+    const x = ev.clientX - r.left - size / 2;
+    const y = ev.clientY - r.top - size / 2;
+    const s = document.createElement("span");
+    s.className = "ripple";
+    s.style.width = s.style.height = size + "px";
+    s.style.left = x + "px"; s.style.top = y + "px";
+    el.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  }
+
+  function sparkleBurst(el) {
+    const wrap = document.createElement("div");
+    wrap.className = "sparkle-burst";
+    for (let i = 0; i < 14; i++) {
+      const s = document.createElement("span");
+      const angle = (Math.PI * 2 * i) / 14;
+      const dist = 60 + Math.random() * 40;
+      s.style.left = "50%"; s.style.top = "50%";
+      s.style.setProperty("--tx", Math.cos(angle) * dist + "px");
+      s.style.setProperty("--ty", Math.sin(angle) * dist + "px");
+      s.style.background = ["#ffd43b","#ff8fab","#74c0fc","#69db7c"][i % 4];
+      wrap.appendChild(s);
+    }
+    el.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 900);
+  }
+
+  function onAnswer(ev, btn, letter, answer) {
+    if (state.locked) return;
+    state.locked = true;
+    ripple(ev, btn);
+    Array.from(els.cards.children).forEach(c => c.classList.add("locked"));
+
+    if (letter === answer) {
+      btn.classList.add("correct");
+      sparkleBurst(btn);
+      playSuccess();
+      state.correct++;
+      state.score += 100;
+      setTimeout(nextQuestion, 1100);
+    } else {
+      btn.classList.add("wrong");
+      playError();
+      state.wrong++;
+      setTimeout(() => {
+        Array.from(els.cards.children).forEach(c => {
+          if (c.querySelector(".letter").textContent === answer) c.classList.add("correct");
+        });
+      }, 1000);
+      setTimeout(nextQuestion, 1900);
+    }
+  }
+
+  function nextQuestion() {
+    state.idx++;
+    state.locked = false;
+    if (state.idx >= QUESTIONS.length) return showModal();
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const q = QUESTIONS[state.idx];
+    renderProgress();
+    renderMorse(q.morse);
+    renderCards(q.answer);
+  }
+
+  /* ---------- Modal ---------- */
+  function showModal() {
+    renderProgress();
+    els.sScore.textContent = state.score;
+    els.sCorrect.textContent = state.correct;
+    els.sWrong.textContent = state.wrong;
+    const total = state.correct + state.wrong || 1;
+    els.sAcc.textContent = Math.round((state.correct / total) * 100) + "%";
+    spawnConfetti();
+    els.modal.hidden = false;
+  }
+  function hideModal() { els.modal.hidden = true; els.confetti.innerHTML = ""; }
+
+  function spawnConfetti() {
+    els.confetti.innerHTML = "";
+    const colors = ["#ffd43b","#ff8fab","#74c0fc","#69db7c","#9775fa","#ff9f43"];
+    for (let i = 0; i < 50; i++) {
+      const s = document.createElement("i");
+      s.style.left = Math.random() * 100 + "%";
+      s.style.setProperty("--c", colors[i % colors.length]);
+      s.style.setProperty("--d", (2 + Math.random() * 3) + "s");
+      s.style.animationDelay = (Math.random() * 2) + "s";
+      s.style.transform = `rotate(${Math.random()*360}deg)`;
+      els.confetti.appendChild(s);
+    }
+  }
+
+  function reset() {
+    state = { idx: 0, correct: 0, wrong: 0, score: 0, locked: false };
+    hideModal();
+    loadQuestion();
+  }
+
+  /* ---------- Listen ---------- */
+  function listen() {
+    const q = QUESTIONS[state.idx];
+    if (!q) return;
+    playMorseSequence(q.morse);
+    if ("speechSynthesis" in window) {
+      const spoken = q.morse.split("").map(c => c === "." ? "dot" : "dash").join(" ");
+      const u = new SpeechSynthesisUtterance(spoken);
+      u.rate = 0.9; u.pitch = 1.2;
+      setTimeout(() => speechSynthesis.speak(u), q.morse.length * 240 + 200);
+    }
+  }
+
+  /* ---------- Wire ---------- */
+  els.listenBtn.addEventListener("click", listen);
+  els.backBtn.addEventListener("click", () => { if (confirm("Leave the game?")) location.reload(); });
+  els.playAgain.addEventListener("click", reset);
+  els.goHome.addEventListener("click", () => location.reload());
+
+  renderRef();
+  loadQuestion();
+})();
+
+  </script>
+</body>
+</html>

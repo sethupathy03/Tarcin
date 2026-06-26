@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Algorithm Animator — Bubble Sort</title>
+<style>
+    :root {
+  --p1: #2a1166;
+  --p2: #5b2bbf;
+  --p3: #8a4dff;
+  --accent: #ffd84d;
+  --pink: #ff6ec7;
+  --cyan: #56e0ff;
+  --green: #6dffb0;
+  --red: #ff6b6b;
+  --card: rgba(255,255,255,0.10);
+  --card-bd: rgba(255,255,255,0.22);
+  --text: #fff;
+  --muted: #d6cdfb;
+  --shadow-lg: 0 25px 60px -20px rgba(0,0,0,.55);
+  --shadow-md: 0 10px 24px -10px rgba(0,0,0,.45);
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --font: "Nunito", "Quicksand", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 214, 102, 0.28) 0, rgba(255, 214, 102, 0) 26%),
+    radial-gradient(circle at 82% 16%, rgba(86, 224, 255, 0.22) 0, rgba(86, 224, 255, 0) 24%),
+    linear-gradient(180deg, #7fe7ff 0%, #69c7ff 34%, #4ea0ff 58%, #ffe29a 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ---------- Background ---------- */
+.bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.glow {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: .55;
+  animation: float 8s ease-in-out infinite;
+}
+.g1 { width: 380px; height: 380px; background: #fff29a; top: -90px; left: -100px; opacity: .62; }
+.g2 { width: 420px; height: 420px; background: #45d6ff; bottom: -120px; right: -90px; animation-delay: 2s; }
+.g3 { width: 300px; height: 300px; background: #ff9f6b; top: 40%; left: 52%; opacity: .28; animation-delay: 4s; }
+
+.deco { position: absolute; animation: float 6s ease-in-out infinite; opacity: .9; }
+.d1 { top: 12%; left: 6%; animation-delay: .2s; }
+.d2 { bottom: 14%; left: 8%; animation-delay: 1.5s; }
+.d3 { top: 18%; right: 8%; animation-delay: 1s; }
+.d4 { bottom: 20%; right: 10%; animation-delay: 2.4s; }
+.d5 { top: 50%; left: 4%; animation-delay: .8s; }
+.d6 { top: 60%; right: 5%; animation-delay: 3s; }
+.d7 { top: 28%; left: 14%; animation-delay: 2s; }
+.d8 { bottom: 8%; right: 18%; animation-delay: 1.3s; }
+
+/* CSS cube */
+.cube {
+  position: absolute; width: 54px; height: 54px;
+  transform-style: preserve-3d; transform: rotateX(-20deg) rotateY(25deg);
+}
+.cube span {
+  position: absolute; width: 54px; height: 54px; border-radius: 8px;
+  background: linear-gradient(135deg, #ffd84d, #ff8a3d);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.15);
+}
+.cube span:nth-child(1) { transform: translateZ(27px); }
+.cube span:nth-child(2) { transform: rotateY(90deg) translateZ(27px); background: linear-gradient(135deg, #ff6ec7, #b14bff); }
+.cube span:nth-child(3) { transform: rotateX(90deg) translateZ(27px); background: linear-gradient(135deg, #56e0ff, #4a7bff); }
+
+/* CSS gear */
+.gear {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: radial-gradient(circle, #ffd84d 30%, #ff8a3d 31%, #ff8a3d 55%, transparent 56%);
+  position: absolute;
+  animation: float 7s ease-in-out infinite;
+}
+.gear::before, .gear::after {
+  content: ""; position: absolute; inset: -8px; border-radius: 50%;
+  background:
+    conic-gradient(from 0deg,
+      #ff8a3d 0 12deg, transparent 12deg 33deg,
+      #ff8a3d 33deg 45deg, transparent 45deg 66deg,
+      #ff8a3d 66deg 78deg, transparent 78deg 99deg,
+      #ff8a3d 99deg 111deg, transparent 111deg 132deg,
+      #ff8a3d 132deg 144deg, transparent 144deg 165deg,
+      #ff8a3d 165deg 177deg, transparent 177deg 198deg,
+      #ff8a3d 198deg 210deg, transparent 210deg 231deg,
+      #ff8a3d 231deg 243deg, transparent 243deg 264deg,
+      #ff8a3d 264deg 276deg, transparent 276deg 297deg,
+      #ff8a3d 297deg 309deg, transparent 309deg 330deg,
+      #ff8a3d 330deg 342deg, transparent 342deg 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 28px, #000 29px);
+          mask: radial-gradient(circle, transparent 28px, #000 29px);
+}
+.gear::after {
+  inset: 18px; background: #2a1166; box-shadow: inset 0 0 0 2px #ffd84d;
+  -webkit-mask: none; mask: none;
+}
+
+/* CSS arrow */
+.arrow {
+  width: 64px; height: 18px; background: #56e0ff; border-radius: 4px;
+  box-shadow: 0 0 18px rgba(86,224,255,.6);
+  position: absolute;
+}
+.arrow::after {
+  content: ""; position: absolute; right: -10px; top: -8px;
+  border-left: 20px solid #56e0ff;
+  border-top: 17px solid transparent;
+  border-bottom: 17px solid transparent;
+}
+.d6.arrow { transform: scaleX(-1); }
+
+/* CSS block (sorting block) */
+.block {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: linear-gradient(180deg, #ff6ec7, #b14bff);
+  box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 8px 24px rgba(177,75,255,.45);
+  position: absolute;
+}
+.d8.block { background: linear-gradient(180deg, #6dffb0, #2bbf7e); box-shadow: 0 6px 0 rgba(0,0,0,.25), 0 8px 24px rgba(109,255,176,.4); }
+
+@keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
+
+/* ---------- App ---------- */
+.app {
+  position: relative; z-index: 2;
+  max-width: 980px; margin: 0 auto;
+  padding: 22px 22px 60px;
+}
+
+.topbar {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px;
+}
+.title-wrap { text-align: center; }
+.title { font-size: clamp(26px, 4vw, 42px); font-weight: 900; letter-spacing: .5px; color: #143a78; text-shadow: 0 2px 0 rgba(255,255,255,.65), 0 8px 18px rgba(20,58,120,.18); }
+.subtitle { color: #1f4c91; font-weight: 800; margin-top: 4px; font-size: clamp(12px, 1.4vw, 15px); text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: none; cursor: pointer;
+  font-family: var(--font); font-weight: 800; font-size: 15px;
+  padding: 11px 20px; border-radius: 999px; color: #fff;
+  box-shadow: var(--shadow-md);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s;
+}
+.btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.05); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-back { background: linear-gradient(180deg, #8a4dff, #5b2bbf); }
+.btn-listen { background: linear-gradient(180deg, #ffd84d, #f5a623); color: #3a1d00; }
+.btn-primary { background: linear-gradient(180deg, #6dffb0, #2bbf7e); color: #003a1d; }
+.btn-soft { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); }
+
+.chev { width: 8px; height: 8px; border-left: 3px solid #fff; border-bottom: 3px solid #fff; transform: rotate(45deg); }
+.spk { width: 12px; height: 12px; background: #3a1d00; clip-path: polygon(0 35%, 40% 35%, 70% 10%, 70% 90%, 40% 65%, 0 65%); }
+
+/* meta */
+.meta { margin: 18px 0 14px; display: flex; flex-direction: column; gap: 8px; }
+.round-counter { color: #1f4c91; font-weight: 800; letter-spacing: .5px; text-align: center; font-size: 14px; text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+.round-counter span { color: #143a78; font-weight: 900; }
+.progress { height: 10px; background: rgba(255,255,255,.12); border-radius: 999px; overflow: hidden; box-shadow: inset 0 1px 4px rgba(0,0,0,.3); }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #56e0ff, #6dffb0, #ffd84d); border-radius: 999px; transition: width .5s ease; box-shadow: 0 0 14px rgba(109,255,176,.6); }
+
+/* card (glassmorphism) */
+.card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--card-bd);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-radius: var(--radius-xl);
+  padding: 26px 24px 22px;
+  box-shadow: var(--shadow-lg);
+}
+.card-head { text-align: center; margin-bottom: 18px; }
+.card-head h2 { font-size: 22px; letter-spacing: 1px; }
+.card-head p { color: #214b8f; margin-top: 4px; font-size: 14px; font-weight: 700; }
+.card-head em { color: var(--accent); font-style: normal; font-weight: 800; }
+
+/* bars */
+.bars {
+  display: flex; align-items: flex-end; justify-content: center; gap: 14px;
+  min-height: 260px; padding: 16px 8px 8px; position: relative;
+}
+.bar-wrap {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  transition: transform .55s cubic-bezier(.6,.05,.3,1.2);
+  cursor: pointer; user-select: none;
+}
+.bar {
+  width: 56px;
+  border-radius: 14px 14px 6px 6px;
+  background: linear-gradient(180deg, #56e0ff, #4a7bff);
+  box-shadow: 0 8px 0 rgba(0,0,0,.25), 0 12px 30px rgba(74,123,255,.35), inset 0 0 0 2px rgba(255,255,255,.18);
+  position: relative;
+  transition: transform .2s ease, filter .2s, box-shadow .2s;
+}
+.bar::after {
+  content: ""; position: absolute; top: 10px; left: 10px; right: 10px; height: 10px;
+  border-radius: 6px; background: rgba(255,255,255,.35);
+}
+.bar-label {
+  font-weight: 900; font-size: 18px;
+  background: rgba(0,0,0,.3); padding: 4px 10px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.bar-wrap:hover .bar { transform: translateY(-4px); filter: brightness(1.1); }
+.bar-wrap.selected .bar {
+  background: linear-gradient(180deg, #ffd84d, #ff8a3d);
+  box-shadow: 0 8px 0 rgba(0,0,0,.25), 0 0 30px rgba(255,216,77,.7), inset 0 0 0 2px rgba(255,255,255,.3);
+  transform: translateY(-6px);
+}
+.bar-wrap.correct .bar {
+  background: linear-gradient(180deg, #6dffb0, #2bbf7e);
+  box-shadow: 0 8px 0 rgba(0,0,0,.25), 0 0 30px rgba(109,255,176,.7);
+}
+.bar-wrap.wrong .bar {
+  background: linear-gradient(180deg, #ff8a8a, #d63b3b);
+  animation: shake .5s;
+}
+.bar-wrap.locked { cursor: default; }
+
+@keyframes shake {
+  0%,100%{transform: translateX(0)} 20%{transform: translateX(-8px)} 40%{transform: translateX(8px)}
+  60%{transform: translateX(-6px)} 80%{transform: translateX(6px)}
+}
+
+.message {
+  text-align: center; margin: 10px 0 14px;
+  color: #000000; font-weight: 800; min-height: 24px;
+  transition: color .2s;
+}
+.message.ok { color: #137a3a; }
+.message.bad { color: #b42318; }
+.message.info { color: #0b5cab; }
+
+.actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+/* Modal */
+.modal {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(10,4,40,.55); backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: fadeIn .3s ease;
+}
+.modal[hidden] { display: none; }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.modal-card {
+  position: relative; overflow: hidden;
+  background: linear-gradient(180deg, rgba(60,30,140,.95), rgba(30,10,80,.95));
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 26px; padding: 30px 28px;
+  width: 100%; max-width: 440px; text-align: center;
+  box-shadow: var(--shadow-lg);
+  animation: pop .4s cubic-bezier(.4,1.5,.5,1);
+}
+@keyframes pop { from { transform: scale(.7); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+
+/* CSS trophy */
+.trophy { position: relative; width: 150px; height: 170px; margin: 0 auto 14px; }
+.floaty { animation: float 3s ease-in-out infinite; }
+.cup {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 96px; height: 88px;
+  background: linear-gradient(180deg, #ffe98a 0%, #f5a623 70%, #c97a00 100%);
+  border-radius: 50% 50% 30% 30% / 25% 25% 55% 55%;
+  box-shadow: inset -8px -6px 0 rgba(0,0,0,.18), inset 6px 8px 0 rgba(255,255,255,.35), 0 4px 18px rgba(245,166,35,.45);
+}
+.cup::after {
+  content: ""; position: absolute; left: 50%; top: 22px; transform: translateX(-50%);
+  width: 34px; height: 24px; border-radius: 6px;
+  background: linear-gradient(180deg, #8a5200, #5a3500);
+  box-shadow: inset 0 2px 0 rgba(0,0,0,.35);
+}
+.handle {
+  position: absolute; top: 16px; width: 28px; height: 48px;
+  border: 9px solid #f5a623; border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+.handle.left { left: 2px; border-right: none; }
+.handle.right { right: 2px; border-left: none; }
+.stem {
+  position: absolute; top: 84px; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 32px;
+  background: linear-gradient(180deg, #f5a623, #8a5200);
+  border-radius: 3px;
+  box-shadow: inset -3px 0 0 rgba(0,0,0,.2);
+}
+.base {
+  position: absolute; top: 114px; left: 50%; transform: translateX(-50%);
+  width: 78px; height: 16px;
+  background: linear-gradient(180deg, #ffe98a, #c97a00);
+  border-radius: 6px 6px 4px 4px;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.25);
+}
+.base::after {
+  content: ""; position: absolute; left: 50%; top: 16px; transform: translateX(-50%);
+  width: 110px; height: 22px;
+  background: linear-gradient(180deg, #f5a623, #6b3f00);
+  border-radius: 6px 6px 10px 10px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.35), inset 0 -3px 0 rgba(0,0,0,.3);
+}
+.trophy .star {
+  position: absolute; width: 14px; height: 14px;
+  background: #fff; opacity: .9;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: twinkle 1.6s ease-in-out infinite;
+}
+.trophy .s1 { top: 4px; left: -6px; }
+.trophy .s2 { top: 30px; right: -8px; animation-delay: .4s; }
+.trophy .s3 { bottom: 24px; left: 0; animation-delay: .8s; }
+@keyframes twinkle { 0%,100%{opacity:.3;transform:scale(.8)} 50%{opacity:1;transform:scale(1.2)} }
+
+.m-title {
+  font-size: 28px;
+  background: linear-gradient(180deg, #fff, black);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.m-sub { color: var(--muted); margin: 6px 0 18px; font-weight: 700; }
+.m-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* Confetti */
+.confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: 26px; }
+.confetti i {
+  position: absolute; top: -10px; width: 10px; height: 14px;
+  background: var(--c, #ffd84d);
+  animation: fall var(--d, 3s) linear infinite;
+  border-radius: 2px;
+}
+@keyframes fall { to { transform: translateY(600px) rotate(720deg); opacity: 0; } }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .topbar { grid-template-columns: auto auto; }
+  .title-wrap { grid-column: 1 / -1; order: -1; }
+  .bars { gap: 8px; min-height: 220px; }
+  .bar { width: 38px; }
+  .bar-label { font-size: 14px; padding: 3px 8px; }
+  .deco { transform: scale(.7); }
+  .btn { padding: 10px 14px; font-size: 13px; }
+  .card { padding: 20px 14px; }
+}
+
+</style>
+</head>
+<body>
+  <div class="bg">
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+    <div class="glow g3"></div>
+    <div class="deco cube d1"><span></span><span></span><span></span></div>
+    <div class="deco cube d2"><span></span><span></span><span></span></div>
+    <div class="deco gear d3"></div>
+    <div class="deco gear d4"></div>
+    <div class="deco arrow d5"></div>
+    <div class="deco arrow d6"></div>
+    <div class="deco block d7"></div>
+    <div class="deco block d8"></div>
+  </div>
+
+  <main class="app">
+    <header class="topbar">
+      <button class="btn btn-back" id="backBtn"><span class="chev"></span>Back</button>
+      <div class="title-wrap">
+        <h1 class="title">Algorithm Animator</h1>
+        <p class="subtitle">Predict which bars will swap next!</p>
+      </div>
+      <button class="btn btn-listen" id="listenBtn"><span class="spk"></span>Listen</button>
+    </header>
+
+    <div class="meta">
+      <div class="round-counter">Round <span id="roundNum">1</span> / <span id="roundTotal">2</span> · Swap <span id="swapNum">1</span> / <span id="swapTotal">3</span></div>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Bubble Sort</h2>
+        <p>Tap two <em>neighboring</em> bars you think will swap next.</p>
+      </div>
+
+      <div class="bars" id="bars"></div>
+
+      <div class="message" id="message">Pick two bars next to each other.</div>
+
+      <div class="actions">
+        <button class="btn btn-soft" id="resetPickBtn">Clear pick</button>
+        <button class="btn btn-primary" id="nextBtn" disabled>Next Swap</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card">
+      <div class="trophy floaty">
+        <div class="cup"></div>
+        <div class="handle left"></div>
+        <div class="handle right"></div>
+        <div class="stem"></div>
+        <div class="base"></div>
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+      </div>
+      <h2 class="m-title">Bubble Sort Master!</h2>
+      <p class="m-sub">You predicted every swap. Amazing work!</p>
+      <div class="m-btns">
+        <button class="btn btn-primary" id="playAgain">Play Again</button>
+        <button class="btn btn-soft" id="goLabs">Back to Labs</button>
+      </div>
+      <div class="confetti" id="confetti"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+  "use strict";
+
+  const ROUNDS = [
+    { array: [3, 7, 1, 5, 2, 6], swapSequence: [[7,1],[7,5],[7,2]] },
+    { array: [8, 2, 6, 1, 5, 3], swapSequence: [[8,2],[8,6],[8,1]] },
+  ];
+
+  const els = {
+    bars: document.getElementById("bars"),
+    message: document.getElementById("message"),
+    nextBtn: document.getElementById("nextBtn"),
+    resetPickBtn: document.getElementById("resetPickBtn"),
+    listenBtn: document.getElementById("listenBtn"),
+    backBtn: document.getElementById("backBtn"),
+    roundNum: document.getElementById("roundNum"),
+    roundTotal: document.getElementById("roundTotal"),
+    swapNum: document.getElementById("swapNum"),
+    swapTotal: document.getElementById("swapTotal"),
+    progressFill: document.getElementById("progressFill"),
+    modal: document.getElementById("modal"),
+    playAgain: document.getElementById("playAgain"),
+    goLabs: document.getElementById("goLabs"),
+    confetti: document.getElementById("confetti"),
+  };
+
+  let state = {
+    roundIdx: 0,
+    swapIdx: 0,
+    arr: [],
+    selected: [], // indices
+    locked: false,
+    solved: false,
+  };
+
+  /* ---------- Audio ---------- */
+  let audioCtx;
+  function tone(freq, dur, when = 0, type = "sine", vol = 0.2) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const t = audioCtx.currentTime + when;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+    osc.start(t); osc.stop(t + dur + 0.02);
+  }
+  const playOk = () => { tone(660, .12); tone(880, .18, .12); };
+  const playBad = () => { tone(180, .25, 0, "square", .12); };
+  const playSwap = () => { tone(440, .08); tone(520, .08, .08); };
+
+  /* ---------- Render ---------- */
+  function maxVal() { return Math.max(...state.arr, 1); }
+  function loadRound() {
+    const r = ROUNDS[state.roundIdx];
+    state.arr = r.array.slice();
+    state.swapIdx = 0;
+    state.selected = [];
+    state.locked = false;
+    state.solved = false;
+    els.roundNum.textContent = state.roundIdx + 1;
+    els.roundTotal.textContent = ROUNDS.length;
+    els.swapTotal.textContent = r.swapSequence.length;
+    renderAll();
+    setMessage("Pick two bars next to each other.", "info");
+  }
+
+  function renderAll() {
+    renderBars();
+    els.swapNum.textContent = Math.min(state.swapIdx + 1, ROUNDS[state.roundIdx].swapSequence.length);
+    updateProgress();
+    els.nextBtn.disabled = !state.solved;
+  }
+
+  function renderBars() {
+    els.bars.innerHTML = "";
+    const m = maxVal();
+    state.arr.forEach((v, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "bar-wrap";
+      wrap.dataset.index = i;
+      if (state.selected.includes(i)) wrap.classList.add("selected");
+      if (state.locked) wrap.classList.add("locked");
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.height = (40 + (v / m) * 180) + "px";
+
+      const label = document.createElement("div");
+      label.className = "bar-label";
+      label.textContent = v;
+
+      wrap.appendChild(bar);
+      wrap.appendChild(label);
+      wrap.addEventListener("click", () => onPick(i, wrap));
+      els.bars.appendChild(wrap);
+    });
+  }
+
+  function updateProgress() {
+    const totalSwaps = ROUNDS.reduce((s, r) => s + r.swapSequence.length, 0);
+    let done = 0;
+    for (let i = 0; i < state.roundIdx; i++) done += ROUNDS[i].swapSequence.length;
+    done += state.swapIdx;
+    els.progressFill.style.width = (done / totalSwaps * 100) + "%";
+  }
+
+  function setMessage(text, kind) {
+    els.message.textContent = text;
+    els.message.className = "message" + (kind ? " " + kind : "");
+  }
+
+  /* ---------- Interaction ---------- */
+  function onPick(i, wrap) {
+    if (state.locked) return;
+    const sel = state.selected;
+    const pos = sel.indexOf(i);
+    if (pos >= 0) {
+      sel.splice(pos, 1);
+      wrap.classList.remove("selected");
+      return;
+    }
+    if (sel.length >= 2) return;
+    sel.push(i);
+    wrap.classList.add("selected");
+    if (sel.length === 2) checkGuess();
+  }
+
+  function checkGuess() {
+    const [a, b] = state.selected.slice().sort((x, y) => x - y);
+    if (b - a !== 1) {
+      setMessage("Those bars aren't neighbors. Try two next to each other!", "bad");
+      playBad();
+      flashWrong();
+      return;
+    }
+    const expected = ROUNDS[state.roundIdx].swapSequence[state.swapIdx];
+    const picked = [state.arr[a], state.arr[b]];
+    const matches = (picked[0] === expected[0] && picked[1] === expected[1]) ||
+                    (picked[0] === expected[1] && picked[1] === expected[0]);
+    if (matches) {
+      state.locked = true;
+      state.solved = true;
+      playOk();
+      markCorrect(a, b);
+      setMessage(`Yes! ${picked[0]} and ${picked[1]} swap because ${Math.max(picked[0],picked[1])} is bigger and bubbles right.`, "ok");
+      els.nextBtn.disabled = false;
+      animateSwap(a, b);
+    } else {
+      playBad();
+      flashWrong();
+      setMessage("Not this pair. Remember: the bigger number bubbles to the right.", "bad");
+      setTimeout(clearSelection, 700);
+    }
+  }
+
+  function markCorrect(a, b) {
+    [...els.bars.children].forEach((c, i) => {
+      c.classList.remove("selected");
+      c.classList.add("locked");
+      if (i === a || i === b) c.classList.add("correct");
+    });
+  }
+
+  function flashWrong() {
+    state.selected.forEach(i => {
+      const c = els.bars.children[i];
+      if (c) { c.classList.add("wrong"); c.classList.remove("selected"); }
+    });
+    setTimeout(() => {
+      [...els.bars.children].forEach(c => c.classList.remove("wrong"));
+    }, 600);
+  }
+
+  function clearSelection() {
+    state.selected = [];
+    [...els.bars.children].forEach(c => c.classList.remove("selected", "wrong"));
+  }
+
+  function animateSwap(a, b) {
+    const children = els.bars.children;
+    const ca = children[a], cb = children[b];
+    if (!ca || !cb) return;
+    const ra = ca.getBoundingClientRect();
+    const rb = cb.getBoundingClientRect();
+    const dx = rb.left - ra.left;
+    ca.style.transform = `translateX(${dx}px)`;
+    cb.style.transform = `translateX(${-dx}px)`;
+    playSwap();
+  }
+
+  function nextSwap() {
+    if (!state.solved) return;
+    // commit swap
+    const [a, b] = state.selected.slice().sort((x, y) => x - y);
+    [state.arr[a], state.arr[b]] = [state.arr[b], state.arr[a]];
+    state.swapIdx++;
+    const r = ROUNDS[state.roundIdx];
+    if (state.swapIdx >= r.swapSequence.length) {
+      // round complete
+      if (state.roundIdx + 1 >= ROUNDS.length) {
+        renderAll();
+        return showModal();
+      }
+      state.roundIdx++;
+      loadRound();
+      return;
+    }
+    state.selected = [];
+    state.locked = false;
+    state.solved = false;
+    renderAll();
+    setMessage("Nice! What's the next pair to swap?", "info");
+  }
+
+  /* ---------- Modal ---------- */
+  function showModal() {
+    spawnConfetti();
+    els.modal.hidden = false;
+  }
+  function hideModal() {
+    els.modal.hidden = true;
+    els.confetti.innerHTML = "";
+  }
+  function spawnConfetti() {
+    els.confetti.innerHTML = "";
+    const colors = ["#ffd84d","#ff6ec7","#56e0ff","#6dffb0","#b14bff","#ff8a3d"];
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement("i");
+      s.style.left = Math.random() * 100 + "%";
+      s.style.setProperty("--c", colors[i % colors.length]);
+      s.style.setProperty("--d", (2 + Math.random() * 3) + "s");
+      s.style.animationDelay = (Math.random() * 2) + "s";
+      s.style.transform = `rotate(${Math.random()*360}deg)`;
+      els.confetti.appendChild(s);
+    }
+  }
+
+  function resetGame() {
+    state.roundIdx = 0;
+    hideModal();
+    loadRound();
+  }
+
+  /* ---------- Listen ---------- */
+  function listen() {
+    if (!("speechSynthesis" in window)) return;
+    const r = ROUNDS[state.roundIdx];
+    const exp = r.swapSequence[state.swapIdx];
+    const text = exp
+      ? `The current bars are ${state.arr.join(", ")}. Find two neighbors that should swap. Hint: the bigger number moves right.`
+      : `Great job sorting!`;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  }
+
+  /* ---------- Wire ---------- */
+  els.nextBtn.addEventListener("click", nextSwap);
+  els.resetPickBtn.addEventListener("click", () => { if (!state.locked) { clearSelection(); setMessage("Pick two bars next to each other.", "info"); } });
+  els.listenBtn.addEventListener("click", listen);
+  els.backBtn.addEventListener("click", () => { if (confirm("Leave the game?")) resetGame(); });
+  els.playAgain.addEventListener("click", resetGame);
+  els.goLabs.addEventListener("click", resetGame);
+
+  loadRound();
+})();
+
+  </script>
+</body>
+</html>
