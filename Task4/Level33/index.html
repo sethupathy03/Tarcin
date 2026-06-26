@@ -6,10 +6,10 @@
 <title>Encryption Lab – 6 Stage Cipher Challenge</title>
 <style>
 :root {
-  --sky-top: #bfe7ff;
-  --sky-bot: #e9f7ff;
-  --primary: #2b5bc4;
-  --accent: #9b6ad6;
+  --sky-top: #7a4bcf;
+  --sky-bot: #d2c0ff;
+  --primary: #5b2fb0;
+  --accent: #b884ff;
   --yellow: #ffd84a;
   --green: #2ecc71;
   --green-dark: #27ae60;
@@ -26,38 +26,60 @@ body{
   font-family:var(--font);
   color:var(--ink);
   overflow-x:hidden;
-  background:linear-gradient(180deg,var(--sky-top),var(--sky-bot));
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255,255,255,.25), transparent 28%),
+    radial-gradient(circle at 82% 8%, rgba(255,255,255,.2), transparent 24%),
+    linear-gradient(180deg,var(--sky-top),var(--sky-bot));
   min-height:100vh;
   position:relative;
 }
 
-/* Background light landscape scene */
+/* Background purple encryption scene */
 .scene{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.sky{position:absolute;inset:0;background:linear-gradient(180deg,#aee0ff 0%, #d8f0ff 55%, #eaf9e8 100%)}
-.clouds{position:absolute;top:0;left:0;width:200%;height:auto;animation:drift 60s linear infinite}
-@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.hills{position:absolute;bottom:0;left:0;width:100%;height:34vh}
-.hills path:nth-child(1) { fill: #86d36a; }
-.hills path:nth-child(2) { fill: #62b94c; }
+.sky{position:absolute;inset:0;background:linear-gradient(180deg,#6f3ac1 0%, #8a55d6 42%, #c9b1ff 100%)}
+.haze{position:absolute;border-radius:50%;filter:blur(2px);opacity:.55}
+.haze.h1{width:220px;height:220px;top:8%;left:6%;background:radial-gradient(circle,#f2e7ff,rgba(242,231,255,0));animation:hazeFloat 10s ease-in-out infinite}
+.haze.h2{width:300px;height:300px;top:18%;right:2%;background:radial-gradient(circle,#d8c2ff,rgba(216,194,255,0));animation:hazeFloat 12s ease-in-out infinite reverse}
+.haze.h3{width:340px;height:340px;bottom:-8%;left:24%;background:radial-gradient(circle,#efe2ff,rgba(239,226,255,0));animation:hazeFloat 11s ease-in-out infinite}
+@keyframes hazeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
 
-.bushes{position:absolute;bottom:6vh;left:0;width:100%;height:80px}
-.bush{position:absolute;bottom:0;width:120px;height:60px;background:radial-gradient(circle at 30% 40%, #67d34f, #3f9a30);border-radius:60px 60px 30px 30px / 60px 60px 20px 20px;}
-.bush.b1{left:4%}.bush.b2{left:28%;width:160px;height:70px}.bush.b3{right:24%;width:140px;height:64px}
+.float-models{position:absolute;inset:0}
+.float-model{
+  position:absolute;width:116px;height:98px;border-radius:18px;
+  background:linear-gradient(160deg, rgba(255,255,255,.82), rgba(242,231,255,.78));
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 16px 34px rgba(64,20,120,.22);
+  animation:modelDrift 7.8s ease-in-out infinite;
+}
+.float-model .tag{
+  position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:999px;
+  font-size:.72rem;font-weight:800;letter-spacing:.7px;color:#fff;
+}
+.float-model svg{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:58px;height:58px}
+.m1{top:12%;left:8%}
+.m2{top:20%;right:12%;animation-delay:-1.6s}
+.m3{bottom:28%;left:12%;animation-delay:-3.2s}
+.m4{bottom:16%;right:18%;animation-delay:-4.8s}
+.m1 .tag{background:#5b2fb0}
+.m2 .tag{background:#a64dff}
+.m3 .tag{background:#6f3ac1}
+.m4 .tag{background:#8c4ee8}
+@keyframes modelDrift{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-16px) rotate(2deg)}}
 
 /* Fullscreen Background Floating Texts */
 .bg-text-stream {
   position: absolute;
   font-size: clamp(1.2rem, 3vw, 2.2rem);
   font-weight: 900;
-  opacity: 0.25;
-  color: var(--primary);
+  opacity: 0.32;
+  color: #f3e8ff;
   letter-spacing: 2px;
   animation: bgFloatingTrack 6s ease-in-out infinite;
   user-select: none;
   pointer-events: none;
 }
 .bg-text-stream.cipher-type {
-  color: var(--accent);
+  color: #e9d5ff;
   animation-duration: 8s;
   animation-delay: -3s;
 }
@@ -87,10 +109,10 @@ body{
 
 .brand-title { text-align: center; }
 .brand-title h1 {
-  font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; color: #2b5bc4;
-  text-shadow: 0 4px 0 #fff, 0 6px 0 rgba(0,0,0,0.1); letter-spacing: -0.5px;
+  font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; color: #f8f2ff;
+  text-shadow: 0 3px 0 rgba(66, 35, 120, 0.65), 0 6px 16px rgba(40, 18, 70, 0.45); letter-spacing: -0.5px;
 }
-.brand-title p { color: #3a4a72; font-weight: 700; font-size: 1.1rem; margin-top: 4px; }
+.brand-title p { color: #f2e8ff; font-weight: 700; font-size: 1.1rem; margin-top: 4px; text-shadow: 0 2px 8px rgba(40, 18, 70, 0.4); }
 
 /* Status Bar Row Layout */
 .status-row-container {
@@ -166,11 +188,12 @@ body{
   font-size: 0.85rem; font-weight: 800; color: #64748b; letter-spacing: 0.5px; text-align: center;
 }
 .alpha-strip {
-  display: flex; justify-content: space-between; overflow-x: auto; gap: 4px; padding-bottom: 5px;
+  display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 8px;
+  width: 100%; overflow: hidden;
 }
 .alpha-pair {
   display: flex; flex-direction: column; align-items: center; gap: 4px; background: white;
-  border-radius: 10px; padding: 6px 4px; border: 1px solid #e2e8f0; min-width: 34px;
+  border-radius: 10px; padding: 6px 4px; border: 1px solid #e2e8f0; min-width: 0;
 }
 .alpha-pair span { font-weight: 800; font-size: 0.95rem; }
 .alpha-pair .source-char { color: #2b5bc4; }
@@ -226,9 +249,13 @@ body{
 
 @media (max-width: 640px) {
   .decor-char { display: none; }
-  .alpha-strip { padding-bottom: 10px; }
+  .alpha-strip { gap: 6px; }
+  .alpha-pair { padding: 5px 2px; }
+  .alpha-pair span { font-size: 0.82rem; }
   .status-row-container { flex-direction: column; gap: 10px; }
   .bg-text-stream { opacity: 0.12; }
+  .float-model { width: 92px; height: 80px; }
+  .float-model svg { width: 46px; height: 46px; }
 }
 </style>
 </head>
@@ -236,25 +263,32 @@ body{
 
   <div class="scene" aria-hidden="true">
     <div class="sky"></div>
+    <div class="haze h1"></div>
+    <div class="haze h2"></div>
+    <div class="haze h3"></div>
+
+    
+      <div class="float-model m3">
+        <span class="tag">KEY</span>
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="23" cy="29" r="10" stroke="#7e22ce" stroke-width="5"/>
+          <path d="M32 29h22m-8 0v8m-8-8v6" stroke="#a855f7" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="23" cy="29" r="3" fill="#e9d5ff"/>
+        </svg>
+      </div>
+      <div class="float-model m4">
+        <span class="tag">SHIFT</span>
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="14" width="48" height="36" rx="8" fill="#6d28d9" opacity=".88"/>
+          <path d="M16 26h32M16 34h32M16 42h20" stroke="#e9d5ff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M43 10l8 8-8 8" stroke="#c084fc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
     
     <div class="bg-text-stream t1">LOZMWB</div>
     <div class="bg-text-stream cipher-type t2">RIGJUE</div>
     <div class="bg-text-stream t3">QTWFSI</div>
-
-    <svg class="clouds" viewBox="0 0 1200 300" preserveAspectRatio="none">
-      <g fill="#ffffff" opacity="0.85">
-        <ellipse cx="150" cy="70" rx="75" ry="20"/>
-        <ellipse cx="550" cy="110" rx="95" ry="26"/>
-        <ellipse cx="950" cy="60" rx="80" ry="22"/>
-      </g>
-    </svg>
-    <svg class="hills" viewBox="0 0 1200 300" preserveAspectRatio="none">
-      <path d="M0,210 C250,130 350,250 650,170 C900,110 1050,230 1200,150 L1200,300 L0,300 Z" />
-      <path d="M0,250 C200,190 450,280 700,220 C900,160 1050,270 1200,210 L1200,300 L0,300 Z" />
-    </svg>
-    <div class="bushes">
-      <span class="bush b1"></span><span class="bush b2"></span><span class="bush b3"></span>
-    </div>
   </div>
 
   <header class="topbar">
@@ -312,7 +346,7 @@ body{
         <div class="context-hint" id="contextHint">Loading Hint...</div>
 
         <div class="cipher-board">
-          <div class="cipher-row-label">CIPHER KEY MATRIX (+3 POSITION SHIFT):</div>
+          <div class="cipher-row-label" id="cipherRowLabel">CIPHER KEY MATRIX (+3 POSITION SHIFT):</div>
           <div class="alpha-strip" id="alphabetStrip"></div>
         </div>
 
@@ -366,6 +400,7 @@ body{
     const panelLabel = document.getElementById('panelLabel');
     const sourceWordRow = document.getElementById('sourceWordRow');
     const contextHint = document.getElementById('contextHint');
+    const cipherRowLabel = document.getElementById('cipherRowLabel');
     const alphabetStrip = document.getElementById('alphabetStrip');
     const userSolutionInput = document.getElementById('userSolutionInput');
     const btnSubmitGuess = document.getElementById('btnSubmitGuess');
@@ -375,12 +410,20 @@ body{
     const modeBadgeText = document.getElementById('modeBadgeText');
     const narrationBtn = document.getElementById('narrationBtn');
 
-    function compileAlphabetLookupGrid() {
+    function compileAlphabetLookupGrid(mode = 'encrypt') {
       alphabetStrip.innerHTML = '';
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      const shift = mode === 'decrypt' ? -3 : 3;
+
+      if (mode === 'decrypt') {
+        cipherRowLabel.textContent = "DECRYPTION KEY MATRIX (-3 POSITION SHIFT):";
+      } else {
+        cipherRowLabel.textContent = "CIPHER KEY MATRIX (+3 POSITION SHIFT):";
+      }
+
       letters.forEach((char) => {
         const idx = letters.indexOf(char);
-        const shiftedIdx = (idx + 3) % 26;
+        const shiftedIdx = (idx + shift + 26) % 26;
         const cipherChar = letters[shiftedIdx];
 
         const box = document.createElement('div');
@@ -415,6 +458,7 @@ body{
       userSolutionInput.style.borderColor = '#cbd5e1';
 
       const activeItem = MASTER_ROUNDS[currentIndex];
+      compileAlphabetLookupGrid(activeItem.type);
       
       if(activeItem.type === 'encrypt') {
         panelLabel.textContent = "Plain Text To Encrypt:";
@@ -513,7 +557,6 @@ body{
       renderActiveChallengeCard();
     });
 
-    compileAlphabetLookupGrid();
     renderActiveChallengeCard();
 
   })();

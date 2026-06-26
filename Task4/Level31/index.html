@@ -6,19 +6,19 @@
 <title>AI Trainer – Fruit & Vegetable</title>
 <style>
     :root{
-  --sky-top:#bfe7ff;
-  --sky-bot:#e9f7ff;
+  --sky-top:#a8e6ff;
+  --sky-bot:#fff4d6;
   --primary:#ff7eb6;
-  --accent:#7ed0ff;
+  --accent:#4fc3f7;
   --yellow:#ffd84a;
   --green:#7bbd49;
   --green-dark:#4cae3a;
   --red:#ff5b66;
   --purple:#9b6ad6;
-  --ink:#2a2a2a;
-  --card:#ffffff;
-  --shadow:0 14px 40px rgba(70,90,140,.18);
-  --glow:0 0 0 6px rgba(255,255,255,.6), 0 18px 48px rgba(123,189,73,.35);
+  --ink:#3a2a4a;
+  --card:rgba(255,255,255,0.85);
+  --shadow:0 14px 40px rgba(120,80,160,.18);
+  --glow:0 0 0 6px rgba(255,255,255,.6), 0 18px 48px rgba(123,189,73,.25);
   --radius:28px;
   --font:'Quicksand', 'Comic Sans MS', system-ui, -apple-system, sans-serif;
 }
@@ -33,22 +33,89 @@ body{
   position:relative;
 }
 
-/* Background scene */
+/* Background scene - kiddish, no trees, no clouds */
 .scene{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.sky{position:absolute;inset:0;background:linear-gradient(180deg,#aee0ff 0%, #d8f0ff 55%, #eaf9e8 100%)}
-.clouds{position:absolute;top:0;left:0;width:200%;height:auto;animation:drift 60s linear infinite}
-@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.rays{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:120vw;height:60vh;opacity:.8}
-.hills{position:absolute;bottom:0;left:0;width:100%;height:34vh}
-.bushes{position:absolute;bottom:6vh;left:0;width:100%;height:80px}
-.bush{position:absolute;bottom:0;width:120px;height:60px;background:radial-gradient(circle at 30% 40%, #67d34f, #3f9a30);border-radius:60px 60px 30px 30px / 60px 60px 20px 20px;box-shadow:inset -10px -6px 0 rgba(0,0,0,.07)}
-.bush.b1{left:4%}.bush.b2{left:28%;width:160px;height:70px}.bush.b3{right:24%;width:140px;height:64px}.bush.b4{right:5%;width:120px}
-.flowers,.sparkles,.butterflies{position:absolute;inset:0}
-.flower{position:absolute;width:18px;height:18px;animation:floaty 4s ease-in-out infinite}
-.flower::before,.flower::after{content:"";position:absolute;inset:0;border-radius:50%}
-.flower::before{background:radial-gradient(circle,#fff 30%, var(--primary) 32%)}
-.flower::after{width:6px;height:6px;background:var(--yellow);left:6px;top:6px}
-.sparkle{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;box-shadow:0 0 8px #fff,0 0 16px #fff;animation:twinkle 3s ease-in-out infinite}
+.sky{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,#7ec8ff 0%, #a8e6ff 30%, #d4f0ff 60%, #fff4d6 100%);
+}
+.rainbow{
+  position:absolute;top:8%;left:50%;transform:translateX(-50%);
+  width:160vw;height:160vw;max-width:1400px;max-height:1400px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at center,
+      transparent 0 38%,
+      #ff5b66 38% 41%,
+      #ff9a3d 41% 44%,
+      #ffd84a 44% 47%,
+      #7bbd49 47% 50%,
+      #4fc3f7 50% 53%,
+      #9b6ad6 53% 56%,
+      transparent 56% 60%);
+  opacity:.7;
+  filter:blur(.5px);
+  animation:rainbowPulse 6s ease-in-out infinite;
+}
+@keyframes rainbowPulse{0%,100%{opacity:.65;transform:translateX(-50%) scale(1)}50%{opacity:.8;transform:translateX(-50%) scale(1.03)}}
+.sun{
+  position:absolute;top:6%;right:8%;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #fff7c2, #ffd84a 60%, #ffb830 100%);
+  box-shadow:0 0 60px rgba(255,216,74,.7), 0 0 120px rgba(255,184,48,.5);
+  animation:sunBob 5s ease-in-out infinite;
+}
+.sun::before,.sun::after{
+  content:"";position:absolute;inset:-22px;border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0 8%, rgba(255,216,74,.5) 8% 12%, transparent 12% 25%, rgba(255,216,74,.5) 25% 29%, transparent 29% 42%, rgba(255,216,74,.5) 42% 46%, transparent 46% 58%, rgba(255,216,74,.5) 58% 62%, transparent 62% 75%, rgba(255,216,74,.5) 75% 79%, transparent 79% 92%, rgba(255,216,74,.5) 92% 96%, transparent 96%);
+  mask:radial-gradient(circle, transparent 50%, #000 51%);
+  -webkit-mask:radial-gradient(circle, transparent 50%, #000 51%);
+  animation:sunSpin 18s linear infinite;
+}
+.sun::after{animation-duration:26s;animation-direction:reverse;opacity:.6}
+@keyframes sunSpin{to{transform:rotate(360deg)}}
+@keyframes sunBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.sun-face{position:absolute;inset:0;}
+.sun-face .eye{position:absolute;width:14px;height:14px;background:#5a3a2a;border-radius:50%;top:42%}
+.sun-face .eye.l{left:32%}
+.sun-face .eye.r{right:32%}
+.sun-face .eye::after{content:"";position:absolute;width:5px;height:5px;background:#fff;border-radius:50%;top:2px;left:2px}
+.sun-face .mouth{position:absolute;left:50%;top:58%;transform:translateX(-50%);width:34px;height:18px;border-bottom-left-radius:18px;border-bottom-right-radius:18px;border:3px solid #5a3a2a;border-top:none;background:transparent}
+
+.balloon{position:absolute;bottom:-20%;width:60px;height:75px;border-radius:50%;
+  box-shadow:inset -8px -10px 0 rgba(0,0,0,.15);
+  animation:balloonUp linear infinite;
+}
+.balloon::after{
+  content:"";position:absolute;bottom:-60px;left:50%;width:1.5px;height:60px;
+  background:rgba(60,40,80,.4);transform:translateX(-50%);
+}
+.balloon::before{
+  content:"";position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  border-left:6px solid transparent;border-right:6px solid transparent;
+  border-top:8px solid currentColor;
+}
+.balloon.b1{left:6%;background:radial-gradient(circle at 35% 30%, #ff9ab6, #ff5b66);color:#ff5b66;animation-duration:22s;animation-delay:-3s}
+.balloon.b2{left:22%;background:radial-gradient(circle at 35% 30%, #a8e6ff, #4fc3f7);color:#4fc3f7;animation-duration:28s;animation-delay:-10s}
+.balloon.b3{right:18%;background:radial-gradient(circle at 35% 30%, #c5ff9a, #7bbd49);color:#7bbd49;animation-duration:26s;animation-delay:-6s}
+.balloon.b4{right:6%;background:radial-gradient(circle at 35% 30%, #ffe1a8, #ffd84a);color:#ffd84a;animation-duration:30s;animation-delay:-15s}
+.balloon.b5{left:42%;background:radial-gradient(circle at 35% 30%, #d6b3ff, #9b6ad6);color:#9b6ad6;animation-duration:24s;animation-delay:-12s}
+@keyframes balloonUp{
+  0%{transform:translateY(0) rotate(-4deg)}
+  50%{transform:translateY(-60vh) rotate(4deg)}
+  100%{transform:translateY(-120vh) rotate(-4deg)}
+}
+
+.shapes{position:absolute;inset:0}
+.shape{position:absolute;animation:shapeFloat 8s ease-in-out infinite;filter:drop-shadow(0 6px 10px rgba(0,0,0,.2))}
+.shape.star-shape{width:40px;height:40px;background:var(--yellow);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.shape.heart-shape{width:38px;height:36px;background:var(--primary);clip-path:polygon(50% 18%, 25% 0, 0 18%, 0 45%, 50% 100%, 100% 45%, 100% 18%, 75% 0)}
+.shape.circle-shape{width:34px;height:34px;background:var(--accent);border-radius:50%}
+.shape.tri-shape{width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:38px solid var(--green);background:transparent}
+.shape.sq-shape{width:32px;height:32px;background:var(--purple);border-radius:8px;transform:rotate(12deg)}
+@keyframes shapeFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-22px) rotate(8deg)}}
+
+.sparkles,.butterflies{position:absolute;inset:0}
+.sparkle{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;box-shadow:0 0 8px #fff,0 0 16px rgba(255,255,255,.8);animation:twinkle 3s ease-in-out infinite}
 @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1.2)}}
 .butterfly{position:absolute;width:36px;height:28px;animation:fly1 18s linear infinite}
 .bf1{top:18%;left:-5%}
@@ -56,7 +123,7 @@ body{
 .butterfly g{transform-origin:center;animation:flap .6s ease-in-out infinite}
 @keyframes flap{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.5)}}
 @keyframes fly1{0%{transform:translate(0,0)}50%{transform:translate(60vw,-40px)}100%{transform:translate(120vw,20px)}}
-.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 55%, rgba(20,40,80,.18) 100%)}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 55%, rgba(120,80,160,.18) 100%)}
 
 /* Header */
 .topbar{
@@ -65,21 +132,22 @@ body{
 }
 .iconbtn{
   height:54px;padding:0 18px;border-radius:999px;border:none;cursor:pointer;
-  background:#fff;color:#5b6b8a;box-shadow:var(--shadow);
+  background:#fff;color:#5a4a6a;box-shadow:var(--shadow);
   display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s ease, box-shadow .2s;
   font-family:var(--font);font-weight:700;font-size:1rem;
+  border:2px solid rgba(120,80,160,.12);
 }
 .iconbtn svg{width:24px;height:24px;flex-shrink:0}
-.iconbtn:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 18px 40px rgba(70,90,140,.25)}
+.iconbtn:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 18px 40px rgba(120,80,160,.28);color:#3a2a4a;}
 .iconbtn:active{transform:scale(.95)}
 .titles{text-align:center;flex:1}
 .titles h1{
   font-size:clamp(1.8rem, 4vw, 2.6rem);font-weight:800;
-  background:linear-gradient(90deg,var(--primary),var(--accent),var(--yellow));
+  background:linear-gradient(90deg,#ff5b66,#ff7eb6,#9b6ad6);
   -webkit-background-clip:text;background-clip:text;color:transparent;
   letter-spacing:.5px;
 }
-.titles p{color:#5b6b8a;font-weight:600;margin-top:2px;font-size:clamp(.85rem,2vw,1rem)}
+.titles p{color:#7a6a8a;font-weight:600;margin-top:2px;font-size:clamp(.85rem,2vw,1rem)}
 
 /* Stage */
 .stage{padding:10px 20px 60px;max-width:1100px;margin:0 auto;position:relative;z-index:2}
@@ -88,8 +156,8 @@ body{
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 .status{text-align:center;margin:6px 0 22px}
-.status h2{font-size:1.4rem;color:#3a4a72}
-.status p{color:#5b6b8a;font-weight:600;margin-top:6px}
+.status h2{font-size:1.4rem;color:#3a2a4a}
+.status p{color:#7a6a8a;font-weight:600;margin-top:6px}
 
 /* Grids */
 .grid{display:grid;gap:22px}
@@ -100,15 +168,15 @@ body{
   background:rgba(255,255,255,.85);backdrop-filter:blur(8px);
   border-radius:var(--radius);padding:22px 18px;text-align:center;
   box-shadow:var(--shadow);position:relative;overflow:hidden;
-  border:2px solid rgba(255,255,255,.9);
+  border:2px solid rgba(120,80,160,.12);
   transition:transform .3s ease, box-shadow .3s ease;
 }
 .card::after{content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;
-  background:radial-gradient(120% 60% at 50% -20%, rgba(255,255,255,.9), transparent 60%);}
-.card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(70,90,140,.22)}
-.illu{width:140px;height:140px;margin:0 auto 8px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.15))}
+  background:radial-gradient(120% 60% at 50% -20%, rgba(255,255,255,.6), transparent 60%);}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(120,80,160,.25)}
+.illu{width:140px;height:140px;margin:0 auto 8px;filter:drop-shadow(0 10px 14px rgba(120,80,160,.2))}
 .illu svg{width:100%;height:100%}
-.name{font-weight:800;font-size:1.25rem;color:#3a4a72;margin-top:4px}
+.name{font-weight:800;font-size:1.25rem;color:#3a2a4a;margin-top:4px}
 .badge{display:inline-block;margin-top:10px;padding:6px 14px;border-radius:999px;font-weight:700;font-size:.8rem;color:#fff;letter-spacing:.5px}
 .badge.fruit{background:linear-gradient(135deg,#ff7eb6,#ff5b66)}
 .badge.veg{background:linear-gradient(135deg,#7bbd49,#4cae3a)}
@@ -125,36 +193,37 @@ body{
   display:block;margin:30px auto 0;padding:16px 38px;border-radius:999px;border:none;cursor:pointer;
   font-family:var(--font);font-weight:800;font-size:1.15rem;color:#fff;letter-spacing:.5px;
   background:linear-gradient(135deg,var(--primary),var(--accent));
-  box-shadow:0 14px 36px rgba(126,208,255,.5), 0 0 0 6px rgba(255,255,255,.55);
+  box-shadow:0 14px 36px rgba(126,208,255,.3), 0 0 0 6px rgba(255,255,255,.05);
   transition:transform .2s ease, box-shadow .2s ease, filter .2s;
   animation:pulseGlow 2.4s ease-in-out infinite;
 }
 .bigbtn:hover{transform:translateY(-2px) scale(1.03);filter:brightness(1.05)}
 .bigbtn:active{transform:scale(.97)}
 .bigbtn.small{font-size:1rem;padding:12px 22px;animation:none}
-.bigbtn.ghost{background:#fff;color:#3a4a72;box-shadow:0 10px 24px rgba(70,90,140,.18)}
-@keyframes pulseGlow{0%,100%{box-shadow:0 14px 36px rgba(126,208,255,.4), 0 0 0 6px rgba(255,255,255,.55)}50%{box-shadow:0 18px 50px rgba(255,126,182,.55), 0 0 0 10px rgba(255,255,255,.55)}}
+.bigbtn.ghost{background:#fff;color:#5a4a6a;box-shadow:0 10px 24px rgba(120,80,160,.18);border:2px solid rgba(120,80,160,.12);}
+@keyframes pulseGlow{0%,100%{box-shadow:0 14px 36px rgba(126,208,255,.2), 0 0 0 6px rgba(255,255,255,.05)}50%{box-shadow:0 18px 50px rgba(255,126,182,.35), 0 0 0 10px rgba(255,255,255,.05)}}
 .hidden{display:none}
 
 /* Quiz */
 .progress-wrap{max-width:560px;margin:0 auto 20px}
-.progress-text{text-align:center;font-weight:800;color:#3a4a72;margin-bottom:8px}
-.progress-bar{height:14px;border-radius:999px;background:rgba(255,255,255,.8);box-shadow:inset 0 2px 6px rgba(0,0,0,.08);overflow:hidden}
+.progress-text{text-align:center;font-weight:800;color:#3a2a4a;margin-bottom:8px}
+.progress-bar{height:14px;border-radius:999px;background:rgba(120,80,160,.12);box-shadow:inset 0 2px 6px rgba(120,80,160,.15);overflow:hidden}
 .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--accent),var(--green));transition:width .5s ease;border-radius:inherit}
 
 .card.quiz{max-width:420px;margin:0 auto;padding:30px 22px}
 .card.quiz .illu{width:180px;height:180px}
-.qtext{margin-top:12px;font-weight:700;color:#5b6b8a;font-size:1.05rem}
+.qtext{margin-top:12px;font-weight:700;color:#7a6a8a;font-size:1.05rem}
 
+/* Layout for choices */
 .answers{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:560px;margin:24px auto 0}
 .ansbtn{
   position:relative;overflow:hidden;cursor:pointer;border:none;
   padding:18px 14px;border-radius:24px;font-family:var(--font);font-weight:800;font-size:1.1rem;color:#fff;
   display:flex;align-items:center;justify-content:center;gap:10px;
-  box-shadow:0 12px 28px rgba(70,90,140,.22), 0 0 0 4px rgba(255,255,255,.55);
+  box-shadow:0 12px 28px rgba(120,80,160,.22), 0 0 0 4px rgba(255,255,255,.4);
   transition:transform .2s, box-shadow .2s, filter .2s;
 }
-.ansbtn .ansicon{width:42px;height:42px;display:inline-block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.2))}
+.ansbtn .ansicon{width:42px;height:42px;display:inline-block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
 .ansbtn .ansicon svg{width:100%;height:100%}
 .ansbtn.fruit-btn{background:linear-gradient(135deg,#ff7eb6,#ff5b66)}
 .ansbtn.veg-btn{background:linear-gradient(135deg,#7bbd49,#4cae3a)}
@@ -164,11 +233,11 @@ body{
 .ansbtn.wrong{box-shadow:0 0 0 6px rgba(255,91,102,.45), 0 0 28px rgba(255,91,102,.7);animation:shake .4s ease}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);pointer-events:none}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.35);transform:scale(0);pointer-events:none}
 .ripple.go{animation:ripple .6s ease-out}
 @keyframes ripple{to{transform:scale(8);opacity:0}}
 
-.correct-banner{text-align:center;margin-top:18px;font-weight:800;color:#3a4a72;min-height:24px;opacity:0;transition:opacity .25s}
+.correct-banner{text-align:center;margin-top:18px;font-weight:800;color:#ff5b66;min-height:24px;opacity:0;transition:opacity .25s;text-shadow:0 1px 0 #fff}
 .correct-banner.show{opacity:1}
 
 /* Floating stars */
@@ -179,23 +248,24 @@ body{
 
 /* Modal */
 .modal-back{
-  position:fixed;inset:0;background:rgba(40,60,100,.35);backdrop-filter:blur(6px);
+  position:fixed;inset:0;background:rgba(60,40,80,.5);backdrop-filter:blur(6px);
   display:none;align-items:center;justify-content:center;z-index:20;padding:20px;
 }
 .modal-back.show{display:flex;animation:fadein .3s ease}
 .modal{
   background:#fff;border-radius:32px;padding:30px 26px;max-width:460px;width:100%;text-align:center;
-  position:relative;box-shadow:0 30px 80px rgba(40,60,100,.35);overflow:hidden;
+  position:relative;box-shadow:0 30px 80px rgba(120,80,160,.4);overflow:hidden;
   animation:popin .35s cubic-bezier(.2,1.2,.4,1);
+  border:2px solid rgba(120,80,160,.12);
 }
 @keyframes popin{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.modal .robot{width:140px;height:140px;margin:0 auto 8px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.18))}
-.modal h2{font-size:1.8rem;color:#3a4a72}
-.modal>p{color:#5b6b8a;margin-top:6px;font-weight:600}
+.modal .robot{width:140px;height:140px;margin:0 auto 8px;filter:drop-shadow(0 10px 14px rgba(120,80,160,.25))}
+.modal h2{font-size:1.8rem;color:#3a2a4a}
+.modal>p{color:#7a6a8a;margin-top:6px;font-weight:600}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}
-.stat{background:#f3f7ff;border-radius:18px;padding:12px}
-.stat .lbl{display:block;font-size:.78rem;color:#7388a8;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
-.stat .val{display:block;margin-top:4px;font-size:1.3rem;color:#3a4a72;font-weight:800}
+.stat{background:#f7f3ff;border-radius:18px;padding:12px;border:1px solid rgba(120,80,160,.1)}
+.stat .lbl{display:block;font-size:.78rem;color:#7a6a8a;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.stat .val{display:block;margin-top:4px;font-size:1.3rem;color:#3a2a4a;font-weight:800}
 .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
 /* Confetti */
@@ -212,6 +282,8 @@ body{
   .illu{width:110px;height:110px}
   .card.quiz .illu{width:150px;height:150px}
   .titles h1{font-size:1.6rem}
+  .sun{width:100px;height:100px}
+  .rainbow{width:200vw;height:200vw}
 }
 @media (max-width: 480px){
   .train-grid{grid-template-columns:1fr;max-width:340px}
@@ -221,6 +293,7 @@ body{
   .topbar{padding:14px}
   .iconbtn{height:44px;padding:0 12px;font-size:0.85rem;gap:4px}
   .iconbtn svg{width:20px;height:20px}
+  .sun{width:80px;height:80px;top:4%;right:4%}
 }
 
 </style>
@@ -228,25 +301,22 @@ body{
 <body>
   <div class="scene" aria-hidden="true">
     <div class="sky"></div>
-    <svg class="clouds" viewBox="0 0 1200 300" preserveAspectRatio="none">
-      <g fill="#ffffff" opacity="0.9">
-        <ellipse cx="150" cy="80" rx="70" ry="22"/>
-        <ellipse cx="200" cy="70" rx="50" ry="18"/>
-        <ellipse cx="500" cy="120" rx="80" ry="24"/>
-        <ellipse cx="560" cy="110" rx="55" ry="20"/>
-        <ellipse cx="900" cy="60" rx="90" ry="26"/>
-        <ellipse cx="970" cy="55" rx="55" ry="20"/>
-      </g>
-    </svg>
-    <svg class="rays" viewBox="0 0 200 200"><defs><radialGradient id="rg" cx="50%" cy="0%" r="80%"><stop offset="0%" stop-color="#fff7c2" stop-opacity=".75"/><stop offset="100%" stop-color="#fff7c2" stop-opacity="0"/></radialGradient></defs><rect width="200" height="200" fill="url(#rg)"/></svg>
-    <svg class="hills" viewBox="0 0 1200 300" preserveAspectRatio="none">
-      <path d="M0,200 C200,120 400,260 600,180 C800,100 1000,240 1200,160 L1200,300 L0,300 Z" fill="#86d36a"/>
-      <path d="M0,240 C200,180 400,290 600,230 C800,170 1000,280 1200,220 L1200,300 L0,300 Z" fill="#62b94c"/>
-    </svg>
-    <div class="bushes">
-      <span class="bush b1"></span><span class="bush b2"></span><span class="bush b3"></span><span class="bush b4"></span>
+    <div class="rainbow"></div>
+    <div class="sun">
+      <div class="sun-face">
+        <span class="eye l"></span>
+        <span class="eye r"></span>
+        <span class="mouth"></span>
+      </div>
     </div>
-    <div class="flowers" id="flowers"></div>
+    <div class="balloons">
+      <span class="balloon b1"></span>
+      <span class="balloon b2"></span>
+      <span class="balloon b3"></span>
+      <span class="balloon b4"></span>
+      <span class="balloon b5"></span>
+    </div>
+    <div class="shapes" id="shapes"></div>
     <div class="sparkles" id="sparkles"></div>
     <div class="butterflies">
       <svg class="butterfly bf1" viewBox="0 0 40 30"><g><ellipse cx="14" cy="15" rx="10" ry="8" fill="#ff7eb6"/><ellipse cx="26" cy="15" rx="10" ry="8" fill="#ff7eb6"/><ellipse cx="14" cy="15" rx="4" ry="3" fill="#fff"/><ellipse cx="26" cy="15" rx="4" ry="3" fill="#fff"/><rect x="19" y="10" width="2" height="12" rx="1" fill="#5a3a2a"/></g></svg>
@@ -446,20 +516,21 @@ body{
   </div>
 
   <script>
-    // AI Trainer - Kid Friendly Fruit/Vegetable Classification
 (function(){
   'use strict';
 
   // ---------- Background decor ----------
-  const flowersEl = document.getElementById('flowers');
+  const shapesEl = document.getElementById('shapes');
   const sparklesEl = document.getElementById('sparkles');
-  for(let i=0;i<14;i++){
-    const f=document.createElement('div');
-    f.className='flower';
-    f.style.left=Math.random()*100+'%';
-    f.style.bottom=(Math.random()*18)+'vh';
-    f.style.animationDelay=(-Math.random()*4)+'s';
-    flowersEl.appendChild(f);
+  const shapeTypes = ['star-shape','heart-shape','circle-shape','tri-shape','sq-shape'];
+  for(let i=0;i<12;i++){
+    const s=document.createElement('div');
+    s.className='shape ' + shapeTypes[i % shapeTypes.length];
+    s.style.left=Math.random()*100+'%';
+    s.style.top=(10 + Math.random()*70)+'%';
+    s.style.animationDelay=(-Math.random()*8)+'s';
+    s.style.animationDuration=(6 + Math.random()*4)+'s';
+    shapesEl.appendChild(s);
   }
   for(let i=0;i<30;i++){
     const s=document.createElement('div');
@@ -505,6 +576,7 @@ body{
   // ---------- State ----------
   let current = 0;
   let correct = 0;
+  let incorrectAttempts = 0;
   let locked = false;
 
   // ---------- Training boot ----------
@@ -519,7 +591,7 @@ body{
     el.classList.add('active');
   }
   startBtn.addEventListener('click', ()=>{
-    current = 0; correct = 0;
+    current = 0; correct = 0; incorrectAttempts = 0;
     renderQuestion();
     showScreen(quizScreen);
   });
@@ -581,7 +653,6 @@ body{
   ansBtns.forEach(btn=>{
     btn.addEventListener('click', (e)=>{
       if(locked) return;
-      locked = true;
 
       // ripple
       const r = btn.querySelector('.ripple');
@@ -595,19 +666,24 @@ body{
       const ans = btn.dataset.ans;
       const q = QUESTIONS[current];
       if(ans === q.answer){
+        locked = true;
         btn.classList.add('correct');
         correct++;
         successSound();
         spawnStars(btn);
         setTimeout(next, 850);
       } else {
+        // Keeps user on current level until correct option is selected
         btn.classList.add('wrong');
         wrongSound();
-        const correctBtn = document.querySelector('.ansbtn[data-ans="'+q.answer+'"]');
-        correctBtn.classList.add('correct');
-        correctBanner.textContent = 'Correct answer: ' + q.answer.charAt(0).toUpperCase()+q.answer.slice(1);
+        incorrectAttempts++;
+        correctBanner.textContent = 'Try again!';
         correctBanner.classList.add('show');
-        setTimeout(next, 1400);
+
+        // Brief timeout removal to let them shake again if double-clicked
+        setTimeout(() => {
+          btn.classList.remove('wrong');
+        }, 400);
       }
     });
   });
@@ -641,11 +717,10 @@ body{
   // ---------- Results modal ----------
   function showResults(){
     const total = QUESTIONS.length;
-    const wrong = total - correct;
-    const pct = Math.round((correct/total)*100);
+    const pct = Math.round((correct / (correct + incorrectAttempts)) * 100) || 0;
     sScore.textContent = correct + ' / ' + total;
     sCorrect.textContent = correct;
-    sWrong.textContent = wrong;
+    sWrong.textContent = incorrectAttempts;
     sPct.textContent = pct + '%';
     modalBack.classList.add('show');
     runConfetti();
@@ -670,7 +745,7 @@ body{
 
   playAgain.addEventListener('click', ()=>{
     modalBack.classList.remove('show');
-    current=0; correct=0;
+    current=0; correct=0; incorrectAttempts=0;
     renderQuestion();
     showScreen(quizScreen);
   });
@@ -679,7 +754,6 @@ body{
     resetTraining();
   });
 })();
-
   </script>
 </body>
 </html>

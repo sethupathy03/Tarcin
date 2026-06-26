@@ -38,13 +38,16 @@ html, body {
 
 body {
   min-height: 100vh;
-  background: linear-gradient(180deg, #6cc3ff 0%, #a5e1ff 60%, #c8f0d2 100%);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 216, 77, 0.28) 0, rgba(255, 216, 77, 0) 26%),
+    radial-gradient(circle at 82% 16%, rgba(255, 110, 199, 0.22) 0, rgba(255, 110, 199, 0) 24%),
+    linear-gradient(180deg, #24124f 0%, #3b2a7a 42%, #ff8f6b 100%);
   position: relative;
 }
 
 /* ---------- Scene ---------- */
 .scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.sky { position: absolute; inset: 0; background: linear-gradient(180deg, #5fb8ff 0%, #9fd9ff 55%, #d6f3e0 100%); }
+.sky { position: absolute; inset: 0; background: linear-gradient(180deg, #1f174a 0%, #4b2d88 52%, #ff9f7a 100%); }
 .rainbow { position: absolute; left: -3%; bottom: 8%; width: 35%; height: 55%; opacity: .85; }
 .hills { position: absolute; bottom: 0; left: 0; width: 100%; height: 30%; }
 .hills svg { width: 100%; height: 100%; display: block; }
@@ -98,7 +101,7 @@ body {
 .title { font-size: clamp(34px, 5vw, 60px); font-weight: 900; letter-spacing: 1px; text-shadow: 0 4px 0 rgba(0,0,0,.08); }
 .t-purple { color: #7b5cf5; -webkit-text-stroke: 2px #fff; }
 .t-orange { color: #ff9f43; -webkit-text-stroke: 2px #fff; margin-left: 12px; }
-.subtitle { color: #1c4f9c; font-weight: 700; margin-top: 6px; font-size: clamp(13px, 1.4vw, 17px); }
+.subtitle { color: #90aae3; font-weight: 700; margin-top: 6px; font-size: clamp(13px, 1.4vw, 17px); }
 .progress { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
 .dot-prog { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid #fff; box-shadow: 0 2px 0 rgba(0,0,0,.08); transition: all .3s; }
 .dot-prog.active { background: var(--yellow); transform: scale(1.2); }
@@ -155,6 +158,9 @@ body {
 .legend .leg { display: inline-flex; align-items: center; gap: 8px; }
 .legend .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--purple); display: inline-block; }
 .legend .dash { width: 30px; height: 14px; border-radius: 999px; background: var(--purple); display: inline-block; }
+.feedback { text-align: center; min-height: 24px; margin-top: -2px; margin-bottom: 8px; font-weight: 900; color: var(--pink-dark); }
+.feedback.ok { color: var(--green-dark); }
+.feedback.bad { color: var(--pink-dark); }
 
 /* Cards */
 .cards {
@@ -418,6 +424,8 @@ body {
         <span class="leg"><span class="dash"></span> dash</span>
       </div>
 
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+
       <div class="cards" id="cards"></div>
 
       <div class="quick-ref">
@@ -495,6 +503,7 @@ body {
     morse: document.getElementById("morseDisplay"),
     cards: document.getElementById("cards"),
     refGrid: document.getElementById("refGrid"),
+    feedback: document.getElementById("feedback"),
     listenBtn: document.getElementById("listenBtn"),
     backBtn: document.getElementById("backBtn"),
     modal: document.getElementById("modal"),
@@ -636,6 +645,8 @@ body {
   function onAnswer(ev, btn, letter, answer) {
     if (state.locked) return;
     state.locked = true;
+    els.feedback.textContent = "";
+    els.feedback.className = "feedback";
     ripple(ev, btn);
     Array.from(els.cards.children).forEach(c => c.classList.add("locked"));
 
@@ -643,19 +654,22 @@ body {
       btn.classList.add("correct");
       sparkleBurst(btn);
       playSuccess();
+      els.feedback.textContent = "Correct";
+      els.feedback.classList.add("ok");
       state.correct++;
       state.score += 100;
       setTimeout(nextQuestion, 1100);
     } else {
       btn.classList.add("wrong");
       playError();
+      els.feedback.textContent = "Try again";
+      els.feedback.classList.add("bad");
       state.wrong++;
       setTimeout(() => {
-        Array.from(els.cards.children).forEach(c => {
-          if (c.querySelector(".letter").textContent === answer) c.classList.add("correct");
-        });
-      }, 1000);
-      setTimeout(nextQuestion, 1900);
+        state.locked = false;
+        btn.classList.remove("wrong");
+        Array.from(els.cards.children).forEach(c => c.classList.remove("locked"));
+      }, 1900);
     }
   }
 
@@ -671,6 +685,8 @@ body {
     renderProgress();
     renderMorse(q.morse);
     renderCards(q.answer);
+    els.feedback.textContent = "";
+    els.feedback.className = "feedback";
   }
 
   /* ---------- Modal ---------- */

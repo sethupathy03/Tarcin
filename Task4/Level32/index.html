@@ -6,17 +6,18 @@
 <title>Debug Lab – Code Fixer</title>
 <style>
 :root {
-  --sky-top: #bfe7ff;
-  --sky-bot: #e9f7ff;
-  --primary: #ff7eb6;
-  --accent: #7ed0ff;
-  --yellow: #ffd84a;
-  --green: #7bbd49;
-  --green-dark: #4cae3a;
-  --blue-panel: #0d1b3e;
-  --ink: #2a2a2a;
-  --card: #fffdeb;
-  --shadow: 0 14px 40px rgba(70,90,140,.18);
+  --sky-top: #e0f2fe;
+  --sky-bot: #bae6fd;
+  --primary: #3b82f6;
+  --accent: #0284c7;
+  --yellow: #fef08a;
+  --yellow-dark: #ca8a04;
+  --green: #bbf7d0;
+  --green-dark: #16a34a;
+  --blue-panel: #f0fdf4;
+  --ink: #1e293b;
+  --card: rgba(255, 255, 255, 0.92);
+  --shadow: 0 14px 40px rgba(2, 132, 199, 0.15);
   --radius: 28px;
   --font: 'Quicksand', 'Comic Sans MS', system-ui, -apple-system, sans-serif;
 }
@@ -26,28 +27,29 @@ body{
   font-family:var(--font);
   color:var(--ink);
   overflow-x:hidden;
-  background:linear-gradient(180deg,var(--sky-top),var(--sky-bot));
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bot));
   min-height:100vh;
   position:relative;
 }
 
-/* Background scene */
+/* Background scene with floating syntax elements */
 .scene{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.sky{position:absolute;inset:0;background:linear-gradient(180deg,#aee0ff 0%, #d8f0ff 55%, #eaf9e8 100%)}
-.clouds{position:absolute;top:0;left:0;width:200%;height:auto;animation:drift 60s linear infinite}
-@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.hills{position:absolute;bottom:0;left:0;width:100%;height:34vh}
-.hills path:nth-child(1) { fill: #86d36a; }
-.hills path:nth-child(2) { fill: #62b94c; }
 
-.bushes{position:absolute;bottom:6vh;left:0;width:100%;height:80px}
-.bush{position:absolute;bottom:0;width:120px;height:60px;background:radial-gradient(circle at 30% 40%, #67d34f, #3f9a30);border-radius:60px 60px 30px 30px / 60px 60px 20px 20px;box-shadow:inset -10px -6px 0 rgba(0,0,0,.07)}
-.bush.b1{left:4%}.bush.b2{left:28%;width:160px;height:70px}.bush.b3{right:24%;width:140px;height:64px}.bush.b4{right:5%;width:120px}
-.flowers, .sparkles{position:absolute;inset:0}
-.flower{position:absolute;width:18px;height:18px;animation:floaty 4s ease-in-out infinite}
-.flower::before,.flower::after{content:"";position:absolute;inset:0;border-radius:50%}
-.flower::before{background:radial-gradient(circle,#fff 30%, var(--primary) 32%)}
-.flower::after{width:6px;height:6px;background:var(--yellow);left:6px;top:6px}
+.floating-syntax {
+  position: absolute;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: rgba(14, 116, 144, 0.22);
+  animation: floatUp 14s linear infinite;
+  white-space: nowrap;
+}
+@keyframes floatUp {
+  0% { transform: translateY(105vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-15vh) rotate(360deg); opacity: 0; }
+}
 
 /* Header */
 .topbar{
@@ -56,11 +58,11 @@ body{
 }
 .iconbtn{
   padding:10px 24px;border-radius:999px;border:none;cursor:pointer;
-  background:#9b6ad6;color:#fff;box-shadow:var(--shadow);
+  background:#0284c7;color:#fff;box-shadow:var(--shadow);
   font-family:var(--font);font-weight:800;font-size:1rem;
   display:flex;align-items:center;gap:8px;transition:transform .2s, box-shadow .2s;
 }
-.iconbtn.listen { background: var(--yellow); color: #3a4a72; }
+.iconbtn.listen { background: var(--yellow-dark); color: #fff; }
 .iconbtn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(0,0,0,0.15)}
 .iconbtn:active{transform:scale(.95)}
 
@@ -70,12 +72,12 @@ body{
 .brand-title h1 {
   font-size: clamp(2.2rem, 5vw, 3.5rem);
   font-weight: 900;
-  color: #2b5bc4;
-  text-shadow: 0 4px 0 #fff, 0 6px 0 rgba(0,0,0,0.15);
+  color: #0369a1;
+  text-shadow: 0 4px 0 #fff, 0 6px 0 rgba(0,0,0,0.05);
   letter-spacing: -1px;
 }
 .brand-title p {
-  color: #3a4a72; font-weight: 700; font-size: 1.1rem; margin-top: 4px;
+  color: #0c4a6e; font-weight: 700; font-size: 1.1rem; margin-top: 4px;
 }
 
 /* Dots Indicator */
@@ -83,24 +85,17 @@ body{
   display: flex; justify-content: center; gap: 8px; margin: 8px 0;
 }
 .dot {
-  width: 14px; height: 14px; border-radius: 50%; background: #b0c9f0;
+  width: 14px; height: 14px; border-radius: 50%; background: #bae6fd;
   border: 2px solid #fff; transition: background 0.3s;
 }
-.dot.active { background: var(--yellow); }
+.dot.active { background: var(--yellow-dark); }
 
 /* Main Lab Container */
 .stage{padding:10px 20px 50px;max-width:1000px;margin:0 auto;position:relative;z-index:2}
 .main-card {
   background: var(--card); border: 8px solid #fff; border-radius: 36px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.1); padding: 30px; position: relative;
+  box-shadow: 0 20px 50px rgba(2, 132, 199, 0.1); padding: 30px; position: relative;
 }
-
-/* Character Placement decoration overlay */
-.decor-char {
-  position: absolute; top: -75px; width: 100px; height: 100px; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.15));
-}
-.decor-char.ladybug { left: 20px; }
-.decor-char.caterpillar { right: 20px; }
 
 /* Bug Header Info Row */
 .bug-info-row {
@@ -111,38 +106,37 @@ body{
 }
 
 .bug-details h2 {
-  font-size: 1.7rem; color: #402408; font-weight: 800;
+  font-size: 1.7rem; color: #0f172a; font-weight: 800;
 }
 .bug-details p {
-  font-size: 1.15rem; color: #6a523a; font-weight: 600; margin-top: 4px;
+  font-size: 1.15rem; color: #334155; font-weight: 600; margin-top: 4px;
 }
 
-/* Code Panel Window */
+/* Code Panel Window - Modern Light IDE look */
 .code-window {
-  background: var(--blue-panel); border-radius: 24px; padding: 24px;
+  background: #f8fafc; border: 3px solid #e2e8f0; border-radius: 24px; padding: 24px;
   position: relative; overflow: hidden; margin-bottom: 25px;
-  box-shadow: inset 0 4px 12px rgba(0,0,0,0.3);
 }
 .code-window::before {
-  content: "BUGGY CODE:"; position: absolute; top: 12px; left: 20px;
-  background: #6d46c7; color: #fff; font-size: 0.75rem; font-weight: 800;
+  content: "BUGGY PYTHON CODE:"; position: absolute; top: 12px; left: 20px;
+  background: #0284c7; color: #fff; font-size: 0.75rem; font-weight: 800;
   padding: 4px 12px; border-radius: 8px; letter-spacing: 0.5px;
 }
 .code-display {
   margin-top: 24px; font-family: 'Courier New', Courier, monospace;
-  font-size: 1.25rem; font-weight: 700; line-height: 1.7; color: #fff;
+  font-size: 1.25rem; font-weight: 700; line-height: 1.7; color: #0f172a;
   white-space: pre-wrap;
 }
 .code-line {
   display: block;
 }
-.code-display .keyword { color: #ff7eb6; }
-.code-display .string { color: #ffd84a; }
-.code-display .comment { color: #78909c; font-style: italic; }
+.code-display .keyword { color: #2563eb; }
+.code-display .string { color: #0d9488; }
+.code-display .comment { color: #64748b; font-style: italic; }
 
 /* Choice Picker Sections */
 .section-divider {
-  text-align: center; font-weight: 800; color: #5a4b9c; font-size: 1.1rem;
+  text-align: center; font-weight: 800; color: #0369a1; font-size: 1.1rem;
   letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px;
 }
 .choices-layout {
@@ -152,18 +146,18 @@ body{
   width: 100%; border: none; cursor: pointer; border-radius: 20px;
   padding: 18px 24px; font-family: var(--font); font-weight: 800; font-size: 1.15rem;
   color: #fff; text-align: left; display: flex; align-items: center; gap: 16px;
-  box-shadow: 0 8px 0 rgba(0,0,0,0.15), inset 0 -4px 0 rgba(0,0,0,0.1);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.1), inset 0 -4px 0 rgba(0,0,0,0.05);
   transition: transform 0.1s, filter 0.2s; position: relative; overflow: hidden;
 }
-.choice-row:nth-child(1) { background: linear-gradient(135deg, #ff5e97, #ff3370); }
-.choice-row:nth-child(2) { background: linear-gradient(135deg, #4dafff, #1a8cff); }
-.choice-row:nth-child(3) { background: linear-gradient(135deg, #6fd134, #4cae1a); }
+.choice-row:nth-child(1) { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+.choice-row:nth-child(2) { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+.choice-row:nth-child(3) { background: linear-gradient(135deg, #4ade80, #16a34a); }
 
-.choice-row:hover { filter: brightness(1.08); }
-.choice-row:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.15); }
+.choice-row:hover { filter: brightness(1.05); }
+.choice-row:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
 
 .choice-num {
-  width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.15);
+  width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.1);
   display: grid; place-items: center; font-size: 1.2rem; color: #fff; flex-shrink: 0;
 }
 
@@ -194,31 +188,31 @@ body{
 
 /* Modal Popup window */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(13,27,62,0.5); backdrop-filter: blur(8px);
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
   display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
 }
 .modal-overlay.active { display: flex; }
 .win-modal {
   background: #fff; border-radius: 36px; padding: 40px 30px; text-align: center;
-  max-width: 480px; width: 100%; box-shadow: 0 30px 70px rgba(0,0,0,0.3);
+  max-width: 480px; width: 100%; box-shadow: 0 30px 70px rgba(0,0,0,0.15);
   position: relative; animation: popUp 0.4s cubic-bezier(.17,1.2,.4,1.1);
 }
 @keyframes popUp { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
 
 .modal-trophy-art { width: 140px; height: 140px; margin: 0 auto 15px; filter: drop-shadow(0 10px 15px rgba(255,182,0,0.25)); }
-.win-modal h2 { font-size: 2.3rem; color: #1a8cff; font-weight: 900; }
-.win-modal p { color: #5b6b8a; font-weight: 700; margin-top: 8px; font-size: 1.1rem; }
+.win-modal h2 { font-size: 2.3rem; color: #2563eb; font-weight: 900; }
+.win-modal p { color: #475569; font-weight: 700; margin-top: 8px; font-size: 1.1rem; }
 
 .score-badge {
-  background: #f0f5ff; border-radius: 20px; padding: 15px; margin: 20px 0;
-  font-size: 1.3rem; font-weight: 800; color: #2b5bc4;
+  background: #f0fdf4; border-radius: 20px; padding: 15px; margin: 20px 0;
+  font-size: 1.3rem; font-weight: 800; color: #16a34a;
 }
 
 .restart-btn {
-  background: linear-gradient(135deg, var(--yellow), #ffb600);
+  background: linear-gradient(135deg, #fef08a, #eab308);
   border: none; padding: 14px 40px; font-family: var(--font); font-weight: 900;
-  font-size: 1.2rem; color: #3a4a72; border-radius: 999px; cursor: pointer;
-  box-shadow: 0 8px 20px rgba(255,182,0,0.4); transition: transform 0.2s;
+  font-size: 1.2rem; color: #1e293b; border-radius: 999px; cursor: pointer;
+  box-shadow: 0 8px 20px rgba(234, 179, 8, 0.3); transition: transform 0.2s;
 }
 .restart-btn:hover { transform: scale(1.05); }
 
@@ -231,31 +225,14 @@ body{
 svg.hidden-symbols { position: absolute; width: 0; height: 0; }
 
 @media (max-width: 680px) {
-  .decor-char { display: none; }
   .bug-info-row { flex-direction: column; text-align: center; }
 }
 </style>
 </head>
 <body>
 
-  <div class="scene" aria-hidden="true">
-    <div class="sky"></div>
-    <svg class="clouds" viewBox="0 0 1200 300" preserveAspectRatio="none">
-      <g fill="#ffffff" opacity="0.85">
-        <ellipse cx="100" cy="60" rx="60" ry="18"/>
-        <ellipse cx="450" cy="100" rx="90" ry="25"/>
-        <ellipse cx="850" cy="50" rx="70" ry="20"/>
-      </g>
-    </svg>
-    <svg class="hills" viewBox="0 0 1200 300" preserveAspectRatio="none">
-      <path d="M0,210 C250,130 350,250 650,170 C900,110 1050,230 1200,150 L1200,300 L0,300 Z" />
-      <path d="M0,250 C200,190 450,280 700,220 C900,160 1050,270 1200,210 L1200,300 L0,300 Z" />
-    </svg>
-    <div class="bushes">
-      <span class="bush b1"></span><span class="bush b2"></span><span class="bush b3"></span>
+  <div class="scene" aria-hidden="true" id="dynamicScene">
     </div>
-    <div class="flowers" id="flowerField"></div>
-  </div>
 
   <svg class="hidden-symbols">
     <defs>
@@ -360,14 +337,6 @@ svg.hidden-symbols { position: absolute; width: 0; height: 0; }
 
   <main class="stage">
     <div class="main-card">
-      
-      <div class="decor-char ladybug float-move">
-        <svg viewBox="0 0 100 100"><use href="#char-ladybug"/></svg>
-      </div>
-      <div class="decor-char caterpillar float-move alt-delay">
-        <svg viewBox="0 0 100 100"><use href="#char-worm"/></svg>
-      </div>
-
       <div class="bug-info-row">
         <div class="bug-art-wrap float-move" id="dynamicGraphic"></div>
         <div class="bug-details">
@@ -477,17 +446,31 @@ svg.hidden-symbols { position: absolute; width: 0; height: 0; }
     const reloadSession = document.getElementById('reloadSession');
     const audioReadout = document.getElementById('audioReadout');
     const confettiAnchor = document.getElementById('confettiAnchor');
+    const dynamicScene = document.getElementById('dynamicScene');
 
-    // Build decoration environmental field particles
-    const flowerField = document.getElementById('flowerField');
-    for(let i=0; i<12; i++){
-      const fl = document.createElement('div');
-      fl.className = 'flower';
-      fl.style.left = (Math.random() * 95) + '%';
-      fl.style.bottom = (Math.random() * 14) + 'vh';
-      fl.style.animationDelay = (-Math.random() * 4) + 's';
-      flowerField.appendChild(fl);
-    }
+    // ONLY the specific requested keywords allowed to float in background
+    const syntaxKeywords = [
+      'for', 'if', 'elif', 'else', 'while', 'continue', 'def', 'return'
+    ];
+
+    // Inject floating syntax keywords at short intervals for a staggered effect
+    const keywordPool = syntaxKeywords.flatMap(word => [word, word]);
+    let keywordIndex = 0;
+    const keywordTimer = setInterval(() => {
+      if(keywordIndex >= keywordPool.length){
+        clearInterval(keywordTimer);
+        return;
+      }
+
+      const word = keywordPool[keywordIndex++];
+      const span = document.createElement('span');
+      span.className = 'floating-syntax';
+      span.textContent = word;
+      span.style.left = (Math.random() * 88 + 2) + '%';
+      span.style.animationDelay = (Math.random() * -4) + 's';
+      span.style.animationDuration = (12 + Math.random() * 6) + 's';
+      dynamicScene.appendChild(span);
+    }, 240);
 
     function setupProgressIndicators() {
       indicatorsBox.innerHTML = '';
@@ -520,7 +503,6 @@ svg.hidden-symbols { position: absolute; width: 0; height: 0; }
       
       dynamicGraphic.innerHTML = `<svg viewBox="0 0 100 100" style="width:100%; height:100%;"><use href="${stepData.graphic}"/></svg>`;
       
-      // Clear code view container and inject strings split structured on individual new lines
       codeContainer.innerHTML = '';
       stepData.code.forEach(lineText => {
         const lineSpan = document.createElement('span');
@@ -541,21 +523,18 @@ svg.hidden-symbols { position: absolute; width: 0; height: 0; }
 
     function handleSelection(option, element) {
       if(optionsLocked) return;
-      optionsLocked = true;
 
       if(option.correct) {
+        optionsLocked = true;
         element.classList.add('correct-pick');
         successfulPicks++;
         setTimeout(transitionNext, 1200);
       } else {
         element.classList.add('wrong-pick');
-        const items = answersGrid.querySelectorAll('.choice-row');
-        DATASET[currentIndex].options.forEach((opt, idx) => {
-          if(opt.correct) {
-            items[idx].classList.add('correct-pick');
-          }
-        });
-        setTimeout(transitionNext, 1800);
+        optionsLocked = false;
+        setTimeout(() => {
+          element.classList.remove('wrong-pick');
+        }, 450);
       }
     }
 
@@ -576,7 +555,7 @@ svg.hidden-symbols { position: absolute; width: 0; height: 0; }
 
     function triggerConfettiBurst() {
       confettiAnchor.innerHTML = '';
-      const hues = ['#ffd84a', '#ff7eb6', '#7ed0ff', '#6fd134', '#ffffff'];
+      const hues = ['#3b82f6', '#0284c7', '#ca8a04', '#16a34a', '#ffffff'];
       for(let i=0; i<45; i++) {
         const particle = document.createElement('span');
         particle.className = 'conf-bit';
